@@ -1,0 +1,340 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SEEKER
+  COMPANY
+  ADMIN
+}
+
+enum ReadinessStatus {
+  GREEN
+  YELLOW
+  RED
+}
+
+enum JobCategory {
+  WAREHOUSE
+  CLEANING
+  DELIVERY
+  CONSTRUCTION
+  OTHER
+}
+
+enum PhysicalLevel {
+  LIGHT
+  MEDIUM
+  HEAVY
+}
+
+enum Availability {
+  FULL_TIME
+  PART_TIME
+  WEEKENDS
+  FLEXIBLE
+}
+
+enum SubscriptionPlan {
+  NONE
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum ReportReason {
+  FAKE_PROFILE
+  ABUSE
+  ILLEGAL_WORK
+  SPAM
+  OTHER
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum OfferStatus {
+  SENT
+  ACCEPTED
+  DECLINED
+  WITHDRAWN
+}
+
+enum MessageType {
+  TEXT
+  OFFER
+  SYSTEM
+}
+
+model User {
+  id            String    @id @default(cuid())
+  phone         String?   @unique
+  phoneVerified Boolean   @default(false)
+  email         String?   @unique
+  emailVerified Boolean   @default(false)
+  passwordHash  String?
+  role          UserRole  @default(SEEKER)
+  locale        String    @default("de")
+  name          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  seekerProfile     SeekerProfile?
+  companyProfile    CompanyProfile?
+  ratingsGiven      Rating[]            @relation("RatingsGiven")
+  ratingsReceived   Rating[]            @relation("RatingsReceived")
+  reportsFiled      Report[]            @relation("ReportsFiled")
+  contacts          ContactUnlock[]
+  jobApplications   JobApplication[]
+  verificationCodes VerificationCode[]
+  messagesSent      Message[]           @relation("MessagesSent")
+  conversationsAsA  Conversation[]      @relation("ConversationUserA")
+  conversationsAsB  Conversation[]      @relation("ConversationUserB")
+  offersSent        JobOffer[]          @relation("OffersSent")
+  offersReceived    JobOffer[]          @relation("OffersReceived")
+}
+
+model VerificationCode {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone     String?
+  email     String?
+  code      String
+  purpose   String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model SeekerProfile {
+  id               String          @id @default(cuid())
+  userId           String          @unique
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skills           String          @default("[]")
+  physicalLevel    PhysicalLevel   @default(MEDIUM)
+  availability     Availability    @default(FLEXIBLE)
+  latitude         Float?
+  longitude        Float?
+  city             String?
+  hasBankAccount   Boolean?
+  hasTaxId         Boolean?
+  hasWorkPermit    Boolean?
+  /// Gültiges Identitäts-/Aufenthaltsdokument (Checkliste)
+  hasIdDocument    Boolean?
+  workPermitNote   String?
+  readinessStatus  ReadinessStatus @default(RED)
+  onboardingDone   Boolean         @default(false)
+  bio              String?
+  photoUrl         String?
+  headline         String?
+  address          String?
+  birthDate        String?
+  birthPlace       String?
+  languagesJson    String          @default("[]")
+  toolsJson        String          @default("[]")
+  hobbiesJson      String          @default("[]")
+  experiencesJson  String          @default("[]")
+  educationJson    String          @default("[]")
+  sideJobsJson     String          @default("[]")
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model CompanyProfile {
+  id                  String             @id @default(cuid())
+  userId              String             @unique
+  user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName         String
+  companyNameI18n     String?
+  description         String?
+  descriptionI18n     String?
+  city                String?
+  address             String?
+  website             String?
+  logoUrl             String?
+  industry            String?
+  companySize         String?
+  contactEmail        String?
+  contactPhone        String?
+  verified            Boolean            @default(false)
+  verificationStatus  VerificationStatus @default(UNVERIFIED)
+  verificationNote    String?
+  verificationDocUrl  String?
+  /// Nur für lokale Entwicklung – nie als echte Firma darstellen
+  isDemoData          Boolean            @default(false)
+  subscription        SubscriptionPlan   @default(NONE)
+  contactCredits      Int                @default(0)
+  latitude            Float?
+  longitude           Float?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  jobs                Job[]
+}
+
+model Job {
+  id                  String         @id @default(cuid())
+  companyId           String
+  company             CompanyProfile @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  title               String
+  description         String
+  titleI18n           String?
+  descriptionI18n     String?
+  /// Extrem einfache Sprache (JSON i18n)
+  simpleWhatI18n      String?
+  simpleNeedI18n      String?
+  workHours           String?
+  germanRequired      Boolean        @default(false)
+  category            JobCategory
+  hourlyWage          Float
+  city                String
+  address             String?
+  latitude            Float?
+  longitude           Float?
+  startDate           DateTime?
+  requirements        String         @default("[]")
+  physicalLevel       PhysicalLevel  @default(MEDIUM)
+  availability        Availability   @default(FLEXIBLE)
+  active              Boolean        @default(true)
+  requiresGreenStatus Boolean        @default(true)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  applications        JobApplication[]
+  offers              JobOffer[]
+}
+
+model JobApplication {
+  id        String   @id @default(cuid())
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String?
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+
+  @@unique([jobId, userId])
+}
+
+model ContactUnlock {
+  id            String   @id @default(cuid())
+  companyUserId String
+  companyUser   User     @relation(fields: [companyUserId], references: [id], onDelete: Cascade)
+  seekerId      String
+  createdAt     DateTime @default(now())
+
+  @@unique([companyUserId, seekerId])
+}
+
+model Conversation {
+  id            String    @id @default(cuid())
+  userAId       String
+  userA         User      @relation("ConversationUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userBId       String
+  userB         User      @relation("ConversationUserB", fields: [userBId], references: [id], onDelete: Cascade)
+  lastMessageAt DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  messages      Message[]
+  offers        JobOffer[]
+
+  @@unique([userAId, userBId])
+}
+
+model Message {
+  id               String       @id @default(cuid())
+  conversationId   String
+  conversation     Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId         String
+  sender           User         @relation("MessagesSent", fields: [senderId], references: [id], onDelete: Cascade)
+  type             MessageType  @default(TEXT)
+  /// Originaltext in der Sprache des Absenders
+  body             String
+  sourceLocale     String
+  /// JobOffer-ID wenn type=OFFER
+  offerId          String?
+  offer            JobOffer?    @relation(fields: [offerId], references: [id], onDelete: SetNull)
+  createdAt        DateTime     @default(now())
+  translations     MessageTranslation[]
+}
+
+model MessageTranslation {
+  id         String   @id @default(cuid())
+  messageId  String
+  message    Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  locale     String
+  body       String
+  provider   String   @default("deepl")
+  createdAt  DateTime @default(now())
+
+  @@unique([messageId, locale])
+}
+
+model JobOffer {
+  id              String       @id @default(cuid())
+  conversationId  String
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  jobId           String?
+  job             Job?         @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  fromUserId      String
+  fromUser        User         @relation("OffersSent", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId        String
+  toUser          User         @relation("OffersReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+  status          OfferStatus  @default(SENT)
+  companyName     String
+  jobTitle        String
+  jobTitleI18n    String?
+  city            String
+  workHours       String?
+  hourlyWage      Float
+  taskDescription String
+  taskDescriptionI18n String?
+  requirements    String       @default("[]")
+  startDate       DateTime?
+  respondedAt     DateTime?
+  /// Nach Annahme: Zusammenarbeit gilt als bestätigt → Bewertung erlaubt
+  collaborationDone Boolean    @default(false)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  messages        Message[]
+  ratings         Rating[]
+}
+
+model Rating {
+  id           String    @id @default(cuid())
+  fromUserId   String
+  fromUser     User      @relation("RatingsGiven", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId     String
+  toUser       User      @relation("RatingsReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+  /// Bewertung nur nach angenommener Zusammenarbeit
+  offerId      String
+  offer        JobOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  score        Int
+  comment      String?
+  flagged      Boolean   @default(false)
+  flagReason   String?
+  hidden       Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  @@unique([fromUserId, toUserId, offerId])
+}
+
+model Report {
+  id           String       @id @default(cuid())
+  reporterId   String
+  reporter     User         @relation("ReportsFiled", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetType   String
+  targetId     String
+  reason       ReportReason
+  details      String?
+  resolved     Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+}

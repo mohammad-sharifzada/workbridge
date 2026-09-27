@@ -1,0 +1,8 @@
+[build]
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Next.js 16 wird von Netlify automatisch erkannt (OpenNext).
+# Kein publish-Ordner nötig – das übernimmt Netlify.

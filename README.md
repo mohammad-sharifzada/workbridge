@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WorkBridge Deutschland
 
-## Getting Started
+Produktionsnahe Web-App: Job-Marktplatz + Onboarding für Arbeit in Deutschland.
 
-First, run the development server:
+## Stack
+
+- **Frontend:** Next.js 16 (App Router), Tailwind CSS 4, next-intl
+- **Backend:** Next.js Server Actions + API
+- **DB:** Prisma 6 + SQLite (lokal) / PostgreSQL (Produktion)
+- **Auth:** SMS-Code (Mock/Twilio-ready) + E-Mail/Passwort für Unternehmen
+- **i18n:** de, en, ar, tr, fa, uk (RTL für ar/fa)
+
+## Schnellstart
 
 ```bash
+cd workbridge
+npm install
+npm run db:push
+npm run db:seed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Öffnen: [http://localhost:3000/de](http://localhost:3000/de)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Demo-Zugänge
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Rolle | Login |
+|-------|--------|
+| Unternehmen | `firma@demo.de` / `demo1234` |
+| Arbeitssuchende | Telefon `+4915111111111` → SMS-Code wird in der UI angezeigt (Mock) |
 
-## Learn More
+## PostgreSQL (Produktion / Live)
 
-To learn more about Next.js, take a look at the following resources:
+Lokal und live wird **PostgreSQL** genutzt (z. B. kostenlos bei [Neon](https://neon.tech)).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+In `.env`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+DATABASE_URL="postgresql://USER:PASS@HOST:5432/workbridge?sslmode=require"
+```
 
-## Deploy on Vercel
+Schema anwenden und Demo-Daten:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run db:push
+npm run db:seed
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Live veröffentlichen
+
+**Netlify (empfohlen, wenn du schon Netlify nutzt):** siehe [`NETLIFY.md`](./NETLIFY.md)  
+**Alternative Railway/Vercel:** siehe [`LIVE.md`](./LIVE.md) / [`DEPLOY.md`](./DEPLOY.md)
+
+Nach dem Deploy auf Netlify:
+
+- Fertig: `https://DEINE-SITE.netlify.app/de/demo/ready`
+- Neustart: `https://DEINE-SITE.netlify.app/de/start`
+
+## Twilio SMS
+
+```
+SMS_PROVIDER=twilio
+TWILIO_ACCOUNT_SID=...
+TWILIO_AUTH_TOKEN=...
+TWILIO_FROM_NUMBER=...
+```
+
+Hook-Stelle: `src/lib/auth.ts` → `createVerificationCode`.
+
+## Dokumentation
+
+Siehe `DOKUMENTATION.md` für implementierte Funktionen, Verbesserungen und Zusatzfeatures (Korso).

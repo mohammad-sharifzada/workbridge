@@ -1,0 +1,15 @@
+WorkBridge Präsentations-Links
+Generiert: 20.09.2026 00:50
+
+NUR AUF DIESEM MAC (Safari zuverlässig):
+  Von null:        http://127.0.0.1:3018/de/start
+  Fertig (Ahmed):  http://127.0.0.1:3018/de/demo/ready
+
+WLAN (gleiche Netzwerk-IP):
+  Von null:        http://192.168.10.81:3018/de/start
+  Fertig:          http://192.168.10.81:3018/de/demo/ready
+
+Sprachen testen (Profil-Inhalt jetzt lokalisiert):
+  Arabisch:  http://127.0.0.1:3018/ar/demo/ready
+  Englisch:  http://127.0.0.1:3018/en/demo/ready
+  Türkisch:  http://127.0.0.1:3018/tr/demo/ready
