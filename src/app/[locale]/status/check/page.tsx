@@ -3,7 +3,7 @@ import { isLocale } from "@/i18n/config";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { StatusCheckForm } from "@/components/status-check-form";
-import { prisma } from "@/lib/db";
+import { getSeekerProfileByUserId } from "@/lib/seeker-profile-p8";
 
 export default async function StatusCheckPage({
   params,
@@ -20,7 +20,7 @@ export default async function StatusCheckPage({
   const user = await getCurrentUser();
   if (!user) redirect(`/${locale}/register`);
   if (user.role !== "SEEKER") redirect(`/${locale}/company`);
-  const profile = await prisma.seekerProfile.findUnique({ where: { userId: user.id } });
+  const profile = await getSeekerProfileByUserId(user.id);
   if (!profile) redirect(`/${locale}/onboarding`);
   if (profile.onboardingDone) redirect(`/${locale}/status`);
   if (from !== "onboarding") redirect(`/${locale}/onboarding`);

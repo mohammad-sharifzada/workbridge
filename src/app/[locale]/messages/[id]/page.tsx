@@ -2,10 +2,10 @@ import { setRequestLocale } from "next-intl/server";
 import { isLocale } from "@/i18n/config";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
 import { ConversationThread } from "@/components/conversation-thread";
 import { getTranslations } from "next-intl/server";
 import { requireSeekerOnboardingDone } from "@/lib/onboarding-guard";
+import { getConversationThreadById } from "@/lib/conversation-p8";
 
 export default async function ConversationPage({
   params,
@@ -22,17 +22,7 @@ export default async function ConversationPage({
     await requireSeekerOnboardingDone(user, locale);
   }
 
-  const conv = await prisma.conversation.findUnique({
-    where: { id },
-    include: {
-      userA: { include: { companyProfile: true } },
-      userB: { include: { companyProfile: true } },
-      messages: {
-        orderBy: { createdAt: "asc" },
-        include: { offer: true },
-      },
-    },
-  });
+  const conv = await getConversationThreadById(id);
   if (!conv || (conv.userAId !== user.id && conv.userBId !== user.id)) notFound();
 
   const t = await getTranslations("messages");

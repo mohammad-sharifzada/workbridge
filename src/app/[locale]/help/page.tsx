@@ -15,8 +15,8 @@ import { Link } from "@/i18n/routing";
 import { HelpBankChoice, HelpPermitChoice } from "@/components/help-choices";
 import { WorkChecklist } from "@/components/work-checklist";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
 import { requireSeekerOnboardingDone } from "@/lib/onboarding-guard";
+import { getSeekerProfileByUserId } from "@/lib/seeker-profile-p8";
 
 export default async function HelpPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -30,9 +30,7 @@ export default async function HelpPage({ params }: { params: Promise<{ locale: s
     await requireSeekerOnboardingDone(user, locale);
   }
   const profile =
-    user?.role === "SEEKER"
-      ? await prisma.seekerProfile.findUnique({ where: { userId: user.id } })
-      : null;
+    user?.role === "SEEKER" ? await getSeekerProfileByUserId(user.id) : null;
 
   const topics = [
     { id: "guide", icon: "✅", title: t("guideNav") },

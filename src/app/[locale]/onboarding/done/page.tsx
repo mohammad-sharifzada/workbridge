@@ -2,9 +2,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isLocale } from "@/i18n/config";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
 import { completeOnboarding } from "@/actions";
 import { OnboardingDoneRedirect } from "@/components/onboarding-done-redirect";
+import { getSeekerProfileByUserId } from "@/lib/seeker-profile-p8";
 
 export default async function OnboardingDonePage({
   params,
@@ -19,7 +19,7 @@ export default async function OnboardingDonePage({
   if (!user) redirect(`/${locale}/register`);
   if (user.role !== "SEEKER") redirect(`/${locale}/company`);
 
-  const profile = await prisma.seekerProfile.findUnique({ where: { userId: user.id } });
+  const profile = await getSeekerProfileByUserId(user.id);
   if (!profile) redirect(`/${locale}/onboarding`);
   const statusAnswered =
     profile.hasBankAccount !== null &&

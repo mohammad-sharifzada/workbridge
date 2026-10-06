@@ -1,13 +1,15 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { isLocale } from "@/i18n/config";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { SimpleJobCard } from "@/components/simple-job-card";
 import { ReportButton } from "@/components/trust";
 import { Link } from "@/i18n/routing";
 import { rankJobs } from "@/lib/matching";
 import { requireSeekerOnboardingDone } from "@/lib/onboarding-guard";
+import { db } from "@/prisma/db";
+import { getSeekerProfileByUserId } from "@/lib/seeker-profile-p8";
+import { getJobWithCompanySelect } from "@/lib/job-p8";
 
 export default async function JobDetailPage({
   params,
@@ -18,19 +20,7 @@ export default async function JobDetailPage({
   if (!isLocale(locale)) notFound();
   setRequestLocale(locale);
 
-  const job = await prisma.job.findUnique({
-    where: { id },
-    include: {
-      company: {
-        select: {
-          id: true,
-          companyName: true,
-          companyNameI18n: true,
-          verificationStatus: true,
-        },
-      },
-    },
-  });
+  const job = await getJobWithCompanySelect(id);
   if (!job) notFound();
 
   const user = await getCurrentUser();
@@ -42,11 +32,14 @@ export default async function JobDetailPage({
 
   if (user?.role === "SEEKER") {
     await requireSeekerOnboardingDone(user, locale);
-    const app = await prisma.jobApplication.findUnique({
-      where: { jobId_userId: { jobId: job.id, userId: user.id } },
-    });
+    const app = await db.orm.public.JobApplication.where({
+      jobId: job.id,
+      userId: user.id,
+    })
+      .select("jobId")
+      .first();
     applied = !!app;
-    const profile = await prisma.seekerProfile.findUnique({ where: { userId: user.id } });
+    const profile = await getSeekerProfileByUserId(user.id);
     if (profile) {
       const ranked = rankJobs(profile, [
         {

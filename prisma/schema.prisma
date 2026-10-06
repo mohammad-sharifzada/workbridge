@@ -3,8 +3,7 @@ generator client {
 }
 
 datasource db {
-  // Lokal: sqlite (file:./dev.db). Live (Vercel/Railway): postgresql + Neon/Supabase-URL
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

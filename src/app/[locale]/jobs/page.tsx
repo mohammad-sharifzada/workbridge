@@ -10,6 +10,7 @@ import { JobSearchBar } from "@/components/job-search-bar";
 import { Link } from "@/i18n/routing";
 import type { ReadinessStatus } from "@prisma/client";
 import { requireSeekerOnboardingDone } from "@/lib/onboarding-guard";
+import { db } from "@/prisma/db";
 
 export default async function JobsPage({
   params,
@@ -63,10 +64,9 @@ export default async function JobsPage({
     profileReady = true;
     readiness = profile.readinessStatus;
     matched = rankJobs(profile, jobs);
-    const apps = await prisma.jobApplication.findMany({
-      where: { userId: user.id },
-      select: { jobId: true },
-    });
+    const apps = await db.orm.public.JobApplication.where({ userId: user.id })
+      .select("jobId")
+      .all();
     applications = apps.map((a) => a.jobId);
   }
 

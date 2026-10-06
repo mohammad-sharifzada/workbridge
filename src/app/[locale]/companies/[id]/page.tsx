@@ -1,13 +1,13 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isLocale } from "@/i18n/config";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
 import { Link } from "@/i18n/routing";
 import { CompanyMap } from "@/components/company-map";
 import { CheckCircle2, Globe, Building2, Phone, Mail } from "lucide-react";
 import { localizeText } from "@/lib/i18n-content";
 import { localizeCity, localizeCompanyDescription, localizeIndustry } from "@/lib/localize-job";
 import { formatWage } from "@/lib/utils";
+import { getCompanyPublicById } from "@/lib/company-p8";
 
 export default async function CompanyPublicPage({
   params,
@@ -18,17 +18,7 @@ export default async function CompanyPublicPage({
   if (!isLocale(locale)) notFound();
   setRequestLocale(locale);
 
-  const company = await prisma.companyProfile.findUnique({
-    where: { id },
-    include: {
-      jobs: { where: { active: true }, orderBy: { createdAt: "desc" } },
-      user: {
-        include: {
-          ratingsReceived: { where: { hidden: false }, take: 20 },
-        },
-      },
-    },
-  });
+  const company = await getCompanyPublicById(id);
   if (!company) notFound();
 
   const t = await getTranslations("companyPage");

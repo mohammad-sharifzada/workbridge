@@ -2,9 +2,7 @@ import type { SeekerProfile, User } from "@prisma/client";
 import { parseCvJson, skillsFromProfile } from "@/components/visual-cv";
 import { getDemoCvContent } from "@/lib/demo-cv-i18n";
 import { localizeText } from "@/lib/i18n-content";
-
-/** Gleiche Nummer wie in presentation-demo (kein Import-Zyklus) */
-const PRESENTATION_READY_PHONE = "+4915111111111";
+import { PRESENTATION_READY_PHONE } from "@/lib/presentation-constants";
 
 export type CvMessageLabels = {
   application: string;

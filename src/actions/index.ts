@@ -1,6 +1,14 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import { db } from "@/prisma/db";
+import { getSeekerProfileByUserId } from "@/lib/seeker-profile-p8";
+import { dateToPlainDateTime } from "@/lib/prisma8-temporal";
+import { conflictOn } from "@/lib/prisma8-upsert";
+import {
+  mapLegacyCompanyProfile,
+  mapLegacyJobScalars,
+  mapLegacyUser,
+} from "@/lib/prisma8-legacy-mappers";
 import {
   createSession,
   createVerificationCode,
@@ -57,25 +65,29 @@ export async function verifyPhoneAndLogin(opts: {
   const valid = await verifyCode({ phone, code, purpose: "phone_login" });
   if (!valid) return { ok: false, error: "invalid_code" };
 
-  let user = await prisma.user.findUnique({ where: { phone } });
+  const row = await db.orm.public.User.where({ phone }).first();
+  let user = row ? mapLegacyUser(row) : null;
   if (!user) {
-    user = await prisma.user.create({
-      data: {
-        phone,
-        phoneVerified: true,
-        role: "SEEKER",
-        locale: opts.locale,
-        seekerProfile: { create: {} },
-      },
+    const created = await db.orm.public.User.create({
+      phone,
+      phoneVerified: true,
+      role: "SEEKER",
+      locale: opts.locale,
+      seekerProfile: (seekerProfile) => seekerProfile.create({}),
     });
+    if (!created) return { ok: false, error: "create_failed" };
+    await createSession(created.id, created.role);
+    await markCodeUsed({ phone, code, purpose: "phone_login" });
+    return { ok: true, data: { userId: created.id } };
   } else {
-    user = await prisma.user.update({
-      where: { id: user.id },
-      data: { phoneVerified: true, locale: opts.locale },
+    await db.orm.public.User.where({ id: user.id }).update({
+      phoneVerified: true,
+      locale: opts.locale,
     });
-    const profile = await prisma.seekerProfile.findUnique({ where: { userId: user.id } });
+    user = { ...user, phoneVerified: true, locale: opts.locale };
+    const profile = await getSeekerProfileByUserId(user.id);
     if (!profile) {
-      await prisma.seekerProfile.create({ data: { userId: user.id } });
+      await db.orm.public.SeekerProfile.create({ userId: user.id });
     }
   }
 
@@ -87,39 +99,39 @@ export async function verifyPhoneAndLogin(opts: {
 /** Demo-Login nutzt denselben Onboarding-Flow wie neue Nutzer */
 export async function demoSeekerLogin(locale: string): Promise<ActionResult<{ userId: string }>> {
   const phone = "+4915111111111";
-  let user = await prisma.user.findUnique({ where: { phone } });
+  const row = await db.orm.public.User.where({ phone }).first();
+  const user = row ? mapLegacyUser(row) : null;
   if (!user) {
-    user = await prisma.user.create({
-      data: {
-        phone,
-        phoneVerified: true,
-        role: "SEEKER",
-        locale,
-        name: "Demo Suchender",
-        seekerProfile: {
-          create: {},
-        },
-      },
+    const created = await db.orm.public.User.create({
+      phone,
+      phoneVerified: true,
+      role: "SEEKER",
+      locale,
+      name: "Demo Suchender",
+      seekerProfile: (seekerProfile) => seekerProfile.create({}),
     });
-  } else {
-    await prisma.seekerProfile.upsert({
-      where: { userId: user.id },
-      create: { userId: user.id },
-      update: {
-        onboardingDone: false,
-        readinessStatus: "RED",
-        hasBankAccount: null,
-        hasTaxId: null,
-        hasWorkPermit: null,
-        hasIdDocument: null,
-        workPermitNote: null,
-      },
-    });
-    user = await prisma.user.update({
-      where: { id: user.id },
-      data: { phoneVerified: true, locale },
-    });
+    if (!created) return { ok: false, error: "create_failed" };
+    await createSession(created.id, "SEEKER");
+    return { ok: true, data: { userId: created.id } };
   }
+
+  await db.orm.public.SeekerProfile.upsert({
+    create: { userId: user.id },
+    update: {
+      onboardingDone: false,
+      readinessStatus: "RED",
+      hasBankAccount: null,
+      hasTaxId: null,
+      hasWorkPermit: null,
+      hasIdDocument: null,
+      workPermitNote: null,
+    },
+    conflictOn: conflictOn({ userId: user.id }),
+  });
+  await db.orm.public.User.where({ id: user.id }).update({
+    phoneVerified: true,
+    locale,
+  });
   await createSession(user.id, "SEEKER");
   return { ok: true, data: { userId: user.id } };
 }
@@ -131,10 +143,7 @@ export async function updateUserLocale(locale: string): Promise<ActionResult> {
   if (!isSupportedLocale(locale)) return { ok: false, error: "invalid_locale" };
   if (user.locale === locale) return { ok: true };
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { locale },
-  });
+  await db.orm.public.User.where({ id: user.id }).update({ locale });
   revalidatePath("/");
   return { ok: true };
 }
@@ -150,28 +159,26 @@ export async function registerCompany(opts: {
   if (!email.includes("@") || opts.password.length < 8) {
     return { ok: false, error: "invalid_input" };
   }
-  const existing = await prisma.user.findUnique({ where: { email } });
+  const existing = await db.orm.public.User.where({ email }).first();
   if (existing) return { ok: false, error: "email_taken" };
 
   const passwordHash = await hashPassword(opts.password);
-  const user = await prisma.user.create({
-    data: {
-      email,
-      passwordHash,
-      emailVerified: true,
-      role: "COMPANY",
-      locale: opts.locale,
-      name: opts.companyName,
-      companyProfile: {
-        create: {
-          companyName: opts.companyName,
-          city: opts.city,
-          contactCredits: 3,
-          subscription: "STARTER",
-        },
-      },
-    },
+  const user = await db.orm.public.User.create({
+    email,
+    passwordHash,
+    emailVerified: true,
+    role: "COMPANY",
+    locale: opts.locale,
+    name: opts.companyName,
+    companyProfile: (companyProfile) =>
+      companyProfile.create({
+        companyName: opts.companyName,
+        city: opts.city,
+        contactCredits: 3,
+        subscription: "STARTER",
+      }),
   });
+  if (!user) return { ok: false, error: "create_failed" };
   await createSession(user.id, user.role);
   return { ok: true };
 }
@@ -182,14 +189,15 @@ export async function loginCompany(opts: {
   locale?: string;
 }): Promise<ActionResult> {
   const email = opts.email.trim().toLowerCase();
-  const user = await prisma.user.findUnique({ where: { email } });
+  const row = await db.orm.public.User.where({ email }).first();
+  const user = row ? mapLegacyUser(row) : null;
   if (!user?.passwordHash || user.role !== "COMPANY") {
     return { ok: false, error: "invalid_credentials" };
   }
   const ok = await verifyPassword(opts.password, user.passwordHash);
   if (!ok) return { ok: false, error: "invalid_credentials" };
   if (opts.locale && isSupportedLocale(opts.locale) && user.locale !== opts.locale) {
-    await prisma.user.update({ where: { id: user.id }, data: { locale: opts.locale } });
+    await db.orm.public.User.where({ id: user.id }).update({ locale: opts.locale });
   }
   await createSession(user.id, user.role);
   return { ok: true };
@@ -226,12 +234,9 @@ export async function saveOnboarding(opts: {
   if (!user || user.role !== "SEEKER") return { ok: false, error: "unauthorized" };
 
   if (opts.name || opts.email) {
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        ...(opts.name ? { name: opts.name } : {}),
-        ...(opts.email ? { email: opts.email } : {}),
-      },
+    await db.orm.public.User.where({ id: user.id }).update({
+      ...(opts.name ? { name: opts.name } : {}),
+      ...(opts.email ? { email: opts.email } : {}),
     });
   }
 
@@ -250,8 +255,7 @@ export async function saveOnboarding(opts: {
     sideJobsJson: JSON.stringify(opts.sideJobs ?? []),
   };
 
-  await prisma.seekerProfile.upsert({
-    where: { userId: user.id },
+  await db.orm.public.SeekerProfile.upsert({
     create: {
       userId: user.id,
       skills: toJsonArray(opts.skills),
@@ -271,6 +275,7 @@ export async function saveOnboarding(opts: {
       longitude: opts.longitude ?? null,
       ...cvData,
     },
+    conflictOn: conflictOn({ userId: user.id }),
   });
   revalidatePath("/");
   return { ok: true };
@@ -285,8 +290,7 @@ export async function saveStatusCheck(opts: {
   if (!user || user.role !== "SEEKER") return { ok: false, error: "unauthorized" };
 
   const { status } = computeReadiness(opts);
-  await prisma.seekerProfile.upsert({
-    where: { userId: user.id },
+  await db.orm.public.SeekerProfile.upsert({
     create: {
       userId: user.id,
       hasBankAccount: opts.hasBankAccount,
@@ -301,6 +305,7 @@ export async function saveStatusCheck(opts: {
       hasWorkPermit: opts.hasWorkPermit,
       readinessStatus: status,
     },
+    conflictOn: conflictOn({ userId: user.id }),
   });
   revalidatePath("/");
   return { ok: true, data: { status } };
@@ -310,8 +315,7 @@ export async function completeOnboarding(): Promise<ActionResult> {
   const user = await getCurrentUser();
   if (!user || user.role !== "SEEKER") return { ok: false, error: "unauthorized" };
 
-  await prisma.seekerProfile.upsert({
-    where: { userId: user.id },
+  await db.orm.public.SeekerProfile.upsert({
     create: {
       userId: user.id,
       onboardingDone: true,
@@ -319,6 +323,7 @@ export async function completeOnboarding(): Promise<ActionResult> {
     update: {
       onboardingDone: true,
     },
+    conflictOn: conflictOn({ userId: user.id }),
   });
   revalidatePath("/");
   revalidatePath("/jobs");
@@ -335,7 +340,7 @@ export async function updateStatusChecks(opts: {
   const user = await getCurrentUser();
   if (!user || user.role !== "SEEKER") return { ok: false, error: "unauthorized" };
 
-  const profile = await prisma.seekerProfile.findUnique({ where: { userId: user.id } });
+  const profile = await getSeekerProfileByUserId(user.id);
   const next = {
     hasBankAccount: opts.hasBankAccount !== undefined ? opts.hasBankAccount : (profile?.hasBankAccount ?? null),
     hasTaxId: opts.hasTaxId !== undefined ? opts.hasTaxId : (profile?.hasTaxId ?? null),
@@ -343,8 +348,7 @@ export async function updateStatusChecks(opts: {
     hasIdDocument: opts.hasIdDocument !== undefined ? opts.hasIdDocument : (profile?.hasIdDocument ?? null),
   };
   const { status } = computeReadiness(next);
-  await prisma.seekerProfile.upsert({
-    where: { userId: user.id },
+  await db.orm.public.SeekerProfile.upsert({
     create: {
       userId: user.id,
       ...next,
@@ -354,6 +358,7 @@ export async function updateStatusChecks(opts: {
       ...next,
       readinessStatus: status,
     },
+    conflictOn: conflictOn({ userId: user.id }),
   });
   revalidatePath("/");
   revalidatePath("/help");
@@ -365,21 +370,31 @@ export async function applyToJob(jobId: string): Promise<ActionResult> {
   const user = await getCurrentUser();
   if (!user || user.role !== "SEEKER") return { ok: false, error: "unauthorized" };
 
-  const profile = await prisma.seekerProfile.findUnique({ where: { userId: user.id } });
+  const profile = await getSeekerProfileByUserId(user.id);
   if (!profile) return { ok: false, error: "no_profile" };
 
-  const job = await prisma.job.findUnique({
-    where: { id: jobId },
-    include: { company: { select: { userId: true, companyName: true } } },
-  });
-  if (!job?.active) return { ok: false, error: "job_not_found" };
+  const jobRow = await db.orm.public.Job.where({ id: jobId })
+    .include("company", (c) => c.select("userId", "companyName"))
+    .first();
+  if (!jobRow?.company) return { ok: false, error: "job_not_found" };
+  const job = {
+    ...mapLegacyJobScalars(jobRow),
+    company: {
+      userId: jobRow.company.userId,
+      companyName: jobRow.company.companyName,
+    },
+  };
+  if (!job.active) return { ok: false, error: "job_not_found" };
   if (job.requiresGreenStatus && profile.readinessStatus !== "GREEN") {
     return { ok: false, error: "not_ready" };
   }
 
-  const existing = await prisma.jobApplication.findUnique({
-    where: { jobId_userId: { jobId, userId: user.id } },
-  });
+  const existing = await db.orm.public.JobApplication.where({
+    jobId,
+    userId: user.id,
+  })
+    .select("jobId")
+    .first();
 
   const locale = (isSupportedLocale(user.locale) ? user.locale : "de") as Locale;
   const de = await import("../../messages/de.json");
@@ -422,27 +437,24 @@ export async function applyToJob(jobId: string): Promise<ActionResult> {
     },
   });
 
-  await prisma.jobApplication.upsert({
-    where: { jobId_userId: { jobId, userId: user.id } },
+  await db.orm.public.JobApplication.upsert({
     create: { jobId, userId: user.id, message: cvMessage },
     update: {},
+    conflictOn: conflictOn({ jobId, userId: user.id }),
   });
 
   if (!existing) {
     const convRes = await getOrCreateConversation(job.company.userId);
     if (convRes.ok && convRes.data) {
-      await prisma.message.create({
-        data: {
-          conversationId: convRes.data.conversationId,
-          senderId: user.id,
-          type: "TEXT",
-          body: cvMessage,
-          sourceLocale: user.locale || "de",
-        },
+      await db.orm.public.Message.create({
+        conversationId: convRes.data.conversationId,
+        senderId: user.id,
+        type: "TEXT",
+        body: cvMessage,
+        sourceLocale: user.locale || "de",
       });
-      await prisma.conversation.update({
-        where: { id: convRes.data.conversationId },
-        data: { lastMessageAt: new Date() },
+      await db.orm.public.Conversation.where({ id: convRes.data.conversationId }).update({
+        lastMessageAt: dateToPlainDateTime(new Date()),
       });
     }
   }
@@ -468,8 +480,9 @@ export async function createJob(opts: {
 }): Promise<ActionResult> {
   const user = await getCurrentUser();
   if (!user || user.role !== "COMPANY") return { ok: false, error: "unauthorized" };
-  const company = await prisma.companyProfile.findUnique({ where: { userId: user.id } });
-  if (!company) return { ok: false, error: "no_company" };
+  const companyRow = await db.orm.public.CompanyProfile.where({ userId: user.id }).first();
+  if (!companyRow) return { ok: false, error: "no_company" };
+  const company = mapLegacyCompanyProfile(companyRow);
 
   const sourceLocale = (isSupportedLocale(user.locale) ? user.locale : "de") as Locale;
   const [titleI18n, descriptionI18n, simpleWhatI18n] = await Promise.all([
@@ -478,25 +491,23 @@ export async function createJob(opts: {
     buildLocaleMap(opts.description, sourceLocale),
   ]);
 
-  await prisma.job.create({
-    data: {
-      companyId: company.id,
-      title: opts.title,
-      description: opts.description,
-      titleI18n,
-      descriptionI18n,
-      simpleWhatI18n,
-      category: opts.category,
-      hourlyWage: opts.hourlyWage,
-      city: opts.city,
-      physicalLevel: opts.physicalLevel,
-      availability: opts.availability,
-      requirements: toJsonArray(opts.requirements),
-      startDate: opts.startDate ? new Date(opts.startDate) : null,
-      requiresGreenStatus: opts.requiresGreenStatus ?? true,
-      latitude: company.latitude,
-      longitude: company.longitude,
-    },
+  await db.orm.public.Job.create({
+    companyId: company.id,
+    title: opts.title,
+    description: opts.description,
+    titleI18n,
+    descriptionI18n,
+    simpleWhatI18n,
+    category: opts.category,
+    hourlyWage: opts.hourlyWage,
+    city: opts.city,
+    physicalLevel: opts.physicalLevel,
+    availability: opts.availability,
+    requirements: toJsonArray(opts.requirements),
+    startDate: opts.startDate ? dateToPlainDateTime(new Date(opts.startDate)) : null,
+    requiresGreenStatus: opts.requiresGreenStatus ?? true,
+    latitude: company.latitude,
+    longitude: company.longitude,
   });
   revalidatePath("/");
   return { ok: true };
@@ -505,11 +516,14 @@ export async function createJob(opts: {
 export async function buyContactCredits(): Promise<ActionResult> {
   const user = await getCurrentUser();
   if (!user || user.role !== "COMPANY") return { ok: false, error: "unauthorized" };
-  // Demo billing: grants credits without payment provider
-  await prisma.companyProfile.update({
-    where: { userId: user.id },
-    data: { contactCredits: { increment: 5 } },
-  });
+  // Demo billing: grants credits without payment provider (atomic SQL increment)
+  await db.runtime().execute(
+    db.raw.sql`
+      UPDATE "CompanyProfile"
+      SET "contactCredits" = "contactCredits" + 5
+      WHERE "userId" = ${user.id}
+    `.affectedCount().build(),
+  );
   revalidatePath("/");
   return { ok: true };
 }
@@ -518,28 +532,34 @@ export async function unlockContact(seekerUserId: string): Promise<ActionResult<
   const user = await getCurrentUser();
   if (!user || user.role !== "COMPANY") return { ok: false, error: "unauthorized" };
 
-  const company = await prisma.companyProfile.findUnique({ where: { userId: user.id } });
+  const company = await db.orm.public.CompanyProfile.where({ userId: user.id }).first();
   if (!company) return { ok: false, error: "no_company" };
 
-  const existing = await prisma.contactUnlock.findUnique({
-    where: {
-      companyUserId_seekerId: { companyUserId: user.id, seekerId: seekerUserId },
-    },
-  });
+  const existing = await db.orm.public.ContactUnlock.where({
+    companyUserId: user.id,
+    seekerId: seekerUserId,
+  }).first();
   if (!existing) {
     if (company.contactCredits < 1) return { ok: false, error: "no_credits" };
-    await prisma.$transaction([
-      prisma.companyProfile.update({
-        where: { id: company.id },
-        data: { contactCredits: { decrement: 1 } },
-      }),
-      prisma.contactUnlock.create({
-        data: { companyUserId: user.id, seekerId: seekerUserId },
-      }),
-    ]);
+    const unlocked = await db.transaction(async (tx) => {
+      const dec = await tx.execute(
+        db.raw.sql`
+          UPDATE "CompanyProfile"
+          SET "contactCredits" = "contactCredits" - 1
+          WHERE id = ${company.id} AND "contactCredits" >= 1
+        `.affectedCount().build(),
+      );
+      if (!dec.affectedRows) return false;
+      await tx.orm.public.ContactUnlock.create({
+        companyUserId: user.id,
+        seekerId: seekerUserId,
+      });
+      return true;
+    });
+    if (!unlocked) return { ok: false, error: "no_credits" };
   }
 
-  const seeker = await prisma.user.findUnique({ where: { id: seekerUserId } });
+  const seeker = await db.orm.public.User.where({ id: seekerUserId }).first();
   revalidatePath("/");
   return { ok: true, data: { phone: seeker?.phone } };
 }
@@ -568,14 +588,12 @@ export async function submitReport(opts: {
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: "unauthorized" };
 
-  await prisma.report.create({
-    data: {
-      reporterId: user.id,
-      targetType: opts.targetType,
-      targetId: opts.targetId,
-      reason: opts.reason,
-      details: opts.details,
-    },
+  await db.orm.public.Report.create({
+    reporterId: user.id,
+    targetType: opts.targetType,
+    targetId: opts.targetId,
+    reason: opts.reason,
+    details: opts.details,
   });
   return { ok: true };
 }
@@ -584,13 +602,10 @@ export async function requestCompanyVerification(): Promise<ActionResult> {
   const user = await getCurrentUser();
   if (!user || user.role !== "COMPANY") return { ok: false, error: "unauthorized" };
   // Demo: auto-verify after request (production would use manual review)
-  await prisma.companyProfile.update({
-    where: { userId: user.id },
-    data: {
-      verified: true,
-      verificationStatus: "VERIFIED",
-      verificationNote: "Demo-Verifizierung",
-    },
+  await db.orm.public.CompanyProfile.where({ userId: user.id }).update({
+    verified: true,
+    verificationStatus: "VERIFIED",
+    verificationNote: "Demo-Verifizierung",
   });
   revalidatePath("/");
   return { ok: true };
@@ -615,16 +630,12 @@ export async function saveCvProfile(opts: {
   const user = await getCurrentUser();
   if (!user || user.role !== "SEEKER") return { ok: false, error: "unauthorized" };
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      name: opts.name.trim() || user.name,
-      email: opts.email.trim() || user.email,
-    },
+  await db.orm.public.User.where({ id: user.id }).update({
+    name: opts.name.trim() || user.name,
+    email: opts.email.trim() || user.email,
   });
 
-  await prisma.seekerProfile.upsert({
-    where: { userId: user.id },
+  await db.orm.public.SeekerProfile.upsert({
     create: {
       userId: user.id,
       headline: opts.headline || null,
@@ -654,6 +665,7 @@ export async function saveCvProfile(opts: {
       ...(opts.education ? { educationJson: JSON.stringify(opts.education) } : {}),
       ...(opts.sideJobs ? { sideJobsJson: JSON.stringify(opts.sideJobs) } : {}),
     },
+    conflictOn: conflictOn({ userId: user.id }),
   });
 
   revalidatePath("/");
@@ -672,8 +684,7 @@ export async function saveCvPhoto(photoUrl: string): Promise<ActionResult> {
     return { ok: false, error: "invalid_photo" };
   }
 
-  await prisma.seekerProfile.upsert({
-    where: { userId: user.id },
+  await db.orm.public.SeekerProfile.upsert({
     create: {
       userId: user.id,
       photoUrl: photoUrl || null,
@@ -681,6 +692,7 @@ export async function saveCvPhoto(photoUrl: string): Promise<ActionResult> {
     update: {
       photoUrl: photoUrl || null,
     },
+    conflictOn: conflictOn({ userId: user.id }),
   });
 
   revalidatePath("/");

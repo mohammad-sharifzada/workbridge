@@ -6,7 +6,7 @@ import { locales, rtlLocales, isLocale, type Locale } from "@/i18n/config";
 import { AppFooter, AppHeader } from "@/components/layout";
 import { HelpChatbot } from "@/components/help-chatbot";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { db } from "@/prisma/db";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -47,15 +47,14 @@ export default async function LocaleLayout({
   const user = await getCurrentUser();
   // URL-Sprache mit Profil synchron halten (Chat/Übersetzungen nutzen user.locale)
   if (user && user.locale !== locale) {
-    await prisma.user.update({ where: { id: user.id }, data: { locale } });
+    await db.orm.public.User.where({ id: user.id }).update({ locale });
     user.locale = locale;
   }
   let headerUser = user as (typeof user & { photoUrl?: string | null; onboardingDone?: boolean }) | null;
   if (user?.role === "SEEKER") {
-    const profile = await prisma.seekerProfile.findUnique({
-      where: { userId: user.id },
-      select: { photoUrl: true, onboardingDone: true },
-    });
+    const profile = await db.orm.public.SeekerProfile.where({ userId: user.id })
+      .select("photoUrl", "onboardingDone")
+      .first();
     headerUser = {
       ...user,
       photoUrl: profile?.photoUrl ?? null,

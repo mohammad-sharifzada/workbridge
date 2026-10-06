@@ -2,7 +2,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isLocale } from "@/i18n/config";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
 import { Link } from "@/i18n/routing";
 import { ReportButton } from "@/components/trust";
 import {
@@ -17,8 +16,9 @@ import { CvEditor } from "@/components/cv-editor";
 import { CvPhotoUpload } from "@/components/cv-photo-upload";
 import { computeReadiness } from "@/lib/status";
 import { requireSeekerOnboardingDone } from "@/lib/onboarding-guard";
+import { getSeekerProfileByUserId } from "@/lib/seeker-profile-p8";
 import { splitToolsAndTraits } from "@/lib/profile-content";
-import { PRESENTATION_READY_PHONE } from "@/lib/presentation-demo";
+import { PRESENTATION_READY_PHONE } from "@/lib/presentation-constants";
 import { buildDemoVisualCvData } from "@/lib/demo-cv";
 import { localizeCity } from "@/lib/localize-job";
 
@@ -31,7 +31,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
   if (!user) redirect(`/${locale}/register`);
   await requireSeekerOnboardingDone(user, locale);
 
-  const profile = await prisma.seekerProfile.findUnique({ where: { userId: user.id } });
+  const profile = await getSeekerProfileByUserId(user.id);
   if (!profile) redirect(`/${locale}/onboarding`);
 
   const t = await getTranslations("profile");

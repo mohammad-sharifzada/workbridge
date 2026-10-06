@@ -1,8 +1,10 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { prisma } from "./db";
+import { db } from "@/prisma/db";
 import type { User, UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { dateToPlainDateTime } from "@/lib/prisma8-temporal";
+import { mapLegacyUser } from "@/lib/prisma8-legacy-mappers";
 
 const COOKIE_NAME = "workbridge_session";
 export { COOKIE_NAME };
@@ -95,7 +97,9 @@ export async function getSession(): Promise<SessionPayload | null> {
 export async function getCurrentUser(): Promise<User | null> {
   const session = await getSession();
   if (!session) return null;
-  return prisma.user.findUnique({ where: { id: session.userId } });
+  const row = await db.orm.public.User.where({ id: session.userId }).first();
+  if (!row) return null;
+  return mapLegacyUser(row);
 }
 
 export function generateCode(): string {
@@ -109,15 +113,13 @@ export async function createVerificationCode(opts: {
   purpose: string;
 }): Promise<{ code: string; mock: boolean }> {
   const code = generateCode();
-  await prisma.verificationCode.create({
-    data: {
-      phone: opts.phone,
-      email: opts.email,
-      userId: opts.userId,
-      purpose: opts.purpose,
-      code,
-      expiresAt: new Date(Date.now() + CODE_TTL_MS),
-    },
+  await db.orm.public.VerificationCode.create({
+    phone: opts.phone,
+    email: opts.email,
+    userId: opts.userId,
+    purpose: opts.purpose,
+    code,
+    expiresAt: dateToPlainDateTime(new Date(Date.now() + CODE_TTL_MS)),
   });
 
   const mock = process.env.SMS_PROVIDER !== "twilio";
@@ -135,17 +137,17 @@ export async function verifyCode(opts: {
   purpose: string;
 }): Promise<boolean> {
   const trimmed = opts.code.trim();
-  const record = await prisma.verificationCode.findFirst({
-    where: {
-      purpose: opts.purpose,
-      code: trimmed,
-      used: false,
-      expiresAt: { gt: new Date() },
-      ...(opts.phone ? { phone: opts.phone } : {}),
-      ...(opts.email ? { email: opts.email } : {}),
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const now = dateToPlainDateTime(new Date());
+  const record = await db.orm.public.VerificationCode.where({
+    purpose: opts.purpose,
+    code: trimmed,
+    used: false,
+    ...(opts.phone ? { phone: opts.phone } : {}),
+    ...(opts.email ? { email: opts.email } : {}),
+  })
+    .where((row) => row.expiresAt.gt(now))
+    .orderBy((row) => row.createdAt.desc())
+    .first();
   if (!record) return false;
   // erst nach erfolgreicher Session als benutzt markieren (siehe markCodeUsed)
   return true;
@@ -158,20 +160,18 @@ export async function markCodeUsed(opts: {
   purpose: string;
 }) {
   const trimmed = opts.code.trim();
-  const record = await prisma.verificationCode.findFirst({
-    where: {
-      purpose: opts.purpose,
-      code: trimmed,
-      used: false,
-      ...(opts.phone ? { phone: opts.phone } : {}),
-      ...(opts.email ? { email: opts.email } : {}),
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const record = await db.orm.public.VerificationCode.where({
+    purpose: opts.purpose,
+    code: trimmed,
+    used: false,
+    ...(opts.phone ? { phone: opts.phone } : {}),
+    ...(opts.email ? { email: opts.email } : {}),
+  })
+    .orderBy((row) => row.createdAt.desc())
+    .first();
   if (record) {
-    await prisma.verificationCode.update({
-      where: { id: record.id },
-      data: { used: true },
+    await db.orm.public.VerificationCode.where({ id: record.id }).update({
+      used: true,
     });
   }
 }

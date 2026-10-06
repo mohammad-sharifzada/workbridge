@@ -10,6 +10,7 @@ import { computeReadiness } from "@/lib/status";
 import { localizeJobFields } from "@/lib/localize-job";
 import { formatWage } from "@/lib/utils";
 import { getNextOpenOnboardingPath } from "@/lib/onboarding-flow";
+import { getSeekerProfileByUserId } from "@/lib/seeker-profile-p8";
 import { redirect } from "next/navigation";
 
 const CAT_ICON: Record<string, string> = {
@@ -34,7 +35,7 @@ export default async function HomePage({
 
   const user = await getCurrentUser();
   if (user?.role === "SEEKER") {
-    const profile = await prisma.seekerProfile.findUnique({ where: { userId: user.id } });
+    const profile = await getSeekerProfileByUserId(user.id);
     const nextPath = getNextOpenOnboardingPath(user, profile);
     if (nextPath !== "/jobs") {
       redirect(`/${locale}${nextPath}`);
@@ -73,7 +74,7 @@ async function SeekerHome({
   const tJobs = await getTranslations("jobs");
   const tSimple = await getTranslations("simpleJob");
 
-  const profile = await prisma.seekerProfile.findUnique({ where: { userId } });
+  const profile = await getSeekerProfileByUserId(userId);
   if (!profile?.onboardingDone) {
     return (
       <div className="surface mx-auto max-w-lg space-y-4 p-6 text-center">

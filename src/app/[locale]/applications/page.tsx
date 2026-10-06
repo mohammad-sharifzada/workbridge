@@ -2,12 +2,13 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isLocale } from "@/i18n/config";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
 import { Link } from "@/i18n/routing";
 import { localizeText } from "@/lib/i18n-content";
 import { localizeCity, localizeCompany } from "@/lib/localize-job";
 import { formatWage } from "@/lib/utils";
 import { requireSeekerOnboardingDone } from "@/lib/onboarding-guard";
+import { listJobApplicationsWithJobAndCompany } from "@/lib/job-application-p8";
+import { listJobOffersForSeeker } from "@/lib/job-offer-p8";
 import { DemoApplicationsList } from "@/components/demo-applications";
 
 export default async function ApplicationsPage({
@@ -25,19 +26,10 @@ export default async function ApplicationsPage({
 
   const t = await getTranslations("applications");
 
-  const apps = await prisma.jobApplication.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: "desc" },
-    include: {
-      job: { include: { company: true } },
-    },
-  });
+  const apps = await listJobApplicationsWithJobAndCompany(user.id);
 
   // Offers linked to this seeker for status overlay
-  const offers = await prisma.jobOffer.findMany({
-    where: { toUserId: user.id },
-    orderBy: { createdAt: "desc" },
-  });
+  const offers = await listJobOffersForSeeker(user.id);
 
   const offerByJob = new Map(
     offers.filter((o) => o.jobId).map((o) => [o.jobId as string, o]),

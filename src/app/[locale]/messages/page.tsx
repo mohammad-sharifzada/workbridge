@@ -2,12 +2,13 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isLocale } from "@/i18n/config";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
 import { Link } from "@/i18n/routing";
 import { MessageCircle } from "lucide-react";
 import { DemoMessagesList } from "@/components/demo-messages";
 import { requireSeekerOnboardingDone } from "@/lib/onboarding-guard";
 import { localizeCompany } from "@/lib/localize-job";
+import { listConversationsForUser } from "@/lib/conversation-p8";
+import { db } from "@/prisma/db";
 
 export default async function MessagesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -22,16 +23,7 @@ export default async function MessagesPage({ params }: { params: Promise<{ local
 
   const t = await getTranslations("messages");
 
-  const conversations = await prisma.conversation.findMany({
-    where: { OR: [{ userAId: user.id }, { userBId: user.id }] },
-    orderBy: { lastMessageAt: "desc" },
-    include: {
-      userA: { include: { companyProfile: true, seekerProfile: true } },
-      userB: { include: { companyProfile: true, seekerProfile: true } },
-      messages: { orderBy: { createdAt: "desc" }, take: 1 },
-      offers: { orderBy: { createdAt: "desc" }, take: 1 },
-    },
-  });
+  const conversations = await listConversationsForUser(user.id);
 
   const rows = await Promise.all(
     conversations.map(async (c) => {
@@ -56,9 +48,10 @@ export default async function MessagesPage({ params }: { params: Promise<{ local
       if (last?.type === "OFFER") preview = t("previewOffer");
       else if (last?.type === "SYSTEM") preview = t("previewSystem");
       else if (last?.body) {
-        const cached = await prisma.messageTranslation.findUnique({
-          where: { messageId_locale: { messageId: last.id, locale } },
-        });
+        const cached = await db.orm.public.MessageTranslation.where({
+          messageId: last.id,
+          locale,
+        }).first();
         preview = (cached?.body || last.body).slice(0, 120);
       }
 

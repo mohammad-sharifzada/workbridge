@@ -10,7 +10,7 @@ import {
   loginCompany,
   demoSeekerLogin,
 } from "@/actions";
-import { PRESENTATION_READY_PHONE } from "@/lib/presentation-demo";
+import { PRESENTATION_READY_PHONE } from "@/lib/presentation-constants";
 import { localeNames, locales, type Locale } from "@/i18n/config";
 import { Link } from "@/i18n/routing";
 

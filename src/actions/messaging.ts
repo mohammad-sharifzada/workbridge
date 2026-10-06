@@ -1,6 +1,14 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import { db } from "@/prisma/db";
+import { dateToPlainDateTime, optionalDateToPlainDateTime } from "@/lib/prisma8-temporal";
+import { conflictOn } from "@/lib/prisma8-upsert";
+import {
+  mapLegacyCompanyProfile,
+  mapLegacyJobOffer,
+  mapLegacyJobScalars,
+  mapLegacyMessage,
+} from "@/lib/prisma8-legacy-mappers";
 import { getCurrentUser } from "@/lib/auth";
 import { translateText, isSupportedLocale } from "@/lib/translate";
 import type { Locale } from "@/i18n/config";
@@ -21,13 +29,14 @@ export async function getOrCreateConversation(otherUserId: string): Promise<Acti
   if (otherUserId === user.id) return { ok: false, error: "self" };
 
   const [userAId, userBId] = pairIds(user.id, otherUserId);
-  let conv = await prisma.conversation.findUnique({
-    where: { userAId_userBId: { userAId, userBId } },
-  });
+  const conv = await db.orm.public.Conversation.where({ userAId, userBId }).first();
   if (!conv) {
-    conv = await prisma.conversation.create({
-      data: { userAId, userBId },
+    const created = await db.orm.public.Conversation.create({
+      userAId,
+      userBId,
     });
+    if (!created) return { ok: false, error: "create_failed" };
+    return { ok: true, data: { conversationId: created.id } };
   }
   return { ok: true, data: { conversationId: conv.id } };
 }
@@ -42,7 +51,7 @@ export async function sendTextMessage(opts: {
   const body = opts.body.trim();
   if (body.length < 1 || body.length > 4000) return { ok: false, error: "invalid" };
 
-  const conv = await prisma.conversation.findUnique({ where: { id: opts.conversationId } });
+  const conv = await db.orm.public.Conversation.where({ id: opts.conversationId }).first();
   if (!conv || (conv.userAId !== user.id && conv.userBId !== user.id)) {
     return { ok: false, error: "forbidden" };
   }
@@ -54,18 +63,15 @@ export async function sendTextMessage(opts: {
         ? user.locale
         : "de";
 
-  await prisma.message.create({
-    data: {
-      conversationId: conv.id,
-      senderId: user.id,
-      type: "TEXT",
-      body,
-      sourceLocale,
-    },
+  await db.orm.public.Message.create({
+    conversationId: conv.id,
+    senderId: user.id,
+    type: "TEXT",
+    body,
+    sourceLocale,
   });
-  await prisma.conversation.update({
-    where: { id: conv.id },
-    data: { lastMessageAt: new Date() },
+  await db.orm.public.Conversation.where({ id: conv.id }).update({
+    lastMessageAt: dateToPlainDateTime(new Date()),
   });
   revalidatePath("/");
   return { ok: true };
@@ -78,58 +84,56 @@ export async function sendJobOffer(opts: {
   const user = await getCurrentUser();
   if (!user || user.role !== "COMPANY") return { ok: false, error: "unauthorized" };
 
-  const company = await prisma.companyProfile.findUnique({ where: { userId: user.id } });
-  if (!company) return { ok: false, error: "no_company" };
+  const companyRow = await db.orm.public.CompanyProfile.where({ userId: user.id }).first();
+  if (!companyRow) return { ok: false, error: "no_company" };
+  const company = mapLegacyCompanyProfile(companyRow);
   if (company.verificationStatus !== "VERIFIED" && !company.isDemoData) {
     return { ok: false, error: "company_not_verified" };
   }
 
-  const job = await prisma.job.findFirst({
-    where: { id: opts.jobId, companyId: company.id, active: true },
-  });
-  if (!job) return { ok: false, error: "job_not_found" };
+  const jobRow = await db.orm.public.Job.where({
+    id: opts.jobId,
+    companyId: company.id,
+    active: true,
+  }).first();
+  if (!jobRow) return { ok: false, error: "job_not_found" };
+  const job = mapLegacyJobScalars(jobRow);
 
-  const seeker = await prisma.user.findFirst({
-    where: { id: opts.toUserId, role: "SEEKER" },
-  });
+  const seeker = await db.orm.public.User.where({ id: opts.toUserId, role: "SEEKER" }).first();
   if (!seeker) return { ok: false, error: "seeker_not_found" };
 
   const convRes = await getOrCreateConversation(opts.toUserId);
   if (!convRes.ok || !convRes.data) return { ok: false, error: convRes.error };
 
-  const offer = await prisma.jobOffer.create({
-    data: {
-      conversationId: convRes.data.conversationId,
-      jobId: job.id,
-      fromUserId: user.id,
-      toUserId: opts.toUserId,
-      status: "SENT",
-      companyName: company.companyName,
-      jobTitle: job.title,
-      jobTitleI18n: job.titleI18n,
-      city: job.city,
-      workHours: job.workHours,
-      hourlyWage: job.hourlyWage,
-      taskDescription: job.description,
-      taskDescriptionI18n: job.descriptionI18n,
-      requirements: job.requirements,
-      startDate: job.startDate,
-    },
+  const offer = await db.orm.public.JobOffer.create({
+    conversationId: convRes.data.conversationId,
+    jobId: job.id,
+    fromUserId: user.id,
+    toUserId: opts.toUserId,
+    status: "SENT",
+    companyName: company.companyName,
+    jobTitle: job.title,
+    jobTitleI18n: job.titleI18n,
+    city: job.city,
+    workHours: job.workHours,
+    hourlyWage: job.hourlyWage,
+    taskDescription: job.description,
+    taskDescriptionI18n: job.descriptionI18n,
+    requirements: job.requirements,
+    startDate: optionalDateToPlainDateTime(job.startDate),
   });
+  if (!offer) return { ok: false, error: "offer_create_failed" };
 
-  await prisma.message.create({
-    data: {
-      conversationId: convRes.data.conversationId,
-      senderId: user.id,
-      type: "OFFER",
-      body: `[JOB_OFFER:${offer.id}]`,
-      sourceLocale: user.locale || "de",
-      offerId: offer.id,
-    },
+  await db.orm.public.Message.create({
+    conversationId: convRes.data.conversationId,
+    senderId: user.id,
+    type: "OFFER",
+    body: `[JOB_OFFER:${offer.id}]`,
+    sourceLocale: user.locale || "de",
+    offerId: offer.id,
   });
-  await prisma.conversation.update({
-    where: { id: convRes.data.conversationId },
-    data: { lastMessageAt: new Date() },
+  await db.orm.public.Conversation.where({ id: convRes.data.conversationId }).update({
+    lastMessageAt: dateToPlainDateTime(new Date()),
   });
 
   revalidatePath("/");
@@ -143,23 +147,20 @@ export async function respondToOffer(opts: {
   const user = await getCurrentUser();
   if (!user || user.role !== "SEEKER") return { ok: false, error: "unauthorized" };
 
-  const offer = await prisma.jobOffer.findUnique({ where: { id: opts.offerId } });
+  const offerRow = await db.orm.public.JobOffer.where({ id: opts.offerId }).first();
+  const offer = offerRow ? mapLegacyJobOffer(offerRow) : null;
   if (!offer || offer.toUserId !== user.id) return { ok: false, error: "forbidden" };
   if (offer.status !== "SENT") return { ok: false, error: "already_responded" };
 
   const status = opts.accept ? "ACCEPTED" : "DECLINED";
-  await prisma.jobOffer.update({
-    where: { id: offer.id },
-    data: {
-      status,
-      respondedAt: new Date(),
-      collaborationDone: opts.accept,
-    },
+  await db.orm.public.JobOffer.where({ id: offer.id }).update({
+    status,
+    respondedAt: dateToPlainDateTime(new Date()),
+    collaborationDone: opts.accept,
   });
 
   if (offer.jobId) {
-    await prisma.jobApplication.upsert({
-      where: { jobId_userId: { jobId: offer.jobId, userId: user.id } },
+    await db.orm.public.JobApplication.upsert({
       create: {
         jobId: offer.jobId,
         userId: user.id,
@@ -168,18 +169,17 @@ export async function respondToOffer(opts: {
       update: {
         status: opts.accept ? "ACCEPTED" : "REJECTED",
       },
+      conflictOn: conflictOn({ jobId: offer.jobId, userId: user.id }),
     });
   }
 
-  await prisma.message.create({
-    data: {
-      conversationId: offer.conversationId,
-      senderId: user.id,
-      type: "SYSTEM",
-      body: opts.accept ? "SYSTEM_OFFER_ACCEPTED" : "SYSTEM_OFFER_DECLINED",
-      sourceLocale: user.locale || "de",
-      offerId: offer.id,
-    },
+  await db.orm.public.Message.create({
+    conversationId: offer.conversationId,
+    senderId: user.id,
+    type: "SYSTEM",
+    body: opts.accept ? "SYSTEM_OFFER_ACCEPTED" : "SYSTEM_OFFER_DECLINED",
+    sourceLocale: user.locale || "de",
+    offerId: offer.id,
   });
 
   revalidatePath("/");
@@ -197,12 +197,12 @@ export async function translateMessageForUser(
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: "unauthorized" };
 
-  const message = await prisma.message.findUnique({
-    where: { id: messageId },
-    include: { conversation: true },
-  });
-  if (!message) return { ok: false, error: "not_found" };
-  const conv = message.conversation;
+  const messageRow = await db.orm.public.Message.where({ id: messageId })
+    .include("conversation")
+    .first();
+  if (!messageRow?.conversation) return { ok: false, error: "not_found" };
+  const message = mapLegacyMessage(messageRow);
+  const conv = messageRow.conversation;
   if (conv.userAId !== user.id && conv.userBId !== user.id) {
     return { ok: false, error: "forbidden" };
   }
@@ -215,15 +215,16 @@ export async function translateMessageForUser(
 
   // UI-Sprache auch im Profil speichern (für spätere Aufrufe)
   if (isSupportedLocale(preferred) && user.locale !== preferred) {
-    await prisma.user.update({ where: { id: user.id }, data: { locale: preferred } });
+    await db.orm.public.User.where({ id: user.id }).update({ locale: preferred });
   }
   if (message.sourceLocale === target) {
     return { ok: true, data: { translated: message.body, disclaimer: false } };
   }
 
-  const cached = await prisma.messageTranslation.findUnique({
-    where: { messageId_locale: { messageId, locale: target } },
-  });
+  const cached = await db.orm.public.MessageTranslation.where({
+    messageId,
+    locale: target,
+  }).first();
   if (cached) {
     return { ok: true, data: { translated: cached.body, disclaimer: true } };
   }
@@ -238,13 +239,11 @@ export async function translateMessageForUser(
     result.text.trim().length > 0;
 
   if (ok) {
-    await prisma.messageTranslation.create({
-      data: {
-        messageId,
-        locale: target,
-        body: result.text,
-        provider: result.provider,
-      },
+    await db.orm.public.MessageTranslation.create({
+      messageId,
+      locale: target,
+      body: result.text,
+      provider: result.provider,
     });
   }
 
@@ -275,23 +274,20 @@ export async function updateCompanyProfile(opts: {
   const user = await getCurrentUser();
   if (!user || user.role !== "COMPANY") return { ok: false, error: "unauthorized" };
 
-  await prisma.companyProfile.update({
-    where: { userId: user.id },
-    data: {
-      companyName: opts.companyName.trim(),
-      description: opts.description.trim() || null,
-      industry: opts.industry.trim() || null,
-      city: opts.city.trim() || null,
-      address: opts.address.trim() || null,
-      website: opts.website.trim() || null,
-      companySize: opts.companySize.trim() || null,
-      contactEmail: opts.contactEmail.trim() || null,
-      contactPhone: opts.contactPhone.trim() || null,
-      logoUrl: opts.logoUrl || undefined,
-      latitude: opts.latitude ?? undefined,
-      longitude: opts.longitude ?? undefined,
-      isDemoData: false,
-    },
+  await db.orm.public.CompanyProfile.where({ userId: user.id }).update({
+    companyName: opts.companyName.trim(),
+    description: opts.description.trim() || null,
+    industry: opts.industry.trim() || null,
+    city: opts.city.trim() || null,
+    address: opts.address.trim() || null,
+    website: opts.website.trim() || null,
+    companySize: opts.companySize.trim() || null,
+    contactEmail: opts.contactEmail.trim() || null,
+    contactPhone: opts.contactPhone.trim() || null,
+    logoUrl: opts.logoUrl || undefined,
+    latitude: opts.latitude ?? undefined,
+    longitude: opts.longitude ?? undefined,
+    isDemoData: false,
   });
   revalidatePath("/");
   return { ok: true };
@@ -301,15 +297,12 @@ export async function submitCompanyVerification(docUrl: string): Promise<ActionR
   const user = await getCurrentUser();
   if (!user || user.role !== "COMPANY") return { ok: false, error: "unauthorized" };
 
-  await prisma.companyProfile.update({
-    where: { userId: user.id },
-    data: {
-      verificationStatus: "PENDING",
-      verificationDocUrl: docUrl.trim() || null,
-      verificationNote: "Manuelle Prüfung ausstehend",
-      verified: false,
-      isDemoData: false,
-    },
+  await db.orm.public.CompanyProfile.where({ userId: user.id }).update({
+    verificationStatus: "PENDING",
+    verificationDocUrl: docUrl.trim() || null,
+    verificationNote: "Manuelle Prüfung ausstehend",
+    verified: false,
+    isDemoData: false,
   });
   revalidatePath("/");
   return { ok: true };
@@ -322,13 +315,10 @@ export async function adminVerifyOwnCompanyDemo(): Promise<ActionResult> {
   if (process.env.ALLOW_SELF_VERIFY !== "true") {
     return { ok: false, error: "self_verify_disabled" };
   }
-  await prisma.companyProfile.update({
-    where: { userId: user.id },
-    data: {
-      verificationStatus: "VERIFIED",
-      verified: true,
-      verificationNote: "Verifiziert (Demo-Modus ALLOW_SELF_VERIFY)",
-    },
+  await db.orm.public.CompanyProfile.where({ userId: user.id }).update({
+    verificationStatus: "VERIFIED",
+    verified: true,
+    verificationNote: "Verifiziert (Demo-Modus ALLOW_SELF_VERIFY)",
   });
   revalidatePath("/");
   return { ok: true };
@@ -343,7 +333,8 @@ export async function submitCollaborationRating(opts: {
   if (!user) return { ok: false, error: "unauthorized" };
   if (opts.score < 1 || opts.score > 5) return { ok: false, error: "invalid_score" };
 
-  const offer = await prisma.jobOffer.findUnique({ where: { id: opts.offerId } });
+  const offerRow = await db.orm.public.JobOffer.where({ id: opts.offerId }).first();
+  const offer = offerRow ? mapLegacyJobOffer(offerRow) : null;
   if (!offer || offer.status !== "ACCEPTED" || !offer.collaborationDone) {
     return { ok: false, error: "no_collaboration" };
   }
@@ -358,29 +349,20 @@ export async function submitCollaborationRating(opts: {
   const abusive =
     /\b(idiot|arsch|fuck|shit|hure|nazi)\b/i.test(comment) || comment.length > 800;
   if (abusive && comment.length > 0) {
-    await prisma.rating.create({
-      data: {
-        fromUserId: user.id,
-        toUserId,
-        offerId: offer.id,
-        score: opts.score,
-        comment,
-        flagged: true,
-        flagReason: "auto_moderation",
-        hidden: true,
-      },
+    await db.orm.public.Rating.create({
+      fromUserId: user.id,
+      toUserId,
+      offerId: offer.id,
+      score: opts.score,
+      comment,
+      flagged: true,
+      flagReason: "auto_moderation",
+      hidden: true,
     });
     return { ok: false, error: "comment_flagged" };
   }
 
-  await prisma.rating.upsert({
-    where: {
-      fromUserId_toUserId_offerId: {
-        fromUserId: user.id,
-        toUserId,
-        offerId: offer.id,
-      },
-    },
+  await db.orm.public.Rating.upsert({
     create: {
       fromUserId: user.id,
       toUserId,
@@ -392,6 +374,11 @@ export async function submitCollaborationRating(opts: {
       score: opts.score,
       comment: comment || null,
     },
+    conflictOn: conflictOn({
+      fromUserId: user.id,
+      toUserId,
+      offerId: offer.id,
+    }),
   });
 
   revalidatePath("/");

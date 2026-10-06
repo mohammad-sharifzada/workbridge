@@ -12,13 +12,17 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma db push --force-reset && tsx prisma/seed.ts",
     "presentation": "bash scripts/presentation-start.sh",
-    "postinstall": "prisma generate"
+    "prisma8:emit": "prisma8 contract emit --config prisma8.config.ts",
+    "prisma8:sign": "prisma8 db sign --config prisma8.config.ts",
+    "prisma8:verify": "prisma8 db verify --config prisma8.config.ts",
+    "postinstall": "node scripts/ensure-prisma6-bin.mjs && prisma generate"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
+    "@prisma/orm-postgres": "^8.0.0-rc.14",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
@@ -29,6 +33,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "tailwind-merge": "^3.6.0",
+    "temporal-polyfill": "^1.0.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -41,6 +46,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.11",
     "prisma": "^6.19.0",
+    "prisma8": "npm:prisma@^8.0.0-rc.20",
     "tailwindcss": "^4",
     "tsx": "^4.23.1",
     "typescript": "^5"

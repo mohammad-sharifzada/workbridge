@@ -1,10 +1,14 @@
-import { prisma } from "@/lib/db";
+import { db } from "@/prisma/db";
+import { dateToPlainDateTime } from "@/lib/prisma8-temporal";
+import { conflictOn } from "@/lib/prisma8-upsert";
+import { mapLegacyJobScalars, mapLegacyUser } from "@/lib/prisma8-legacy-mappers";
 import { demoSeekerProfileSeed, DEMO_CV_PERSON } from "@/lib/demo-cv";
 import { buildCvApplicationMessage, type CvMessageLabels } from "@/lib/cv";
 import { isLocale, type Locale } from "@/i18n/config";
+import { PRESENTATION_READY_PHONE } from "@/lib/presentation-constants";
+import { getSeekerProfileByUserId } from "@/lib/seeker-profile-p8";
 
-/** Feste Demo-Nummer für Präsentation „alles fertig“ – nicht für manuellen Neustart nutzen. */
-export const PRESENTATION_READY_PHONE = "+4915111111111";
+export { PRESENTATION_READY_PHONE } from "@/lib/presentation-constants";
 
 async function labelsForLocale(locale: string): Promise<CvMessageLabels> {
   const loc = (isLocale(locale) ? locale : "de") as Locale;
@@ -46,8 +50,8 @@ export async function ensurePresentationReadyUser(locale: string) {
   const profileData = demoSeekerProfileSeed();
   const labels = await labelsForLocale(locale);
 
-  const user = await prisma.user.upsert({
-    where: { phone: PRESENTATION_READY_PHONE },
+  // P8 upsert does not support nested relation creates — User then SeekerProfile.
+  const userRow = await db.orm.public.User.upsert({
     create: {
       phone: PRESENTATION_READY_PHONE,
       phoneVerified: true,
@@ -55,7 +59,6 @@ export async function ensurePresentationReadyUser(locale: string) {
       locale,
       name: DEMO_CV_PERSON.name,
       email: "ahmed.hassan@example.de",
-      seekerProfile: { create: profileData },
     },
     update: {
       phoneVerified: true,
@@ -63,25 +66,29 @@ export async function ensurePresentationReadyUser(locale: string) {
       name: DEMO_CV_PERSON.name,
       email: "ahmed.hassan@example.de",
     },
+    conflictOn: conflictOn({ phone: PRESENTATION_READY_PHONE }),
   });
+  if (!userRow) throw new Error("presentation_user_upsert_failed");
+  const user = mapLegacyUser(userRow);
 
-  await prisma.seekerProfile.upsert({
-    where: { userId: user.id },
+  await db.orm.public.SeekerProfile.upsert({
     create: { userId: user.id, ...profileData },
     update: profileData,
+    conflictOn: conflictOn({ userId: user.id }),
   });
 
-  const profile = await prisma.seekerProfile.findUnique({ where: { userId: user.id } });
+  const profile = await getSeekerProfileByUserId(user.id);
   if (!profile) return user;
 
-  const jobs = await prisma.job.findMany({
-    where: { active: true },
-    take: 2,
-    orderBy: { createdAt: "desc" },
-    include: { company: { select: { userId: true } } },
-  });
+  const jobRows = await db.orm.public.Job.where({ active: true })
+    .include("company", (c) => c.select("userId"))
+    .orderBy((j) => j.createdAt.desc())
+    .limit(2)
+    .all();
 
-  for (const job of jobs) {
+  for (const jobRow of jobRows) {
+    if (!jobRow.company) continue;
+    const job = mapLegacyJobScalars(jobRow);
     const cvMessage = buildCvApplicationMessage({
       user,
       profile,
@@ -90,47 +97,61 @@ export async function ensurePresentationReadyUser(locale: string) {
       labels,
     });
 
-    await prisma.jobApplication.upsert({
-      where: { jobId_userId: { jobId: job.id, userId: user.id } },
-      create: { jobId: job.id, userId: user.id, message: cvMessage, status: "PENDING" },
+    await db.orm.public.JobApplication.upsert({
+      create: {
+        jobId: job.id,
+        userId: user.id,
+        message: cvMessage,
+        status: "PENDING",
+      },
       update: { message: cvMessage },
+      conflictOn: conflictOn({ jobId: job.id, userId: user.id }),
     });
 
+    const companyUserId = jobRow.company.userId;
     const [userAId, userBId] =
-      user.id < job.company.userId
-        ? [user.id, job.company.userId]
-        : [job.company.userId, user.id];
+      user.id < companyUserId
+        ? [user.id, companyUserId]
+        : [companyUserId, user.id];
 
-    let conv = await prisma.conversation.findUnique({
-      where: { userAId_userBId: { userAId, userBId } },
-    });
-    if (!conv) {
-      conv = await prisma.conversation.create({ data: { userAId, userBId } });
+    let convId: string | null = null;
+    const existingConv = await db.orm.public.Conversation.where({
+      userAId,
+      userBId,
+    }).first();
+    if (existingConv) {
+      convId = existingConv.id;
+    } else {
+      const created = await db.orm.public.Conversation.create({ userAId, userBId });
+      if (!created) continue;
+      convId = created.id;
     }
 
-    const existingMsg = await prisma.message.findFirst({
-      where: { conversationId: conv.id, senderId: user.id, body: { startsWith: "📄 " } },
-    });
+    const existingMsg = await db.orm.public.Message.where({
+      conversationId: convId,
+      senderId: user.id,
+    })
+      .where((m) => m.body.like("📄 %"))
+      .first();
     if (!existingMsg) {
-      await prisma.message.create({
-        data: {
-          conversationId: conv.id,
-          senderId: user.id,
-          type: "TEXT",
-          body: cvMessage,
-          sourceLocale: locale,
-        },
+      await db.orm.public.Message.create({
+        conversationId: convId,
+        senderId: user.id,
+        type: "TEXT",
+        body: cvMessage,
+        sourceLocale: locale,
       });
-      await prisma.conversation.update({
-        where: { id: conv.id },
-        data: { lastMessageAt: new Date() },
+      await db.orm.public.Conversation.where({ id: convId }).update({
+        lastMessageAt: dateToPlainDateTime(new Date()),
       });
     } else {
-      await prisma.message.update({
-        where: { id: existingMsg.id },
-        data: { body: cvMessage, sourceLocale: locale },
+      await db.orm.public.Message.where({ id: existingMsg.id }).update({
+        body: cvMessage,
+        sourceLocale: locale,
       });
-      await prisma.messageTranslation.deleteMany({ where: { messageId: existingMsg.id } });
+      await db.orm.public.MessageTranslation.where({
+        messageId: existingMsg.id,
+      }).deleteAll();
     }
   }
 

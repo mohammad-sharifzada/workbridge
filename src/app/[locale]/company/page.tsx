@@ -2,13 +2,13 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isLocale } from "@/i18n/config";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
 import { formatWage } from "@/lib/utils";
 import { CreateJobForm, CompanyBillingActions } from "@/components/company-forms";
 import { Link } from "@/i18n/routing";
 import { CheckCircle2 } from "lucide-react";
 import { localizeText } from "@/lib/i18n-content";
 import { localizeCity } from "@/lib/localize-job";
+import { getCompanyDashboardByUserId } from "@/lib/company-p8";
 
 export default async function CompanyDashboardPage({
   params,
@@ -23,15 +23,7 @@ export default async function CompanyDashboardPage({
   if (!user) redirect(`/${locale}/register?role=company`);
   if (user.role !== "COMPANY") redirect(`/${locale}/`);
 
-  const company = await prisma.companyProfile.findUnique({
-    where: { userId: user.id },
-    include: {
-      jobs: {
-        include: { _count: { select: { applications: true } } },
-        orderBy: { createdAt: "desc" },
-      },
-    },
-  });
+  const company = await getCompanyDashboardByUserId(user.id);
   if (!company) redirect(`/${locale}/register?role=company`);
 
   const t = await getTranslations("company");

@@ -2,10 +2,10 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isLocale } from "@/i18n/config";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
 import { computeReadiness, STATUS_COLORS } from "@/lib/status";
 import { Link } from "@/i18n/routing";
 import { getNextOpenOnboardingPath } from "@/lib/onboarding-flow";
+import { getSeekerProfileByUserId } from "@/lib/seeker-profile-p8";
 
 export default async function StatusPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -16,7 +16,7 @@ export default async function StatusPage({ params }: { params: Promise<{ locale:
   if (!user) redirect(`/${locale}/register`);
   if (user.role !== "SEEKER") redirect(`/${locale}/company`);
 
-  const profile = await prisma.seekerProfile.findUnique({ where: { userId: user.id } });
+  const profile = await getSeekerProfileByUserId(user.id);
   const nextPath = getNextOpenOnboardingPath(user, profile);
   if (nextPath !== "/jobs") redirect(`/${locale}${nextPath}`);
   if (!profile) redirect(`/${locale}/onboarding`);
