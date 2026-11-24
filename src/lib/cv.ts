@@ -1,4 +1,4 @@
-import type { SeekerProfile, User } from "@prisma/client";
+import type { SeekerProfile, User } from "@/prisma/types";
 import { parseCvJson, skillsFromProfile } from "@/components/visual-cv";
 import { getDemoCvContent } from "@/lib/demo-cv-i18n";
 import { localizeText } from "@/lib/i18n-content";

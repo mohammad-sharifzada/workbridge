@@ -55,13 +55,13 @@ git push -u origin main
 openssl rand -base64 32
 ```
 
-5. **Deploy** klicken
+5. Node.js **24.x** einstellen. Die Datenbank vor dem Deploy wie unter [PostgreSQL-Migrationen](./README.md#postgresql-migrationen) beschrieben vorbereiten, dann **Deploy** klicken.
 
 ---
 
 ## Schritt 4: Demo-Daten einmalig laden
 
-Nach dem ersten erfolgreichen Deploy, lokal im `workbridge`-Ordner:
+Optional für eine leere Demo-Datenbank, lokal im `workbridge`-Ordner:
 
 ```bash
 DATABASE_URL="postgresql://..." npm run db:seed
@@ -84,7 +84,7 @@ Falls `NEXT_PUBLIC_APP_URL` noch falsch war: in Vercel korrigieren → **Redeplo
 
 ## Updates später
 
-Jeder `git push` auf `main` löst automatisch einen neuen Deploy aus.
+Jeder `git push` auf `main` löst automatisch einen neuen Deploy aus. Schema-Migrationen sind ein separater Schritt und werden nicht vom Build angewendet.
 
 ---
 
@@ -94,7 +94,7 @@ Jeder `git push` auf `main` löst automatisch einen neuen Deploy aus.
 2. **PostgreSQL** als Service hinzufügen
 3. `DATABASE_URL` aus Railway in die App-Variablen verknüpfen
 4. Gleiche Env-Vars wie oben setzen
-5. Build Command: `npm run build` (package.json enthält bereits Prisma)
+5. Node.js 24 verwenden und die Datenbank gemäß README vorbereiten. Build Command: `npm run build`.
 
 ---
 

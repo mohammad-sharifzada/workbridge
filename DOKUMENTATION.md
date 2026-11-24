@@ -59,7 +59,7 @@
 | Health-API `/api/health` | Betriebsbereitschaft / Monitoring |
 | Job-Detailseite + Report am Job | Vertrauen & Moderation |
 | Auto-Verifizierung (Demo) | Flow testbar, vor Produktivbetrieb durch manuelle Prüfung ersetzen |
-| PostgreSQL-ready Schema | Einfacher Wechsel von SQLite → Postgres für Vercel/Cloud |
+| PostgreSQL-Vertrag | Prisma-8-Migrationen für lokale und gehostete Datenbanken |
 
 ---
 

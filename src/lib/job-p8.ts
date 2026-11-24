@@ -1,6 +1,19 @@
-import type { CompanyProfile, Job, VerificationStatus } from "@prisma/client";
+import { or } from "@prisma/orm-postgres/orm-client";
+import type { CompanyProfile, Job } from "@/prisma/types";
 import { db } from "@/prisma/db";
-import { mapLegacyJobScalars } from "@/lib/prisma8-legacy-mappers";
+
+export async function listVisibleJobs(limit?: number) {
+  const query = db.orm.public.Job.where({ active: true })
+    .where((job) => job.company.some((company) =>
+      or(company.verificationStatus.eq("VERIFIED"), company.isDemoData.eq(true)),
+    ))
+    .include("company", (company) =>
+      company.select("id", "companyName", "companyNameI18n", "verified", "verificationStatus"),
+    )
+    .orderBy([(job) => job.createdAt.desc(), (job) => job.id.desc()]);
+  const rows = await (limit === undefined ? query : query.limit(limit)).all();
+  return rows.flatMap((row) => row.company ? [{ ...row, company: row.company }] : []);
+}
 
 export type JobWithCompanySelect = Job & {
   company: Pick<
@@ -9,13 +22,6 @@ export type JobWithCompanySelect = Job & {
   >;
 };
 
-/**
- * P6-equivalent of:
- * prisma.job.findUnique({
- *   where: { id },
- *   include: { company: { select: { id, companyName, companyNameI18n, verificationStatus } } },
- * })
- */
 export async function getJobWithCompanySelect(
   id: string,
 ): Promise<JobWithCompanySelect | null> {
@@ -27,14 +33,5 @@ export async function getJobWithCompanySelect(
 
   if (!row?.company) return null;
 
-  const verificationStatus: VerificationStatus = row.company.verificationStatus;
-  return {
-    ...mapLegacyJobScalars(row),
-    company: {
-      id: row.company.id,
-      companyName: row.company.companyName,
-      companyNameI18n: row.company.companyNameI18n,
-      verificationStatus,
-    },
-  };
+  return { ...row, company: row.company };
 }

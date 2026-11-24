@@ -1,4 +1,4 @@
-import type { SeekerProfile, User } from "@prisma/client";
+import type { SeekerProfile, User } from "@/prisma/types";
 
 type SeekerStage = "registered" | "onboarding" | "profile_completed" | "ready";
 
@@ -31,4 +31,3 @@ export function getNextOpenOnboardingPath(user: User, profile: SeekerProfile | n
   if (profile.onboardingDone) return "/jobs";
   return "/onboarding";
 }
-

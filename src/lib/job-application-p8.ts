@@ -1,23 +1,27 @@
-import type { CompanyProfile, Job, JobApplication } from "@prisma/client";
+import type { CompanyProfile, Job, JobApplication } from "@/prisma/types";
 import { db } from "@/prisma/db";
-import {
-  mapLegacyCompanyProfile,
-  mapLegacyJobScalars,
-} from "@/lib/prisma8-legacy-mappers";
-import { plainDateTimeToDate, type PlainDateTimeLike } from "@/lib/prisma8-temporal";
+
+type ApplicationPatch = Partial<Pick<JobApplication, "status" | "message">>;
+
+export async function upsertJobApplication(
+  key: Pick<JobApplication, "jobId" | "userId">,
+  create: ApplicationPatch,
+  update: ApplicationPatch,
+) {
+  await db.transaction(async ({ orm }) => {
+    const applications = orm.public.JobApplication;
+    const inserted = await applications.createAndCount([{ ...key, ...create }], {
+      onConflict: "skip",
+      conflictOn: ["jobId", "userId"],
+    });
+    if (!inserted) await applications.where(key).update(update);
+  });
+}
 
 export type JobApplicationWithJobAndCompany = JobApplication & {
   job: Job & { company: CompanyProfile };
 };
 
-/**
- * P6-equivalent of:
- * prisma.jobApplication.findMany({
- *   where: { userId },
- *   orderBy: { createdAt: "desc" },
- *   include: { job: { include: { company: true } } },
- * })
- */
 export async function listJobApplicationsWithJobAndCompany(
   userId: string,
 ): Promise<JobApplicationWithJobAndCompany[]> {
@@ -31,16 +35,8 @@ export async function listJobApplicationsWithJobAndCompany(
       throw new Error(`JobApplication ${row.id} missing required job/company relation`);
     }
     return {
-      id: row.id,
-      jobId: row.jobId,
-      userId: row.userId,
-      message: row.message,
-      status: row.status,
-      createdAt: plainDateTimeToDate(row.createdAt as PlainDateTimeLike),
-      job: {
-        ...mapLegacyJobScalars(row.job),
-        company: mapLegacyCompanyProfile(row.job.company),
-      },
+      ...row,
+      job: { ...row.job, company: row.job.company },
     };
   });
 }

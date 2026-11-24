@@ -1,9 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { loadEnvConfig } from "@next/env";
 import bcrypt from "bcryptjs";
 import { i18nJson } from "../src/lib/i18n-content";
 import { demoSeekerProfileSeed } from "../src/lib/demo-cv";
-
-const prisma = new PrismaClient();
 
 function t(
   de: string,
@@ -16,135 +14,112 @@ function t(
   return i18nJson({ de, en, ar, tr, fa, uk });
 }
 
-async function main() {
-  await prisma.messageTranslation.deleteMany();
-  await prisma.message.deleteMany();
-  await prisma.jobOffer.deleteMany();
-  await prisma.conversation.deleteMany();
-  await prisma.report.deleteMany();
-  await prisma.rating.deleteMany();
-  await prisma.contactUnlock.deleteMany();
-  await prisma.jobApplication.deleteMany();
-  await prisma.job.deleteMany();
-  await prisma.verificationCode.deleteMany();
-  await prisma.seekerProfile.deleteMany();
-  await prisma.companyProfile.deleteMany();
-  await prisma.user.deleteMany();
+type Database = typeof import("../src/prisma/db").db;
+type Transaction = Parameters<Parameters<Database["transaction"]>[0]>[0];
 
-  const passwordHash = await bcrypt.hash("demo1234", 12);
+async function seed({ orm }: Transaction, passwordHash: string) {
+  if (await orm.public.User.select("id").first()) {
+    throw new Error("Demo seed requires an empty database; existing data was not changed.");
+  }
 
-  const companyUser = await prisma.user.create({
-    data: {
-      email: "firma@demo.de",
-      passwordHash,
-      emailVerified: true,
-      role: "COMPANY",
-      locale: "de",
-      name: "Nordlogistik GmbH",
-      companyProfile: {
-        create: {
-          companyName: "Nordlogistik GmbH",
-          companyNameI18n: t(
-            "Nordlogistik GmbH",
-            "Nordlogistik GmbH",
-            "نوردلوجستيك ش.ذ.م.م",
-            "Nordlogistik GmbH",
-            "نوردلجیستیک GmbH",
-            "Nordlogistik GmbH",
-          ),
-          description: "Lager und Versand in Berlin und Hamburg.",
-          industry: "Logistik",
-          companySize: "50–100",
-          city: "Berlin",
-          address: "Industrieweg 12, 12099 Berlin",
-          website: "https://example-nordlogistik.local",
-          verified: true,
-          verificationStatus: "VERIFIED",
-          isDemoData: true,
-          subscription: "PRO",
-          contactCredits: 20,
-          latitude: 52.456,
-          longitude: 13.384,
-        },
-      },
-    },
-    include: { companyProfile: true },
+  const companyUser = await orm.public.User.include("companyProfile").create({
+    email: "firma@demo.de",
+    passwordHash,
+    emailVerified: true,
+    role: "COMPANY",
+    locale: "de",
+    name: "Nordlogistik GmbH",
+    companyProfile: (profile) => profile.create({
+      companyName: "Nordlogistik GmbH",
+      companyNameI18n: t(
+        "Nordlogistik GmbH",
+        "Nordlogistik GmbH",
+        "نوردلوجستيك ش.ذ.م.م",
+        "Nordlogistik GmbH",
+        "نوردلجیستیک GmbH",
+        "Nordlogistik GmbH",
+      ),
+      description: "Lager und Versand in Berlin und Hamburg.",
+      industry: "Logistik",
+      companySize: "50–100",
+      city: "Berlin",
+      address: "Industrieweg 12, 12099 Berlin",
+      website: "https://example-nordlogistik.local",
+      verified: true,
+      verificationStatus: "VERIFIED",
+      isDemoData: true,
+      subscription: "PRO",
+      contactCredits: 20,
+      latitude: 52.456,
+      longitude: 13.384,
+    }),
   });
 
-  const company2 = await prisma.user.create({
-    data: {
-      email: "clean@demo.de",
-      passwordHash,
-      emailVerified: true,
-      role: "COMPANY",
-      locale: "de",
-      name: "SauberPlus Service",
-      companyProfile: {
-        create: {
-          companyName: "SauberPlus Service",
-          companyNameI18n: t(
-            "SauberPlus Service",
-            "SauberPlus Service",
-            "ساوبر بلس للخدمات",
-            "SauberPlus Service",
-            "ساوبرپلاس سرویس",
-            "SauberPlus Service",
-          ),
-          description: "Reinigung für Büros und Hotels.",
-          industry: "Gebäudereinigung",
-          companySize: "10–49",
-          city: "Berlin",
-          verified: true,
-          verificationStatus: "VERIFIED",
-          isDemoData: true,
-          subscription: "STARTER",
-          contactCredits: 10,
-          latitude: 52.52,
-          longitude: 13.405,
-        },
-      },
-    },
-    include: { companyProfile: true },
+  const company2 = await orm.public.User.include("companyProfile").create({
+    email: "clean@demo.de",
+    passwordHash,
+    emailVerified: true,
+    role: "COMPANY",
+    locale: "de",
+    name: "SauberPlus Service",
+    companyProfile: (profile) => profile.create({
+      companyName: "SauberPlus Service",
+      companyNameI18n: t(
+        "SauberPlus Service",
+        "SauberPlus Service",
+        "ساوبر بلس للخدمات",
+        "SauberPlus Service",
+        "ساوبرپلاس سرویس",
+        "SauberPlus Service",
+      ),
+      description: "Reinigung für Büros und Hotels.",
+      industry: "Gebäudereinigung",
+      companySize: "10–49",
+      city: "Berlin",
+      verified: true,
+      verificationStatus: "VERIFIED",
+      isDemoData: true,
+      subscription: "STARTER",
+      contactCredits: 10,
+      latitude: 52.52,
+      longitude: 13.405,
+    }),
   });
 
-  const company3 = await prisma.user.create({
-    data: {
-      email: "bau@demo.de",
-      passwordHash,
-      emailVerified: true,
-      role: "COMPANY",
-      locale: "de",
-      name: "BauHelfer Berlin",
-      companyProfile: {
-        create: {
-          companyName: "BauHelfer Berlin",
-          companyNameI18n: t(
-            "BauHelfer Berlin",
-            "BauHelfer Berlin",
-            "مساعدو البناء برلين",
-            "BauHelfer Berlin",
-            "باوهلفر برلین",
-            "BauHelfer Berlin",
-          ),
-          description: "Bauhelfer und Abrissunterstützung.",
-          industry: "Bau",
-          city: "Berlin",
-          verified: false,
-          verificationStatus: "PENDING",
-          isDemoData: true,
-          subscription: "NONE",
-          contactCredits: 3,
-          latitude: 52.49,
-          longitude: 13.42,
-        },
-      },
-    },
-    include: { companyProfile: true },
+  const company3 = await orm.public.User.include("companyProfile").create({
+    email: "bau@demo.de",
+    passwordHash,
+    emailVerified: true,
+    role: "COMPANY",
+    locale: "de",
+    name: "BauHelfer Berlin",
+    companyProfile: (profile) => profile.create({
+      companyName: "BauHelfer Berlin",
+      companyNameI18n: t(
+        "BauHelfer Berlin",
+        "BauHelfer Berlin",
+        "مساعدو البناء برلين",
+        "BauHelfer Berlin",
+        "باوهلفر برلین",
+        "BauHelfer Berlin",
+      ),
+      description: "Bauhelfer und Abrissunterstützung.",
+      industry: "Bau",
+      city: "Berlin",
+      verified: false,
+      verificationStatus: "PENDING",
+      isDemoData: true,
+      subscription: "NONE",
+      contactCredits: 3,
+      latitude: 52.49,
+      longitude: 13.42,
+    }),
   });
 
-  const c1 = companyUser.companyProfile!;
-  const c2 = company2.companyProfile!;
-  const c3 = company3.companyProfile!;
+  const c1 = companyUser?.companyProfile;
+  const c2 = company2?.companyProfile;
+  const c3 = company3?.companyProfile;
+  if (!c1 || !c2 || !c3) throw new Error("Demo company profiles were not created.");
 
   const jobs = [
     {
@@ -524,39 +499,42 @@ async function main() {
   for (let i = 0; i < jobs.length; i++) {
     const job = jobs[i];
     const simple = simpleByKey[jobKeys[i]];
-    await prisma.job.create({
-      data: {
-        ...job,
-        workHours: simple.hours === "flexibel" ? null : simple.hours,
-        germanRequired: false,
-        simpleWhatI18n: simple.what,
-        simpleNeedI18n: simple.need,
-      },
+    await orm.public.Job.create({
+      ...job,
+      workHours: simple.hours === "flexibel" ? null : simple.hours,
+      germanRequired: false,
+      simpleWhatI18n: simple.what,
+      simpleNeedI18n: simple.need,
     });
   }
 
-  await prisma.user.create({
-    data: {
-      phone: "+4915111111111",
-      phoneVerified: true,
-      role: "SEEKER",
-      locale: "de",
-      name: "Ahmed Hassan",
-      email: "ahmed.hassan@example.de",
-      seekerProfile: {
-        create: demoSeekerProfileSeed(),
-      },
-    },
+  await orm.public.User.create({
+    phone: "+4915111111111",
+    phoneVerified: true,
+    role: "SEEKER",
+    locale: "de",
+    name: "Ahmed Hassan",
+    email: "ahmed.hassan@example.de",
+    seekerProfile: (profile) => profile.create(demoSeekerProfileSeed()),
   });
+}
 
+async function main() {
+  loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production");
+  if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required to seed.");
+  const { db } = await import("../src/prisma/db");
+  try {
+    const passwordHash = await bcrypt.hash("demo1234", 12);
+    await db.transaction((tx) => seed(tx, passwordHash));
+  } finally {
+    await db.close();
+  }
   console.log("Seed OK");
   console.log("Unternehmen: firma@demo.de / demo1234");
   console.log("Seeker: Demo-Login oder +4915111111111");
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

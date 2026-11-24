@@ -1,0 +1,339 @@
+// use prisma-8
+
+// Keep the existing PostgreSQL timestamp(3) storage and use JavaScript Date in the app.
+types {
+  Stamp = DateTime(storage: timestamp)
+}
+
+namespace public {
+  model User {
+    id                String             @id @onCreate(cuid(2))
+    phone             String?
+    phoneVerified     Boolean            @default(false)
+    email             String?
+    emailVerified     Boolean            @default(false)
+    passwordHash      String?
+    role              pg.enum(UserRole)  @default("SEEKER")
+    locale            String             @default("de")
+    name              String?
+    createdAt         Stamp              @default(now())
+    updatedAt         Stamp              @onCreate(now()) @onUpdate(now())
+    companyProfile    CompanyProfile?
+    contacts          ContactUnlock[]
+    jobApplications   JobApplication[]
+    messagesSent      Message[]
+    reportsFiled      Report[]
+    seekerProfile     SeekerProfile?
+    verificationCodes VerificationCode[]
+    conversationsAsA  Conversation[]     @relation(name: "Conversation_userA")
+    conversationsAsB  Conversation[]     @relation(name: "Conversation_userB")
+    offersReceived    JobOffer[]         @relation(name: "JobOffer_toUser")
+    offersSent        JobOffer[]         @relation(name: "JobOffer_fromUser")
+    ratingsGiven      Rating[]           @relation(name: "Rating_fromUser")
+    ratingsReceived   Rating[]           @relation(name: "Rating_toUser")
+
+    @@index([phone], map: "User_phone_key", unique: true)
+    @@index([email], map: "User_email_key", unique: true)
+  }
+
+  model CompanyProfile {
+    id                 String                      @id @onCreate(cuid(2))
+    userId             String
+    companyName        String
+    companyNameI18n    String?
+    description        String?
+    descriptionI18n    String?
+    city               String?
+    address            String?
+    website            String?
+    logoUrl            String?
+    industry           String?
+    companySize        String?
+    contactEmail       String?
+    contactPhone       String?
+    verified           Boolean                     @default(false)
+    verificationStatus pg.enum(VerificationStatus) @default("UNVERIFIED")
+    verificationNote   String?
+    verificationDocUrl String?
+    isDemoData         Boolean                     @default(false)
+    subscription       pg.enum(SubscriptionPlan)   @default("NONE")
+    contactCredits     Int                         @default(0)
+    latitude           Float?
+    longitude          Float?
+    createdAt          Stamp                       @default(now())
+    updatedAt          Stamp                       @onCreate(now()) @onUpdate(now())
+    jobs               Job[]
+    user               User                        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+
+    @@index([userId], map: "CompanyProfile_userId_key", unique: true)
+  }
+
+  model ContactUnlock {
+    id            String @id @onCreate(cuid(2))
+    companyUserId String
+    seekerId      String
+    createdAt     Stamp  @default(now())
+    companyUser   User   @relation(fields: [companyUserId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+
+    @@index([companyUserId, seekerId], map: "ContactUnlock_companyUserId_seekerId_key", unique: true)
+  }
+
+  model Conversation {
+    id            String     @id @onCreate(cuid(2))
+    userAId       String
+    userBId       String
+    lastMessageAt Stamp      @default(now())
+    createdAt     Stamp      @default(now())
+    messages      Message[]
+    offers        JobOffer[]
+    userA         User       @relation(name: "Conversation_userA", fields: [userAId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+    userB         User       @relation(name: "Conversation_userB", fields: [userBId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+
+    @@index([userAId, userBId], map: "Conversation_userAId_userBId_key", unique: true)
+  }
+
+  model Job {
+    id                  String                 @id @onCreate(cuid(2))
+    companyId           String
+    title               String
+    description         String
+    titleI18n           String?
+    descriptionI18n     String?
+    simpleWhatI18n      String?
+    simpleNeedI18n      String?
+    workHours           String?
+    germanRequired      Boolean                @default(false)
+    category            pg.enum(JobCategory)
+    hourlyWage          Float
+    city                String
+    address             String?
+    latitude            Float?
+    longitude           Float?
+    startDate           Stamp?
+    requirements        String                 @default("[]")
+    physicalLevel       pg.enum(PhysicalLevel) @default("MEDIUM")
+    availability        pg.enum(Availability)  @default("FLEXIBLE")
+    active              Boolean                @default(true)
+    requiresGreenStatus Boolean                @default(true)
+    createdAt           Stamp                  @default(now())
+    updatedAt           Stamp                  @onCreate(now()) @onUpdate(now())
+    applications        JobApplication[]
+    offers              JobOffer[]
+    company             CompanyProfile         @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+  }
+
+  model JobApplication {
+    id        String  @id @onCreate(cuid(2))
+    jobId     String
+    userId    String
+    message   String?
+    status    String  @default("PENDING")
+    createdAt Stamp   @default(now())
+    job       Job     @relation(fields: [jobId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+    user      User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+
+    @@index([jobId, userId], map: "JobApplication_jobId_userId_key", unique: true)
+  }
+
+  model JobOffer {
+    id                  String               @id @onCreate(cuid(2))
+    conversationId      String
+    jobId               String?
+    fromUserId          String
+    toUserId            String
+    status              pg.enum(OfferStatus) @default("SENT")
+    companyName         String
+    jobTitle            String
+    jobTitleI18n        String?
+    city                String
+    workHours           String?
+    hourlyWage          Float
+    taskDescription     String
+    taskDescriptionI18n String?
+    requirements        String               @default("[]")
+    startDate           Stamp?
+    respondedAt         Stamp?
+    collaborationDone   Boolean              @default(false)
+    createdAt           Stamp                @default(now())
+    updatedAt           Stamp                @onCreate(now()) @onUpdate(now())
+    messages            Message[]
+    ratings             Rating[]
+    conversation        Conversation         @relation(fields: [conversationId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+    job                 Job?                 @relation(fields: [jobId], references: [id], onDelete: SetNull, onUpdate: Cascade, index: false)
+    fromUser            User                 @relation(name: "JobOffer_fromUser", fields: [fromUserId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+    toUser              User                 @relation(name: "JobOffer_toUser", fields: [toUserId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+  }
+
+  model Message {
+    id             String               @id @onCreate(cuid(2))
+    conversationId String
+    senderId       String
+    type           pg.enum(MessageType) @default("TEXT")
+    body           String
+    sourceLocale   String
+    offerId        String?
+    createdAt      Stamp                @default(now())
+    translations   MessageTranslation[]
+    conversation   Conversation         @relation(fields: [conversationId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+    sender         User                 @relation(fields: [senderId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+    offer          JobOffer?            @relation(fields: [offerId], references: [id], onDelete: SetNull, onUpdate: Cascade, index: false)
+  }
+
+  model MessageTranslation {
+    id        String  @id @onCreate(cuid(2))
+    messageId String
+    locale    String
+    body      String
+    provider  String  @default("deepl")
+    createdAt Stamp   @default(now())
+    message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+
+    @@index([messageId, locale], map: "MessageTranslation_messageId_locale_key", unique: true)
+  }
+
+  model Rating {
+    id         String   @id @onCreate(cuid(2))
+    fromUserId String
+    toUserId   String
+    offerId    String
+    score      Int
+    comment    String?
+    flagged    Boolean  @default(false)
+    flagReason String?
+    hidden     Boolean  @default(false)
+    createdAt  Stamp    @default(now())
+    fromUser   User     @relation(name: "Rating_fromUser", fields: [fromUserId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+    toUser     User     @relation(name: "Rating_toUser", fields: [toUserId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+    offer      JobOffer @relation(fields: [offerId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+
+    @@index([fromUserId, toUserId, offerId], map: "Rating_fromUserId_toUserId_offerId_key", unique: true)
+  }
+
+  model Report {
+    id         String                @id @onCreate(cuid(2))
+    reporterId String
+    targetType String
+    targetId   String
+    reason     pg.enum(ReportReason)
+    details    String?
+    resolved   Boolean               @default(false)
+    createdAt  Stamp                 @default(now())
+    reporter   User                  @relation(fields: [reporterId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+  }
+
+  model SeekerProfile {
+    id              String                   @id @onCreate(cuid(2))
+    userId          String
+    skills          String                   @default("[]")
+    physicalLevel   pg.enum(PhysicalLevel)   @default("MEDIUM")
+    availability    pg.enum(Availability)    @default("FLEXIBLE")
+    latitude        Float?
+    longitude       Float?
+    city            String?
+    hasBankAccount  Boolean?
+    hasTaxId        Boolean?
+    hasWorkPermit   Boolean?
+    hasIdDocument   Boolean?
+    workPermitNote  String?
+    readinessStatus pg.enum(ReadinessStatus) @default("RED")
+    onboardingDone  Boolean                  @default(false)
+    bio             String?
+    photoUrl        String?
+    headline        String?
+    address         String?
+    birthDate       String?
+    birthPlace      String?
+    languagesJson   String                   @default("[]")
+    toolsJson       String                   @default("[]")
+    hobbiesJson     String                   @default("[]")
+    experiencesJson String                   @default("[]")
+    educationJson   String                   @default("[]")
+    sideJobsJson    String                   @default("[]")
+    createdAt       Stamp                    @default(now())
+    updatedAt       Stamp                    @onCreate(now()) @onUpdate(now())
+    user            User                     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+
+    @@index([userId], map: "SeekerProfile_userId_key", unique: true)
+  }
+
+  model VerificationCode {
+    id        String  @id @onCreate(cuid(2))
+    userId    String?
+    phone     String?
+    email     String?
+    code      String
+    purpose   String
+    expiresAt Stamp
+    used      Boolean @default(false)
+    createdAt Stamp   @default(now())
+    user      User?   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade, index: false)
+  }
+
+  native_enum UserRole {
+    SEEKER = "SEEKER"
+    COMPANY = "COMPANY"
+    ADMIN = "ADMIN"
+  }
+
+  native_enum ReadinessStatus {
+    GREEN = "GREEN"
+    YELLOW = "YELLOW"
+    RED = "RED"
+  }
+
+  native_enum JobCategory {
+    WAREHOUSE = "WAREHOUSE"
+    CLEANING = "CLEANING"
+    DELIVERY = "DELIVERY"
+    CONSTRUCTION = "CONSTRUCTION"
+    OTHER = "OTHER"
+  }
+
+  native_enum PhysicalLevel {
+    LIGHT = "LIGHT"
+    MEDIUM = "MEDIUM"
+    HEAVY = "HEAVY"
+  }
+
+  native_enum Availability {
+    FULL_TIME = "FULL_TIME"
+    PART_TIME = "PART_TIME"
+    WEEKENDS = "WEEKENDS"
+    FLEXIBLE = "FLEXIBLE"
+  }
+
+  native_enum SubscriptionPlan {
+    NONE = "NONE"
+    STARTER = "STARTER"
+    PRO = "PRO"
+    ENTERPRISE = "ENTERPRISE"
+  }
+
+  native_enum ReportReason {
+    FAKE_PROFILE = "FAKE_PROFILE"
+    ABUSE = "ABUSE"
+    ILLEGAL_WORK = "ILLEGAL_WORK"
+    SPAM = "SPAM"
+    OTHER = "OTHER"
+  }
+
+  native_enum VerificationStatus {
+    UNVERIFIED = "UNVERIFIED"
+    PENDING = "PENDING"
+    VERIFIED = "VERIFIED"
+    REJECTED = "REJECTED"
+  }
+
+  native_enum OfferStatus {
+    SENT = "SENT"
+    ACCEPTED = "ACCEPTED"
+    DECLINED = "DECLINED"
+    WITHDRAWN = "WITHDRAWN"
+  }
+
+  native_enum MessageType {
+    TEXT = "TEXT"
+    OFFER = "OFFER"
+    SYSTEM = "SYSTEM"
+  }
+}

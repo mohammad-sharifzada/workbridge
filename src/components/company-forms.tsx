@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { createJob, buyContactCredits, requestCompanyVerification } from "@/actions";
-import type { Availability, JobCategory, PhysicalLevel } from "@prisma/client";
+import type { Availability, JobCategory, PhysicalLevel } from "@/prisma/types";
 
 export function CreateJobForm() {
   const t = useTranslations("company");

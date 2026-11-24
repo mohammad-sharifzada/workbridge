@@ -1,14 +1,15 @@
-import type { CompanyProfile, Conversation, JobOffer, Message, SeekerProfile, User } from "@prisma/client";
+import type { CompanyProfile, Conversation, JobOffer, Message, SeekerProfile, User } from "@/prisma/types";
 import { db } from "@/prisma/db";
-import { or } from "@prisma/orm-postgres/orm-client";
-import {
-  mapLegacyConversation,
-  mapLegacyJobOffer,
-  mapLegacyMessage,
-  mapLegacyUser,
-  mapOptionalCompanyProfile,
-  mapOptionalSeekerProfile,
-} from "@/lib/prisma8-legacy-mappers";
+import { and, or } from "@prisma/orm-postgres/orm-client";
+
+export async function countRecentConversations(userId: string) {
+  const since = new Date(Date.now() - 7 * 86400000);
+  const { count } = await db.orm.public.Conversation.where((c) => and(
+    or(c.userAId.eq(userId), c.userBId.eq(userId)),
+    c.lastMessageAt.gte(since),
+  )).aggregate((a) => ({ count: a.count() }));
+  return count;
+}
 
 export type ConversationListRow = Conversation & {
   userA: User & {
@@ -29,9 +30,6 @@ export type ConversationDetail = Conversation & {
   messages: Array<Message & { offer: JobOffer | null }>;
 };
 
-/**
- * P6-equivalent of messages list conversation.findMany with OR, nested includes, take:1.
- */
 export async function listConversationsForUser(userId: string): Promise<ConversationListRow[]> {
   const rows = await db.orm.public.Conversation.where((c) =>
     or(c.userAId.eq(userId), c.userBId.eq(userId)),
@@ -47,27 +45,10 @@ export async function listConversationsForUser(userId: string): Promise<Conversa
     if (!row.userA || !row.userB) {
       throw new Error(`Conversation ${row.id} missing userA/userB`);
     }
-    return {
-      ...mapLegacyConversation(row),
-      userA: {
-        ...mapLegacyUser(row.userA),
-        companyProfile: mapOptionalCompanyProfile(row.userA.companyProfile),
-        seekerProfile: mapOptionalSeekerProfile(row.userA.seekerProfile),
-      },
-      userB: {
-        ...mapLegacyUser(row.userB),
-        companyProfile: mapOptionalCompanyProfile(row.userB.companyProfile),
-        seekerProfile: mapOptionalSeekerProfile(row.userB.seekerProfile),
-      },
-      messages: (row.messages ?? []).map(mapLegacyMessage),
-      offers: (row.offers ?? []).map(mapLegacyJobOffer),
-    };
+    return { ...row, userA: row.userA, userB: row.userB };
   });
 }
 
-/**
- * P6-equivalent of conversation.findUnique with messages+offer and peer companyProfile.
- */
 export async function getConversationThreadById(
   id: string,
 ): Promise<ConversationDetail | null> {
@@ -79,19 +60,5 @@ export async function getConversationThreadById(
 
   if (!row || !row.userA || !row.userB) return null;
 
-  return {
-    ...mapLegacyConversation(row),
-    userA: {
-      ...mapLegacyUser(row.userA),
-      companyProfile: mapOptionalCompanyProfile(row.userA.companyProfile),
-    },
-    userB: {
-      ...mapLegacyUser(row.userB),
-      companyProfile: mapOptionalCompanyProfile(row.userB.companyProfile),
-    },
-    messages: (row.messages ?? []).map((m) => ({
-      ...mapLegacyMessage(m),
-      offer: m.offer ? mapLegacyJobOffer(m.offer) : null,
-    })),
-  };
+  return { ...row, userA: row.userA, userB: row.userB };
 }

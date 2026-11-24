@@ -1,10 +1,8 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { db } from "@/prisma/db";
-import type { User, UserRole } from "@prisma/client";
+import type { User, UserRole } from "@/prisma/types";
 import bcrypt from "bcryptjs";
-import { dateToPlainDateTime } from "@/lib/prisma8-temporal";
-import { mapLegacyUser } from "@/lib/prisma8-legacy-mappers";
 
 const COOKIE_NAME = "workbridge_session";
 export { COOKIE_NAME };
@@ -97,9 +95,7 @@ export async function getSession(): Promise<SessionPayload | null> {
 export async function getCurrentUser(): Promise<User | null> {
   const session = await getSession();
   if (!session) return null;
-  const row = await db.orm.public.User.where({ id: session.userId }).first();
-  if (!row) return null;
-  return mapLegacyUser(row);
+  return db.orm.public.User.first({ id: session.userId });
 }
 
 export function generateCode(): string {
@@ -119,7 +115,7 @@ export async function createVerificationCode(opts: {
     userId: opts.userId,
     purpose: opts.purpose,
     code,
-    expiresAt: dateToPlainDateTime(new Date(Date.now() + CODE_TTL_MS)),
+    expiresAt: new Date(Date.now() + CODE_TTL_MS),
   });
 
   const mock = process.env.SMS_PROVIDER !== "twilio";
@@ -137,7 +133,7 @@ export async function verifyCode(opts: {
   purpose: string;
 }): Promise<boolean> {
   const trimmed = opts.code.trim();
-  const now = dateToPlainDateTime(new Date());
+  const now = new Date();
   const record = await db.orm.public.VerificationCode.where({
     purpose: opts.purpose,
     code: trimmed,

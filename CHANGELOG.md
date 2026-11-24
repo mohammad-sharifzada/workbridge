@@ -1,5 +1,11 @@
 # Changelog
 
+## Prisma ORM 8 — vollständige Umstellung
+
+- PostgreSQL-Vertrag im v8-Format und eine v8-Baseline-Migration.
+- Alle Abfragen, Modelltypen und Demo-Seeds nutzen den v8-Client.
+- Builds ändern die Datenbank nicht mehr. Der Einstieg für vorhandene Datenbanken steht in der README.
+
 ## Sicherung 02 — `prisma8-runtime-2026-10-06`
 
 Runtime-Migration von Prisma 6 auf Prisma-8-Patterns weitgehend abgeschlossen.

@@ -1,14 +1,7 @@
 "use server";
 
 import { db } from "@/prisma/db";
-import { dateToPlainDateTime, optionalDateToPlainDateTime } from "@/lib/prisma8-temporal";
-import { conflictOn } from "@/lib/prisma8-upsert";
-import {
-  mapLegacyCompanyProfile,
-  mapLegacyJobOffer,
-  mapLegacyJobScalars,
-  mapLegacyMessage,
-} from "@/lib/prisma8-legacy-mappers";
+import { upsertJobApplication } from "@/lib/job-application-p8";
 import { getCurrentUser } from "@/lib/auth";
 import { translateText, isSupportedLocale } from "@/lib/translate";
 import type { Locale } from "@/i18n/config";
@@ -71,7 +64,7 @@ export async function sendTextMessage(opts: {
     sourceLocale,
   });
   await db.orm.public.Conversation.where({ id: conv.id }).update({
-    lastMessageAt: dateToPlainDateTime(new Date()),
+    lastMessageAt: new Date(),
   });
   revalidatePath("/");
   return { ok: true };
@@ -84,20 +77,18 @@ export async function sendJobOffer(opts: {
   const user = await getCurrentUser();
   if (!user || user.role !== "COMPANY") return { ok: false, error: "unauthorized" };
 
-  const companyRow = await db.orm.public.CompanyProfile.where({ userId: user.id }).first();
-  if (!companyRow) return { ok: false, error: "no_company" };
-  const company = mapLegacyCompanyProfile(companyRow);
+  const company = await db.orm.public.CompanyProfile.where({ userId: user.id }).first();
+  if (!company) return { ok: false, error: "no_company" };
   if (company.verificationStatus !== "VERIFIED" && !company.isDemoData) {
     return { ok: false, error: "company_not_verified" };
   }
 
-  const jobRow = await db.orm.public.Job.where({
+  const job = await db.orm.public.Job.where({
     id: opts.jobId,
     companyId: company.id,
     active: true,
   }).first();
-  if (!jobRow) return { ok: false, error: "job_not_found" };
-  const job = mapLegacyJobScalars(jobRow);
+  if (!job) return { ok: false, error: "job_not_found" };
 
   const seeker = await db.orm.public.User.where({ id: opts.toUserId, role: "SEEKER" }).first();
   if (!seeker) return { ok: false, error: "seeker_not_found" };
@@ -120,7 +111,7 @@ export async function sendJobOffer(opts: {
     taskDescription: job.description,
     taskDescriptionI18n: job.descriptionI18n,
     requirements: job.requirements,
-    startDate: optionalDateToPlainDateTime(job.startDate),
+    startDate: job.startDate,
   });
   if (!offer) return { ok: false, error: "offer_create_failed" };
 
@@ -133,7 +124,7 @@ export async function sendJobOffer(opts: {
     offerId: offer.id,
   });
   await db.orm.public.Conversation.where({ id: convRes.data.conversationId }).update({
-    lastMessageAt: dateToPlainDateTime(new Date()),
+    lastMessageAt: new Date(),
   });
 
   revalidatePath("/");
@@ -147,30 +138,20 @@ export async function respondToOffer(opts: {
   const user = await getCurrentUser();
   if (!user || user.role !== "SEEKER") return { ok: false, error: "unauthorized" };
 
-  const offerRow = await db.orm.public.JobOffer.where({ id: opts.offerId }).first();
-  const offer = offerRow ? mapLegacyJobOffer(offerRow) : null;
+  const offer = await db.orm.public.JobOffer.first({ id: opts.offerId });
   if (!offer || offer.toUserId !== user.id) return { ok: false, error: "forbidden" };
   if (offer.status !== "SENT") return { ok: false, error: "already_responded" };
 
   const status = opts.accept ? "ACCEPTED" : "DECLINED";
   await db.orm.public.JobOffer.where({ id: offer.id }).update({
     status,
-    respondedAt: dateToPlainDateTime(new Date()),
+    respondedAt: new Date(),
     collaborationDone: opts.accept,
   });
 
   if (offer.jobId) {
-    await db.orm.public.JobApplication.upsert({
-      create: {
-        jobId: offer.jobId,
-        userId: user.id,
-        status: opts.accept ? "ACCEPTED" : "REJECTED",
-      },
-      update: {
-        status: opts.accept ? "ACCEPTED" : "REJECTED",
-      },
-      conflictOn: conflictOn({ jobId: offer.jobId, userId: user.id }),
-    });
+    const patch = { status: opts.accept ? "ACCEPTED" : "REJECTED" };
+    await upsertJobApplication({ jobId: offer.jobId, userId: user.id }, patch, patch);
   }
 
   await db.orm.public.Message.create({
@@ -197,12 +178,11 @@ export async function translateMessageForUser(
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: "unauthorized" };
 
-  const messageRow = await db.orm.public.Message.where({ id: messageId })
+  const message = await db.orm.public.Message.where({ id: messageId })
     .include("conversation")
     .first();
-  if (!messageRow?.conversation) return { ok: false, error: "not_found" };
-  const message = mapLegacyMessage(messageRow);
-  const conv = messageRow.conversation;
+  if (!message?.conversation) return { ok: false, error: "not_found" };
+  const conv = message.conversation;
   if (conv.userAId !== user.id && conv.userBId !== user.id) {
     return { ok: false, error: "forbidden" };
   }
@@ -333,8 +313,7 @@ export async function submitCollaborationRating(opts: {
   if (!user) return { ok: false, error: "unauthorized" };
   if (opts.score < 1 || opts.score > 5) return { ok: false, error: "invalid_score" };
 
-  const offerRow = await db.orm.public.JobOffer.where({ id: opts.offerId }).first();
-  const offer = offerRow ? mapLegacyJobOffer(offerRow) : null;
+  const offer = await db.orm.public.JobOffer.first({ id: opts.offerId });
   if (!offer || offer.status !== "ACCEPTED" || !offer.collaborationDone) {
     return { ok: false, error: "no_collaboration" };
   }
@@ -362,23 +341,15 @@ export async function submitCollaborationRating(opts: {
     return { ok: false, error: "comment_flagged" };
   }
 
-  await db.orm.public.Rating.upsert({
-    create: {
-      fromUserId: user.id,
-      toUserId,
-      offerId: offer.id,
-      score: opts.score,
-      comment: comment || null,
-    },
-    update: {
-      score: opts.score,
-      comment: comment || null,
-    },
-    conflictOn: conflictOn({
-      fromUserId: user.id,
-      toUserId,
-      offerId: offer.id,
-    }),
+  const key = { fromUserId: user.id, toUserId, offerId: offer.id };
+  const patch = { score: opts.score, comment: comment || null };
+  await db.transaction(async ({ orm }) => {
+    const ratings = orm.public.Rating;
+    const inserted = await ratings.createAndCount([{ ...key, ...patch }], {
+      onConflict: "skip",
+      conflictOn: ["fromUserId", "toUserId", "offerId"],
+    });
+    if (!inserted) await ratings.where(key).update(patch);
   });
 
   revalidatePath("/");

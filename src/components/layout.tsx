@@ -1,7 +1,7 @@
 import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
 import { destroySession } from "@/lib/auth";
-import type { User } from "@prisma/client";
+import type { User } from "@/prisma/types";
 import {
   Briefcase,
   LayoutDashboard,
@@ -45,15 +45,15 @@ export async function AppHeader({ user }: { user: HeaderUser | null }) {
             </div>
           )}
 
-          <nav className="hidden items-center gap-0.5 md:flex">
+          <nav className="hidden items-center justify-evenly md:flex">
             {seekerReady && (
               <>
                 <NavIcon href="/" label={t("home")} icon={<Home className="h-5 w-5" />} />
-                <NavIcon href="/jobs" label={t("jobs")} icon={<Briefcase className="h-5 w-5" />} />
-                <NavIcon href="/applications" label={t("applications")} icon={<ClipboardList className="h-5 w-5" />} />
-                <NavIcon href="/messages" label={t("messages")} icon={<MessageCircle className="h-5 w-5" />} />
-                <NavIcon href="/help" label={t("help")} icon={<CircleHelp className="h-5 w-5" />} />
-                <NavIcon href="/settings" label={t("settings")} icon={<Settings className="h-5 w-5" />} />
+                <NavIcon href="/jobs" label={t("jobs")} icon={<Briefcase className="h-5 w-15" />} />
+                <NavIcon href="/applications" label={t("applications")} icon={<ClipboardList className="h-5 w-15" />} />
+                <NavIcon href="/messages" label={t("messages")} icon={<MessageCircle className="h-5 w-15" />} />
+                <NavIcon href="/help" label={t("help")} icon={<CircleHelp className="h-5 w-15" />} />
+                <NavIcon href="/settings" label={t("settings")} icon={<Settings className="h-5 w-15" />} />
               </>
             )}
             {user?.role === "COMPANY" && (

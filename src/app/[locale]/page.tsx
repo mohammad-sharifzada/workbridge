@@ -4,7 +4,9 @@ import { isLocale } from "@/i18n/config";
 import { notFound } from "next/navigation";
 import { CheckCircle2, MailCheck } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { db } from "@/prisma/db";
+import { listVisibleJobs } from "@/lib/job-p8";
+import { countRecentConversations } from "@/lib/conversation-p8";
 import { rankJobs } from "@/lib/matching";
 import { computeReadiness } from "@/lib/status";
 import { localizeJobFields } from "@/lib/localize-job";
@@ -91,38 +93,14 @@ async function SeekerHome({
 
   const { status, missing } = computeReadiness(profile);
 
-  const jobs = await prisma.job.findMany({
-    where: {
-      active: true,
-      company: {
-        OR: [{ verificationStatus: "VERIFIED" }, { isDemoData: true }],
-      },
-    },
-    include: {
-      company: {
-        select: {
-          companyName: true,
-          companyNameI18n: true,
-          verified: true,
-          verificationStatus: true,
-        },
-      },
-    },
-    take: 30,
-  });
+  const [jobs, { count: pendingApps }, unreadConvs] = await Promise.all([
+    listVisibleJobs(30),
+    db.orm.public.JobApplication.where({ userId, status: "PENDING" })
+      .aggregate((a) => ({ count: a.count() })),
+    countRecentConversations(userId),
+  ]);
 
   const matched = rankJobs(profile, jobs).slice(0, 4);
-
-  const pendingApps = await prisma.jobApplication.count({
-    where: { userId, status: "PENDING" },
-  });
-
-  const unreadConvs = await prisma.conversation.count({
-    where: {
-      OR: [{ userAId: userId }, { userBId: userId }],
-      lastMessageAt: { gte: new Date(Date.now() - 7 * 86400000) },
-    },
-  });
 
   const statusEmoji = status === "GREEN" ? "🟢" : status === "YELLOW" ? "🟡" : "🔴";
   const statusLabel =

@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { saveOnboarding } from "@/actions";
-import type { Availability, PhysicalLevel, SeekerProfile } from "@prisma/client";
+import type { Availability, PhysicalLevel, SeekerProfile } from "@/prisma/types";
 import {
   Bike,
   Building2,

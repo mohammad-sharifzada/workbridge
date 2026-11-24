@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { submitReport } from "@/actions";
 import { submitCollaborationRating } from "@/actions/messaging";
-import type { ReportReason } from "@prisma/client";
+import type { ReportReason } from "@/prisma/types";
 
 export function ReportButton({ targetType, targetId }: { targetType: string; targetId: string }) {
   const t = useTranslations("trust");

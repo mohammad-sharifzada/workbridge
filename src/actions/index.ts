@@ -1,14 +1,7 @@
 "use server";
 
 import { db } from "@/prisma/db";
-import { getSeekerProfileByUserId } from "@/lib/seeker-profile-p8";
-import { dateToPlainDateTime } from "@/lib/prisma8-temporal";
-import { conflictOn } from "@/lib/prisma8-upsert";
-import {
-  mapLegacyCompanyProfile,
-  mapLegacyJobScalars,
-  mapLegacyUser,
-} from "@/lib/prisma8-legacy-mappers";
+import { getSeekerProfileByUserId, upsertSeekerProfile } from "@/lib/seeker-profile-p8";
 import {
   createSession,
   createVerificationCode,
@@ -32,7 +25,7 @@ import type {
   JobCategory,
   PhysicalLevel,
   ReportReason,
-} from "@prisma/client";
+} from "@/prisma/types";
 import { revalidatePath } from "next/cache";
 
 export type ActionResult<T = undefined> = {
@@ -65,8 +58,7 @@ export async function verifyPhoneAndLogin(opts: {
   const valid = await verifyCode({ phone, code, purpose: "phone_login" });
   if (!valid) return { ok: false, error: "invalid_code" };
 
-  const row = await db.orm.public.User.where({ phone }).first();
-  let user = row ? mapLegacyUser(row) : null;
+  const user = await db.orm.public.User.where({ phone }).first();
   if (!user) {
     const created = await db.orm.public.User.create({
       phone,
@@ -84,7 +76,6 @@ export async function verifyPhoneAndLogin(opts: {
       phoneVerified: true,
       locale: opts.locale,
     });
-    user = { ...user, phoneVerified: true, locale: opts.locale };
     const profile = await getSeekerProfileByUserId(user.id);
     if (!profile) {
       await db.orm.public.SeekerProfile.create({ userId: user.id });
@@ -99,8 +90,7 @@ export async function verifyPhoneAndLogin(opts: {
 /** Demo-Login nutzt denselben Onboarding-Flow wie neue Nutzer */
 export async function demoSeekerLogin(locale: string): Promise<ActionResult<{ userId: string }>> {
   const phone = "+4915111111111";
-  const row = await db.orm.public.User.where({ phone }).first();
-  const user = row ? mapLegacyUser(row) : null;
+  const user = await db.orm.public.User.where({ phone }).first();
   if (!user) {
     const created = await db.orm.public.User.create({
       phone,
@@ -115,18 +105,14 @@ export async function demoSeekerLogin(locale: string): Promise<ActionResult<{ us
     return { ok: true, data: { userId: created.id } };
   }
 
-  await db.orm.public.SeekerProfile.upsert({
-    create: { userId: user.id },
-    update: {
-      onboardingDone: false,
-      readinessStatus: "RED",
-      hasBankAccount: null,
-      hasTaxId: null,
-      hasWorkPermit: null,
-      hasIdDocument: null,
-      workPermitNote: null,
-    },
-    conflictOn: conflictOn({ userId: user.id }),
+  await upsertSeekerProfile(user.id, {}, {
+    onboardingDone: false,
+    readinessStatus: "RED",
+    hasBankAccount: null,
+    hasTaxId: null,
+    hasWorkPermit: null,
+    hasIdDocument: null,
+    workPermitNote: null,
   });
   await db.orm.public.User.where({ id: user.id }).update({
     phoneVerified: true,
@@ -189,8 +175,7 @@ export async function loginCompany(opts: {
   locale?: string;
 }): Promise<ActionResult> {
   const email = opts.email.trim().toLowerCase();
-  const row = await db.orm.public.User.where({ email }).first();
-  const user = row ? mapLegacyUser(row) : null;
+  const user = await db.orm.public.User.where({ email }).first();
   if (!user?.passwordHash || user.role !== "COMPANY") {
     return { ok: false, error: "invalid_credentials" };
   }
@@ -255,27 +240,14 @@ export async function saveOnboarding(opts: {
     sideJobsJson: JSON.stringify(opts.sideJobs ?? []),
   };
 
-  await db.orm.public.SeekerProfile.upsert({
-    create: {
-      userId: user.id,
-      skills: toJsonArray(opts.skills),
-      physicalLevel: opts.physicalLevel,
-      availability: opts.availability,
-      city: opts.city,
-      latitude: opts.latitude ?? null,
-      longitude: opts.longitude ?? null,
-      ...cvData,
-    },
-    update: {
-      skills: toJsonArray(opts.skills),
-      physicalLevel: opts.physicalLevel,
-      availability: opts.availability,
-      city: opts.city,
-      latitude: opts.latitude ?? null,
-      longitude: opts.longitude ?? null,
-      ...cvData,
-    },
-    conflictOn: conflictOn({ userId: user.id }),
+  await upsertSeekerProfile(user.id, {
+    skills: toJsonArray(opts.skills),
+    physicalLevel: opts.physicalLevel,
+    availability: opts.availability,
+    city: opts.city,
+    latitude: opts.latitude ?? null,
+    longitude: opts.longitude ?? null,
+    ...cvData,
   });
   revalidatePath("/");
   return { ok: true };
@@ -290,23 +262,8 @@ export async function saveStatusCheck(opts: {
   if (!user || user.role !== "SEEKER") return { ok: false, error: "unauthorized" };
 
   const { status } = computeReadiness(opts);
-  await db.orm.public.SeekerProfile.upsert({
-    create: {
-      userId: user.id,
-      hasBankAccount: opts.hasBankAccount,
-      hasTaxId: opts.hasTaxId,
-      hasWorkPermit: opts.hasWorkPermit,
-      readinessStatus: status,
-      onboardingDone: false,
-    },
-    update: {
-      hasBankAccount: opts.hasBankAccount,
-      hasTaxId: opts.hasTaxId,
-      hasWorkPermit: opts.hasWorkPermit,
-      readinessStatus: status,
-    },
-    conflictOn: conflictOn({ userId: user.id }),
-  });
+  const statusPatch = { ...opts, readinessStatus: status };
+  await upsertSeekerProfile(user.id, { ...statusPatch, onboardingDone: false }, statusPatch);
   revalidatePath("/");
   return { ok: true, data: { status } };
 }
@@ -315,16 +272,7 @@ export async function completeOnboarding(): Promise<ActionResult> {
   const user = await getCurrentUser();
   if (!user || user.role !== "SEEKER") return { ok: false, error: "unauthorized" };
 
-  await db.orm.public.SeekerProfile.upsert({
-    create: {
-      userId: user.id,
-      onboardingDone: true,
-    },
-    update: {
-      onboardingDone: true,
-    },
-    conflictOn: conflictOn({ userId: user.id }),
-  });
+  await upsertSeekerProfile(user.id, { onboardingDone: true });
   revalidatePath("/");
   revalidatePath("/jobs");
   return { ok: true };
@@ -348,18 +296,7 @@ export async function updateStatusChecks(opts: {
     hasIdDocument: opts.hasIdDocument !== undefined ? opts.hasIdDocument : (profile?.hasIdDocument ?? null),
   };
   const { status } = computeReadiness(next);
-  await db.orm.public.SeekerProfile.upsert({
-    create: {
-      userId: user.id,
-      ...next,
-      readinessStatus: status,
-    },
-    update: {
-      ...next,
-      readinessStatus: status,
-    },
-    conflictOn: conflictOn({ userId: user.id }),
-  });
+  await upsertSeekerProfile(user.id, { ...next, readinessStatus: status });
   revalidatePath("/");
   revalidatePath("/help");
   revalidatePath("/profile");
@@ -373,28 +310,14 @@ export async function applyToJob(jobId: string): Promise<ActionResult> {
   const profile = await getSeekerProfileByUserId(user.id);
   if (!profile) return { ok: false, error: "no_profile" };
 
-  const jobRow = await db.orm.public.Job.where({ id: jobId })
+  const job = await db.orm.public.Job.where({ id: jobId })
     .include("company", (c) => c.select("userId", "companyName"))
     .first();
-  if (!jobRow?.company) return { ok: false, error: "job_not_found" };
-  const job = {
-    ...mapLegacyJobScalars(jobRow),
-    company: {
-      userId: jobRow.company.userId,
-      companyName: jobRow.company.companyName,
-    },
-  };
+  if (!job?.company) return { ok: false, error: "job_not_found" };
   if (!job.active) return { ok: false, error: "job_not_found" };
   if (job.requiresGreenStatus && profile.readinessStatus !== "GREEN") {
     return { ok: false, error: "not_ready" };
   }
-
-  const existing = await db.orm.public.JobApplication.where({
-    jobId,
-    userId: user.id,
-  })
-    .select("jobId")
-    .first();
 
   const locale = (isSupportedLocale(user.locale) ? user.locale : "de") as Locale;
   const de = await import("../../messages/de.json");
@@ -437,13 +360,14 @@ export async function applyToJob(jobId: string): Promise<ActionResult> {
     },
   });
 
-  await db.orm.public.JobApplication.upsert({
-    create: { jobId, userId: user.id, message: cvMessage },
-    update: {},
-    conflictOn: conflictOn({ jobId, userId: user.id }),
+  const insertedCount = await db.orm.public.JobApplication.createAndCount([
+    { jobId, userId: user.id, message: cvMessage },
+  ], {
+    onConflict: "skip",
+    conflictOn: ["jobId", "userId"],
   });
 
-  if (!existing) {
+  if (insertedCount > 0) {
     const convRes = await getOrCreateConversation(job.company.userId);
     if (convRes.ok && convRes.data) {
       await db.orm.public.Message.create({
@@ -454,7 +378,7 @@ export async function applyToJob(jobId: string): Promise<ActionResult> {
         sourceLocale: user.locale || "de",
       });
       await db.orm.public.Conversation.where({ id: convRes.data.conversationId }).update({
-        lastMessageAt: dateToPlainDateTime(new Date()),
+        lastMessageAt: new Date(),
       });
     }
   }
@@ -480,9 +404,8 @@ export async function createJob(opts: {
 }): Promise<ActionResult> {
   const user = await getCurrentUser();
   if (!user || user.role !== "COMPANY") return { ok: false, error: "unauthorized" };
-  const companyRow = await db.orm.public.CompanyProfile.where({ userId: user.id }).first();
-  if (!companyRow) return { ok: false, error: "no_company" };
-  const company = mapLegacyCompanyProfile(companyRow);
+  const company = await db.orm.public.CompanyProfile.where({ userId: user.id }).first();
+  if (!company) return { ok: false, error: "no_company" };
 
   const sourceLocale = (isSupportedLocale(user.locale) ? user.locale : "de") as Locale;
   const [titleI18n, descriptionI18n, simpleWhatI18n] = await Promise.all([
@@ -504,7 +427,7 @@ export async function createJob(opts: {
     physicalLevel: opts.physicalLevel,
     availability: opts.availability,
     requirements: toJsonArray(opts.requirements),
-    startDate: opts.startDate ? dateToPlainDateTime(new Date(opts.startDate)) : null,
+    startDate: opts.startDate ? new Date(opts.startDate) : null,
     requiresGreenStatus: opts.requiresGreenStatus ?? true,
     latitude: company.latitude,
     longitude: company.longitude,
@@ -517,7 +440,7 @@ export async function buyContactCredits(): Promise<ActionResult> {
   const user = await getCurrentUser();
   if (!user || user.role !== "COMPANY") return { ok: false, error: "unauthorized" };
   // Demo billing: grants credits without payment provider (atomic SQL increment)
-  await db.runtime().execute(
+  await db.execute(
     db.raw.sql`
       UPDATE "CompanyProfile"
       SET "contactCredits" = "contactCredits" + 5
@@ -635,38 +558,21 @@ export async function saveCvProfile(opts: {
     email: opts.email.trim() || user.email,
   });
 
-  await db.orm.public.SeekerProfile.upsert({
-    create: {
-      userId: user.id,
-      headline: opts.headline || null,
-      address: opts.address || null,
-      birthDate: opts.birthDate || null,
-      birthPlace: opts.birthPlace || null,
-      bio: opts.bio || null,
-      photoUrl: opts.photoUrl || null,
-      toolsJson: JSON.stringify(opts.tools),
-      hobbiesJson: JSON.stringify(opts.hobbies),
-      languagesJson: JSON.stringify(opts.languages),
-      experiencesJson: JSON.stringify(opts.experiences ?? []),
-      educationJson: JSON.stringify(opts.education ?? []),
-      sideJobsJson: JSON.stringify(opts.sideJobs ?? []),
-    },
-    update: {
-      headline: opts.headline || null,
-      address: opts.address || null,
-      birthDate: opts.birthDate || null,
-      birthPlace: opts.birthPlace || null,
-      bio: opts.bio || null,
-      photoUrl: opts.photoUrl || null,
-      toolsJson: JSON.stringify(opts.tools),
-      hobbiesJson: JSON.stringify(opts.hobbies),
-      languagesJson: JSON.stringify(opts.languages),
-      ...(opts.experiences ? { experiencesJson: JSON.stringify(opts.experiences) } : {}),
-      ...(opts.education ? { educationJson: JSON.stringify(opts.education) } : {}),
-      ...(opts.sideJobs ? { sideJobsJson: JSON.stringify(opts.sideJobs) } : {}),
-    },
-    conflictOn: conflictOn({ userId: user.id }),
-  });
+  const cvPatch = {
+    headline: opts.headline || null,
+    address: opts.address || null,
+    birthDate: opts.birthDate || null,
+    birthPlace: opts.birthPlace || null,
+    bio: opts.bio || null,
+    photoUrl: opts.photoUrl || null,
+    toolsJson: JSON.stringify(opts.tools),
+    hobbiesJson: JSON.stringify(opts.hobbies),
+    languagesJson: JSON.stringify(opts.languages),
+    ...(opts.experiences ? { experiencesJson: JSON.stringify(opts.experiences) } : {}),
+    ...(opts.education ? { educationJson: JSON.stringify(opts.education) } : {}),
+    ...(opts.sideJobs ? { sideJobsJson: JSON.stringify(opts.sideJobs) } : {}),
+  };
+  await upsertSeekerProfile(user.id, cvPatch);
 
   revalidatePath("/");
   revalidatePath("/profile");
@@ -684,16 +590,7 @@ export async function saveCvPhoto(photoUrl: string): Promise<ActionResult> {
     return { ok: false, error: "invalid_photo" };
   }
 
-  await db.orm.public.SeekerProfile.upsert({
-    create: {
-      userId: user.id,
-      photoUrl: photoUrl || null,
-    },
-    update: {
-      photoUrl: photoUrl || null,
-    },
-    conflictOn: conflictOn({ userId: user.id }),
-  });
+  await upsertSeekerProfile(user.id, { photoUrl: photoUrl || null });
 
   revalidatePath("/");
   revalidatePath("/profile");

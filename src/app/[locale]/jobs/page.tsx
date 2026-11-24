@@ -2,13 +2,12 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isLocale } from "@/i18n/config";
 import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
 import { rankJobs } from "@/lib/matching";
 import { filterJobsByQuery } from "@/lib/cv";
 import { SimpleJobCard } from "@/components/simple-job-card";
 import { JobSearchBar } from "@/components/job-search-bar";
-import { Link } from "@/i18n/routing";
-import type { ReadinessStatus } from "@prisma/client";
+import type { ReadinessStatus } from "@/prisma/types";
+import { listVisibleJobs } from "@/lib/job-p8";
 import { requireSeekerOnboardingDone } from "@/lib/onboarding-guard";
 import { db } from "@/prisma/db";
 
@@ -29,30 +28,7 @@ export default async function JobsPage({
   const tSearch = await getTranslations("search");
   const user = await getCurrentUser();
 
-  const jobs = await prisma.job.findMany({
-    where: {
-      active: true,
-      company: {
-        OR: [
-          { verificationStatus: "VERIFIED" },
-          { isDemoData: true }, // lokal: Demo-Firmen sichtbar
-        ],
-      },
-    },
-    include: {
-      company: {
-        select: {
-          id: true,
-          companyName: true,
-          companyNameI18n: true,
-          verified: true,
-          verificationStatus: true,
-          isDemoData: true,
-        },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const jobs = await listVisibleJobs();
 
   let matched: ReturnType<typeof rankJobs> = [];
   let applications: string[] = [];

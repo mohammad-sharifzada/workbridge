@@ -1,12 +1,10 @@
 import { db } from "@/prisma/db";
-import { dateToPlainDateTime } from "@/lib/prisma8-temporal";
-import { conflictOn } from "@/lib/prisma8-upsert";
-import { mapLegacyJobScalars, mapLegacyUser } from "@/lib/prisma8-legacy-mappers";
 import { demoSeekerProfileSeed, DEMO_CV_PERSON } from "@/lib/demo-cv";
 import { buildCvApplicationMessage, type CvMessageLabels } from "@/lib/cv";
 import { isLocale, type Locale } from "@/i18n/config";
 import { PRESENTATION_READY_PHONE } from "@/lib/presentation-constants";
-import { getSeekerProfileByUserId } from "@/lib/seeker-profile-p8";
+import { getSeekerProfileByUserId, upsertSeekerProfile } from "@/lib/seeker-profile-p8";
+import { upsertJobApplication } from "@/lib/job-application-p8";
 
 export { PRESENTATION_READY_PHONE } from "@/lib/presentation-constants";
 
@@ -50,32 +48,19 @@ export async function ensurePresentationReadyUser(locale: string) {
   const profileData = demoSeekerProfileSeed();
   const labels = await labelsForLocale(locale);
 
-  // P8 upsert does not support nested relation creates — User then SeekerProfile.
-  const userRow = await db.orm.public.User.upsert({
-    create: {
-      phone: PRESENTATION_READY_PHONE,
-      phoneVerified: true,
-      role: "SEEKER",
-      locale,
-      name: DEMO_CV_PERSON.name,
-      email: "ahmed.hassan@example.de",
-    },
-    update: {
-      phoneVerified: true,
-      locale,
-      name: DEMO_CV_PERSON.name,
-      email: "ahmed.hassan@example.de",
-    },
-    conflictOn: conflictOn({ phone: PRESENTATION_READY_PHONE }),
+  const phone = PRESENTATION_READY_PHONE;
+  const patch = { phoneVerified: true, locale, name: DEMO_CV_PERSON.name, email: "ahmed.hassan@example.de" };
+  const user = await db.transaction(async ({ orm }) => {
+    const users = orm.public.User;
+    const inserted = await users.createAndCount([{ ...patch, phone, role: "SEEKER" }], {
+      onConflict: "skip", conflictOn: ["phone"],
+    });
+    const seeker = users.where({ phone });
+    return inserted ? seeker.first() : seeker.update(patch);
   });
-  if (!userRow) throw new Error("presentation_user_upsert_failed");
-  const user = mapLegacyUser(userRow);
+  if (!user) throw new Error("presentation_user_upsert_failed");
 
-  await db.orm.public.SeekerProfile.upsert({
-    create: { userId: user.id, ...profileData },
-    update: profileData,
-    conflictOn: conflictOn({ userId: user.id }),
-  });
+  await upsertSeekerProfile(user.id, profileData);
 
   const profile = await getSeekerProfileByUserId(user.id);
   if (!profile) return user;
@@ -86,9 +71,8 @@ export async function ensurePresentationReadyUser(locale: string) {
     .limit(2)
     .all();
 
-  for (const jobRow of jobRows) {
-    if (!jobRow.company) continue;
-    const job = mapLegacyJobScalars(jobRow);
+  for (const job of jobRows) {
+    if (!job.company) continue;
     const cvMessage = buildCvApplicationMessage({
       user,
       profile,
@@ -97,18 +81,13 @@ export async function ensurePresentationReadyUser(locale: string) {
       labels,
     });
 
-    await db.orm.public.JobApplication.upsert({
-      create: {
-        jobId: job.id,
-        userId: user.id,
-        message: cvMessage,
-        status: "PENDING",
-      },
-      update: { message: cvMessage },
-      conflictOn: conflictOn({ jobId: job.id, userId: user.id }),
-    });
+    await upsertJobApplication(
+      { jobId: job.id, userId: user.id },
+      { message: cvMessage, status: "PENDING" },
+      { message: cvMessage },
+    );
 
-    const companyUserId = jobRow.company.userId;
+    const companyUserId = job.company.userId;
     const [userAId, userBId] =
       user.id < companyUserId
         ? [user.id, companyUserId]
@@ -142,7 +121,7 @@ export async function ensurePresentationReadyUser(locale: string) {
         sourceLocale: locale,
       });
       await db.orm.public.Conversation.where({ id: convId }).update({
-        lastMessageAt: dateToPlainDateTime(new Date()),
+        lastMessageAt: new Date(),
       });
     } else {
       await db.orm.public.Message.where({ id: existingMsg.id }).update({

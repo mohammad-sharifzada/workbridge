@@ -80,7 +80,7 @@ export default async function CompanyDashboardPage({
                   <p className="text-sm text-ink-soft">
                     {formatWage(job.hourlyWage, locale)} · {localizeCity(job.city, locale)} ·{" "}
                     {job.active ? t("active") : t("inactive")} · {t("applications")}:{" "}
-                    {job._count.applications}
+                    {job.applications}
                   </p>
                 </div>
                 <Link href={`/jobs/${job.id}`} className="text-sm font-semibold text-brand">

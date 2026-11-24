@@ -1,4 +1,4 @@
-import type { ReadinessStatus } from "@prisma/client";
+import type { ReadinessStatus } from "@/prisma/types";
 
 export type ReadinessInput = {
   hasBankAccount: boolean | null | undefined;

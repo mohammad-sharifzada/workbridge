@@ -28,10 +28,9 @@ Auf deiner **WorkBridge-App** (nicht Postgres) → **Variables**:
 | `AUTH_SECRET` | Ein langes Geheimnis, z. B. `workbridge-live-secret-2026-min32chars!!` |
 | `NEXT_PUBLIC_APP_URL` | Erst leer lassen – nach Deploy eintragen (Schritt 6) |
 | `SMS_PROVIDER` | `mock` |
-| `SEED_ON_DEPLOY` | `true` (nur beim ersten Deploy) |
 
 ### Schritt 5: Deploy
-Railway baut automatisch. Warten bis **Success** (ca. 3–5 Min.).
+Node.js 24 verwenden und die Datenbank vor dem Start gemäß [README](./README.md#postgresql-migrationen) vorbereiten. Railway baut automatisch.
 
 ### Schritt 6: Öffentliche URL
 1. App → **Settings** → **Networking** → **Generate Domain**
@@ -40,15 +39,12 @@ Railway baut automatisch. Warten bis **Success** (ca. 3–5 Min.).
 4. **Redeploy** (Deployments → … → Redeploy)
 
 ### Schritt 7: Nach erstem Deploy – Demo-Daten
-Wenn `SEED_ON_DEPLOY=true` gesetzt war, sind Demo-Jobs schon da.  
-Sonst einmal lokal:
+Optional für eine leere Demo-Datenbank, einmal lokal:
 
 ```bash
 cd workbridge
 DATABASE_URL="postgresql://..." npm run db:seed
 ```
-
-Danach `SEED_ON_DEPLOY` wieder **löschen** (sonst werden bei jedem Deploy Daten zurückgesetzt).
 
 ---
 
@@ -103,4 +99,4 @@ Dann in Railway das Repo verbinden.
 
 - Build-Fehler in Railway → **Deployments** → Logs öffnen
 - Seite lädt nicht → `NEXT_PUBLIC_APP_URL` prüfen und redeployen
-- Demo-Login geht nicht → `npm run db:seed` mit Production-`DATABASE_URL` ausführen
+- Demo-Login geht nicht → `DATABASE_URL` und den Datenbankstatus mit `npm run db:verify` prüfen

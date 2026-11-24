@@ -1,4 +1,4 @@
-import type { Availability, Job, JobCategory, PhysicalLevel, SeekerProfile } from "@prisma/client";
+import type { Availability, Job, JobCategory, PhysicalLevel, SeekerProfile } from "@/prisma/types";
 import { distanceKm, parseJsonArray } from "./utils";
 
 export type MatchReasonKey =

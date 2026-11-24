@@ -2,7 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isLocale } from "@/i18n/config";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { db } from "@/prisma/db";
 import { parseJsonArray } from "@/lib/utils";
 import { STATUS_COLORS } from "@/lib/status";
 import { UnlockButton } from "@/components/unlock-button";
@@ -24,25 +24,23 @@ export default async function CandidatesPage({
   const user = await getCurrentUser();
   if (!user || user.role !== "COMPANY") redirect(`/${locale}/register?role=company`);
 
-  const company = await prisma.companyProfile.findUnique({
-    where: { userId: user.id },
-    include: { jobs: { where: { active: true }, select: { id: true, title: true, titleI18n: true } } },
-  });
+  const company = await db.orm.public.CompanyProfile.where({ userId: user.id })
+    .include("jobs", (jobs) => jobs.where({ active: true }).select("id", "title", "titleI18n"))
+    .first();
 
   const onlyGreen = green !== "0";
-  const seekers = await prisma.seekerProfile.findMany({
-    where: {
+  const seekers = await db.orm.public.SeekerProfile
+    .where({
       onboardingDone: true,
       ...(onlyGreen ? { readinessStatus: "GREEN" } : {}),
-    },
-    include: { user: true },
-    orderBy: { updatedAt: "desc" },
-    take: 50,
-  });
+    })
+    .include("user")
+    .orderBy((s) => s.updatedAt.desc())
+    .limit(50)
+    .all();
 
-  const unlocks = await prisma.contactUnlock.findMany({
-    where: { companyUserId: user.id },
-  });
+  const unlocks = await db.orm.public.ContactUnlock.where({ companyUserId: user.id })
+    .select("seekerId").all();
   const unlockedIds = new Set(unlocks.map((u) => u.seekerId));
 
   const t = await getTranslations("company");

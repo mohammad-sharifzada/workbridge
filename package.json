@@ -3,26 +3,26 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "node scripts/prepare-build.mjs && prisma generate && prisma db push --skip-generate && node scripts/seed-if-needed.mjs && next build",
-    "vercel-build": "node scripts/prepare-build.mjs && prisma generate && prisma db push --skip-generate && node scripts/seed-if-needed.mjs && next build",
+    "dev": "next dev --turbopack",
+    "build": "npm run db:emit && next build",
+    "vercel-build": "npm run build",
     "start": "next start",
     "lint": "eslint",
-    "db:push": "prisma db push",
+    "db:emit": "prisma contract emit",
+    "db:init": "prisma db init",
+    "db:plan": "prisma migration plan",
+    "db:migrate": "prisma db migrate --advance-ref db",
+    "db:sign": "prisma db sign",
+    "db:verify": "prisma db verify",
     "db:seed": "tsx prisma/seed.ts",
-    "db:reset": "prisma db push --force-reset && tsx prisma/seed.ts",
-    "presentation": "bash scripts/presentation-start.sh",
-    "prisma8:emit": "prisma8 contract emit --config prisma8.config.ts",
-    "prisma8:sign": "prisma8 db sign --config prisma8.config.ts",
-    "prisma8:verify": "prisma8 db verify --config prisma8.config.ts",
-    "postinstall": "node scripts/ensure-prisma6-bin.mjs && prisma generate"
+    "presentation": "bash scripts/presentation-start.sh"
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
+  "engines": {
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.0",
-    "@prisma/orm-postgres": "^8.0.0-rc.14",
+    "@next/env": "16.2.11",
+    "@prisma/orm-postgres": "8.0.0-rc.24",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
@@ -42,11 +42,9 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.2.11",
-    "prisma": "^6.19.0",
-    "prisma8": "npm:prisma@^8.0.0-rc.20",
+    "prisma": "8.0.0-rc.34",
     "tailwindcss": "^4",
     "tsx": "^4.23.1",
     "typescript": "^5"

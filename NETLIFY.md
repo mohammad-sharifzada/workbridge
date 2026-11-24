@@ -66,9 +66,8 @@ git push -u origin main
 | `AUTH_SECRET` | z. B. `workbridge-live-geheim-2026-mindestens-32-zeichen` |
 | `NEXT_PUBLIC_APP_URL` | Erst leer – nach Deploy eintragen (Schritt 5) |
 | `SMS_PROVIDER` | `mock` |
-| `SEED_ON_DEPLOY` | `true` *(nur beim ersten Deploy)* |
 
-5. **Deploy site** klicken (dauert ca. 3–5 Min.)
+5. Die Datenbank vor dem Deploy gemäß [README](./README.md#postgresql-migrationen) vorbereiten und **Deploy site** klicken.
 
 ---
 
@@ -77,10 +76,10 @@ git push -u origin main
 Unter **Deploys** → aktueller Deploy → **Deploy log**
 
 Erfolg wenn du siehst:
-- `Using PostgreSQL schema for production build`
+- `Emitted contract.json and contract.d.ts`
 - `Build successful`
 
-Bei Fehler: meist falsches `DATABASE_URL` → Supabase-URL nochmal kopieren.
+Bei Laufzeitfehlern die Supabase-URL und `npm run db:verify` prüfen. Der Build selbst greift nicht auf die Datenbank zu.
 
 ---
 
@@ -98,11 +97,7 @@ Bei Fehler: meist falsches `DATABASE_URL` → Supabase-URL nochmal kopieren.
 
 ## Schritt 6: Demo-Daten
 
-Mit `SEED_ON_DEPLOY=true` beim ersten Deploy sind Demo-Jobs und Ahmed schon drin.
-
-Danach **`SEED_ON_DEPLOY` löschen** (sonst Reset bei jedem Deploy).
-
-Falls nötig, einmal lokal:
+Optional für eine leere Demo-Datenbank, einmal lokal:
 
 ```bash
 DATABASE_URL="postgresql://..." npm run db:seed
@@ -152,6 +147,6 @@ Netlify baut automatisch neu.
 | Problem | Lösung |
 |---------|--------|
 | Build schlägt fehl | `DATABASE_URL` in Netlify prüfen (Supabase-URI mit Passwort) |
-| Seite lädt, Login geht nicht | `SEED_ON_DEPLOY=true` setzen und redeployen |
+| Seite lädt, Login geht nicht | Datenbankstatus mit `npm run db:verify` prüfen |
 | Demo zeigt alten Stand | **Clear cache and deploy** |
 | Links auf Handy gehen nicht | `NEXT_PUBLIC_APP_URL` muss exakt deine Netlify-URL sein |
