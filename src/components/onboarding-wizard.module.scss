@@ -1,0 +1,328 @@
+@use "../styles/design";
+
+.wizard {
+  margin-inline: auto;
+  max-width: 32rem;
+  @include design.stack(1.25rem);
+}
+
+.wizardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.title {
+  @include design.display-font;
+  font-size: 1.5rem;
+  line-height: var(--wb-leading-2xl);
+  font-weight: 800;
+}
+
+.step {
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-ink-soft);
+}
+
+.progressTrack {
+  height: 0.5rem;
+  overflow: hidden;
+  border-radius: 9999px;
+  background-color: var(--wb-line);
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: 9999px;
+  background-color: var(--wb-brand);
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.cvBuildHint {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  color: var(--wb-ink-soft);
+}
+
+.exampleNotice {
+  border-radius: 0.75rem;
+  border: 1px solid #ffcc80;
+  background-color: #fff8e1;
+  padding-inline: 1rem;
+  padding-block: 0.75rem;
+  @include design.stack(0.5rem);
+}
+
+.exampleBadge {
+  font-size: 0.75rem;
+  line-height: var(--wb-leading-xs);
+  font-weight: 800;
+  letter-spacing: 0.025em;
+  color: #ef6c00;
+  text-transform: uppercase;
+}
+
+.exampleBanner {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 700;
+  color: #e65100;
+}
+
+.exampleLink {
+  display: inline-block;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 700;
+  color: var(--wb-brand);
+  text-decoration-line: underline;
+}
+
+.standardStep {
+  @include design.rise;
+
+  @include design.stack(1rem);
+}
+
+.stepTitle {
+  font-size: 1.125rem;
+  line-height: var(--wb-leading-lg);
+  font-weight: 700;
+}
+
+.photoStepContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.photoFrame {
+  display: flex;
+  height: 7rem;
+  width: 7rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 9999px;
+  border: 4px solid color-mix(in oklab, var(--wb-brand) 30%, transparent);
+  background-color: var(--wb-paper-2);
+}
+
+.image {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.cameraIcon {
+  height: 2.5rem;
+  width: 2.5rem;
+  color: var(--wb-ink-soft);
+}
+
+.choosePhoto {
+  @include design.secondary-button;
+  min-height: 2.75rem;
+  cursor: pointer;
+  padding-inline: 1rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.photoInput {
+  display: none;
+}
+
+.optionalStep {
+  font-size: 0.75rem;
+  line-height: var(--wb-leading-xs);
+  color: var(--wb-ink-soft);
+}
+
+.skipButton {
+  @include design.secondary-button;
+  min-height: 2.5rem;
+  width: 100%;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.compactStep {
+  @include design.rise;
+
+  @include design.stack(0.75rem);
+}
+
+.twoColumnChoices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.choiceTile {
+  @include design.choice-tile;
+}
+
+.mobilityIcon {
+  height: 2rem;
+  width: 2rem;
+  color: var(--wb-brand);
+}
+
+.hasBikeButton {
+  @include design.choice-tile;
+  width: 100%;
+}
+
+.availabilityStep {
+  @include design.rise;
+
+  @include design.stack(1.25rem);
+}
+
+.stepFields {
+  @include design.stack(0.75rem);
+}
+
+.threeColumnChoices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.choiceIcon {
+  height: 1.75rem;
+  width: 1.75rem;
+  color: var(--wb-brand);
+}
+
+.useGpsButton {
+  @include design.secondary-button;
+  width: 100%;
+}
+
+.mapPinIcon {
+  height: 1.25rem;
+  width: 1.25rem;
+}
+
+.locationSuccess {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 500;
+  color: var(--wb-ok);
+}
+
+.locationError {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  color: var(--wb-bad);
+}
+
+.languageRow {
+  @include design.surface;
+  display: grid;
+  grid-template-columns: 1fr 100px auto;
+  gap: 0.5rem;
+  padding: 0.75rem;
+}
+
+.compactInput {
+  @include design.input;
+  min-height: 2.75rem;
+}
+
+.removeLanguage {
+  border-radius: 0.75rem;
+  padding-inline: 0.5rem;
+  color: var(--wb-bad);
+}
+
+.plusIcon {
+  height: 1rem;
+  width: 1rem;
+}
+
+.interestGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.interestTile {
+  @include design.choice-tile;
+  min-height: 3rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.toolsHobbiesTitle {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 700;
+}
+
+.bioPlaceholderTextarea {
+  @include design.input;
+}
+
+.reviewStep {
+  @include design.rise;
+
+  @include design.stack(1.5rem);
+}
+
+.wizardActions {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
+
+.backButton {
+  @include design.secondary-button;
+  flex: 1;
+}
+
+.nextButton {
+  @include design.primary-button;
+  flex: 1;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+}
+
+.requiredMarker {
+  color: var(--wb-bad);
+}
+
+.fieldInput {
+  @include design.input;
+  margin-top: 0.25rem;
+}
+
+.historyEntry {
+  @include design.surface;
+
+  padding: 0.75rem;
+  @include design.stack(0.5rem);
+}
+
+.historyActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.historyNotes {
+  @include design.input;
+}

@@ -6,6 +6,7 @@ import { computeReadiness, STATUS_COLORS } from "@/lib/status";
 import { Link } from "@/i18n/routing";
 import { getNextOpenOnboardingPath } from "@/lib/onboarding-flow";
 import { getSeekerProfileByUserId } from "@/lib/seeker-profile-p8";
+import styles from "./page.module.scss";
 
 export default async function StatusPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -29,32 +30,32 @@ export default async function StatusPage({ params }: { params: Promise<{ locale:
   const descKey = `${statusKey}Desc` as "greenDesc" | "yellowDesc" | "redDesc";
 
   return (
-    <div className="mx-auto max-w-lg space-y-6">
-      <h1 className="font-display text-2xl font-extrabold">{t("title")}</h1>
+    <div className={styles.statusPage}>
+      <h1 className={styles.title}>{t("title")}</h1>
 
       <div
-        className="animate-pulse-soft rounded-[1.5rem] border-2 p-6 text-center"
+        className={styles.statusCard}
         style={{ background: colors.bg, borderColor: colors.border, color: colors.fg }}
       >
         <div
-          className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full text-3xl font-black text-white"
+          className={styles.statusIcon}
           style={{ background: colors.border }}
         >
           {status === "GREEN" ? "✓" : status === "YELLOW" ? "!" : "×"}
         </div>
-        <p className="font-display text-2xl font-extrabold">{t(statusKey)}</p>
-        <p className="mt-2 text-sm font-medium opacity-90">{t(descKey)}</p>
+        <p className={styles.title}>{t(statusKey)}</p>
+        <p className={styles.statusDescription}>{t(descKey)}</p>
       </div>
 
       {missing.length > 0 && (
-        <div className="surface space-y-3 p-5">
-          <h2 className="font-bold">{t("missing")}</h2>
-          <ul className="space-y-2">
+        <div className={styles.missingItems}>
+          <h2 className={styles.missingHeading}>{t("missing")}</h2>
+          <ul className={styles.list}>
             {missing.map((m) => (
               <li key={m}>
-                <Link href={`/help#${m}`} className="flex items-center justify-between rounded-xl bg-paper-2 px-4 py-3 font-semibold hover:bg-[#e7f4f3]">
+                <Link href={`/help#${m}`} className={styles.missingItemLink}>
                   <span>{t(m === "bank" ? "bank" : m === "taxId" ? "taxId" : "workPermit")}</span>
-                  <span className="text-brand">→</span>
+                  <span className={styles.missingItemArrow}>→</span>
                 </Link>
               </li>
             ))}
@@ -62,21 +63,21 @@ export default async function StatusPage({ params }: { params: Promise<{ locale:
         </div>
       )}
 
-      <div className="flex flex-col gap-3">
+      <div className={styles.statusActions}>
         {status === "GREEN" ? (
-          <Link href="/jobs" className="btn-primary w-full">
+          <Link href="/jobs" className={styles.seeJobsLink}>
             {t("seeJobs")}
           </Link>
         ) : (
-          <Link href="/help" className="btn-primary w-full">
+          <Link href="/help" className={styles.seeJobsLink}>
             {t("getHelp")}
           </Link>
         )}
-        <Link href="/status/check" className="btn-secondary w-full">
+        <Link href="/status/check" className={styles.updateLink}>
           {t("update")}
         </Link>
         {status !== "GREEN" && (
-          <Link href="/jobs" className="text-center text-sm font-semibold text-brand">
+          <Link href="/jobs" className={styles.skipToJobsLink}>
             {t("seeJobs")}
           </Link>
         )}

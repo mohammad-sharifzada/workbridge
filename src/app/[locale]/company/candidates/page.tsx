@@ -8,6 +8,7 @@ import { STATUS_COLORS } from "@/lib/status";
 import { UnlockButton } from "@/components/unlock-button";
 import { SendOfferButton } from "@/components/send-offer-button";
 import { Link } from "@/i18n/routing";
+import styles from "./page.module.scss";
 
 export default async function CandidatesPage({
   params,
@@ -50,16 +51,16 @@ export default async function CandidatesPage({
   const tMsg = await getTranslations("messages");
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="font-display text-2xl font-extrabold">{t("candidates")}</h1>
-        <div className="flex flex-wrap gap-2">
-          <Link href="/messages" className="btn-secondary !min-h-11 !text-sm">
+    <div className={styles.candidatesPage}>
+      <div className={styles.pageHeader}>
+        <h1 className={styles.candidatesHeading}>{t("candidates")}</h1>
+        <div className={styles.filters}>
+          <Link href="/messages" className={styles.messagesLink}>
             {tMsg("title")}
           </Link>
           <a
             href={`/${locale}/company/candidates?green=${onlyGreen ? "0" : "1"}`}
-            className="icon-tile !min-h-11 !flex-row !px-4 text-sm"
+            className={styles.onlyGreenLink}
             data-active={onlyGreen}
           >
             {t("onlyGreen")}
@@ -68,21 +69,21 @@ export default async function CandidatesPage({
       </div>
 
       {seekers.length === 0 ? (
-        <p className="surface p-6 text-center font-semibold text-ink-soft">{t("noCandidates")}</p>
+        <p className={styles.noCandidates}>{t("noCandidates")}</p>
       ) : (
-        <ul className="space-y-4">
+        <ul className={styles.list}>
           {seekers.map((s) => {
             const colors = STATUS_COLORS[s.readinessStatus];
             const skills = parseJsonArray(s.skills);
             const unlocked = unlockedIds.has(s.userId);
             return (
-              <li key={s.id} className="surface p-5">
-                <div className="flex flex-wrap items-start justify-between gap-3">
+              <li key={s.id} className={styles.candidateCard}>
+                <div className={styles.candidateSummary}>
                   <div>
-                    <p className="font-display text-lg font-bold">
+                    <p className={styles.shortView}>
                       {s.user.name ?? (s.user.phone ? `${s.user.phone.slice(0, 8)}…` : tProfile("shortView"))}
                     </p>
-                    <p className="text-sm text-ink-soft">
+                    <p className={styles.candidateDetails}>
                       {s.city} ·{" "}
                       {skills
                         .map((sk) =>
@@ -99,7 +100,7 @@ export default async function CandidatesPage({
                         .join(", ")}
                     </p>
                     <span
-                      className="mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-bold"
+                      className={styles.readinessBadge}
                       style={{ background: colors.bg, color: colors.fg }}
                     >
                       {s.readinessStatus === "GREEN"
@@ -110,7 +111,7 @@ export default async function CandidatesPage({
                     </span>
                   </div>
                   {unlocked ? (
-                    <p className="text-sm font-bold text-ok">
+                    <p className={styles.unlocked}>
                       {t("unlocked")}: {s.user.phone}
                     </p>
                   ) : (

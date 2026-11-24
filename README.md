@@ -4,7 +4,7 @@ Produktionsnahe Web-App: Job-Marktplatz + Onboarding für Arbeit in Deutschland.
 
 ## Stack
 
-- **Frontend:** Next.js 16 (App Router), Tailwind CSS 4, next-intl
+- **Frontend:** Next.js 16 (App Router), Sass CSS Modules, next-intl
 - **Backend:** Next.js Server Actions + API
 - **DB:** Prisma ORM 8 (Release Candidate) + PostgreSQL, lokal und in Produktion
 - **Auth:** SMS-Code (Mock/Twilio-ready) + E-Mail/Passwort für Unternehmen
@@ -30,6 +30,23 @@ npm run dev
 |-------|--------|
 | Unternehmen | `firma@demo.de` / `demo1234` |
 | Arbeitssuchende | Telefon `+4915111111111` → SMS-Code wird in der UI angezeigt (Mock) |
+
+## Styling
+
+Seiten und Komponenten importieren ihre jeweils benachbarte `*.module.scss`-Datei. Zustände verwenden lokale Klassen, bei Bedarf kombiniert mit `clsx`. Gemeinsame Breakpoints und Mixins liegen in `src/styles/_design.scss`; die globalen Farbvariablen und der Seitenhintergrund stehen in `src/app/globals.scss`.
+
+### Tailwind optional aktivieren
+
+Der Standard-Build benötigt kein Tailwind. Wenn du es für neue Komponenten verwenden möchtest:
+
+1. Installiere `npm install -D tailwindcss@^4 @tailwindcss/postcss@^4`.
+2. Lege im Projektstamm `postcss.config.mjs` an:
+
+   ```js
+   export default { plugins: { "@tailwindcss/postcss": {} } };
+   ```
+
+3. Ergänze `import "../styles/tailwind.optional.css";` in `src/app/layout.tsx` und starte den Dev-Server neu. Die Hilfsklassen haben das Präfix `tw:` (z. B. `tw:flex`); Tailwind Preflight wird nicht geladen.
 
 ## PostgreSQL-Migrationen
 

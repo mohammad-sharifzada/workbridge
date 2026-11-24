@@ -1,0 +1,141 @@
+@use "../styles/design";
+
+.formCard {
+  @include design.surface;
+  padding: 1.25rem;
+}
+
+.chooseLanguage {
+  @include design.display-font;
+  margin-bottom: 0.75rem;
+  font-size: 1.125rem;
+  line-height: var(--wb-leading-lg);
+  font-weight: 700;
+}
+
+.languageGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+
+  @media (min-width: design.$sm) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.languageChoice {
+  @include design.choice-tile;
+  min-height: 3.5rem;
+  flex-direction: row;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.authPanel {
+  @include design.surface;
+
+  padding: 1.25rem;
+  @include design.stack(1rem);
+}
+
+.infoNotice {
+  border-radius: 0.75rem;
+  background-color: #e7f4f3;
+  padding-inline: 1rem;
+  padding-block: 0.75rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-brand-deep);
+}
+
+.authTitle {
+  @include design.display-font;
+  font-size: 1.25rem;
+  line-height: var(--wb-leading-xl);
+  font-weight: 700;
+}
+
+.authDescription {
+  color: var(--wb-ink-soft);
+}
+
+.instructions {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  color: var(--wb-ink-soft);
+  @include design.stack(0.25rem);
+}
+
+.submitButton {
+  @include design.primary-button;
+  width: 100%;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+}
+
+.fieldInput {
+  @include design.input;
+  margin-top: 0.25rem;
+}
+
+.demoLoginButton {
+  @include design.secondary-button;
+  width: 100%;
+}
+
+.devCode {
+  border-radius: 0.75rem;
+  background-color: var(--wb-accent-soft);
+  padding-inline: 0.75rem;
+  padding-block: 0.5rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-accent);
+}
+
+.codeInput {
+  @include design.input;
+  margin-top: 0.25rem;
+  letter-spacing: 0.35em;
+}
+
+.formError {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-bad);
+}
+
+.authTabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.authTab {
+  @include design.choice-tile;
+  min-height: 3rem;
+  flex: 1;
+  flex-direction: row;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.backPrompt {
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  color: var(--wb-ink-soft);
+}
+
+.backLink {
+  font-weight: 600;
+  color: var(--wb-brand);
+}

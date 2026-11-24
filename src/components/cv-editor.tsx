@@ -6,6 +6,7 @@ import { useRouter } from "@/i18n/routing";
 import { saveCvProfile } from "@/actions";
 import { compressImageFile } from "@/lib/image-upload";
 import { Camera } from "lucide-react";
+import styles from "./cv-editor.module.scss";
 
 type Props = {
   initial: {
@@ -47,35 +48,35 @@ export function CvEditor({ initial }: Props) {
 
   if (!open) {
     return (
-      <button type="button" className="btn-secondary w-full" onClick={() => setOpen(true)}>
+      <button type="button" className={styles.editCvButton} onClick={() => setOpen(true)}>
         {t("editCv")}
       </button>
     );
   }
 
   return (
-    <div className="surface space-y-3 p-5">
-      <h2 className="font-display text-lg font-bold">{t("editCv")}</h2>
-      <p className="text-sm text-ink-soft">{t("editHint")}</p>
+    <div className={styles.panel}>
+      <h2 className={styles.editCvHeading}>{t("editCv")}</h2>
+      <p className={styles.editHint}>{t("editHint")}</p>
 
-      <div className="flex flex-col items-center gap-3 rounded-2xl bg-paper-2 p-4">
+      <div className={styles.photoEditor}>
         <button
           type="button"
-          className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-brand/30 bg-white"
+          className={styles.photoPicker}
           onClick={() => inputRef.current?.click()}
           aria-label={t("photoUpload")}
         >
           {form.photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={form.photoUrl} alt="" className="h-full w-full object-cover" />
+            <img src={form.photoUrl} alt="" className={styles.image} />
           ) : (
-            <Camera className="h-10 w-10 text-ink-soft" />
+            <Camera className={styles.cameraIcon} />
           )}
         </button>
-        <div className="flex flex-wrap justify-center gap-2">
+        <div className={styles.photoActions}>
           <button
             type="button"
-            className="btn-secondary !min-h-11 cursor-pointer !px-4 !text-sm"
+            className={styles.photoUploadButton}
             onClick={() => inputRef.current?.click()}
           >
             {t("photoUpload")}
@@ -83,7 +84,7 @@ export function CvEditor({ initial }: Props) {
           {form.photoUrl ? (
             <button
               type="button"
-              className="btn-secondary !min-h-11 !px-4 !text-sm"
+              className={styles.photoRemoveButton}
               onClick={() => setForm((f) => ({ ...f, photoUrl: "" }))}
             >
               {t("photoRemove")}
@@ -95,13 +96,13 @@ export function CvEditor({ initial }: Props) {
           type="file"
           accept="image/*"
           capture="user"
-          className="hidden"
+          className={styles.photoInput}
           onChange={(e) => {
             void onPhoto(e.target.files?.[0] ?? null);
             e.target.value = "";
           }}
         />
-        <p className="text-center text-xs text-ink-soft">{t("photoHint")}</p>
+        <p className={styles.photoHint}>{t("photoHint")}</p>
       </div>
 
       {(
@@ -114,10 +115,10 @@ export function CvEditor({ initial }: Props) {
           ["birthPlace", t("birthPlace")],
         ] as const
       ).map(([key, label]) => (
-        <label key={key} className="block text-sm font-semibold">
+        <label key={key} className={styles.fieldLabel}>
           {label}
           <input
-            className="input-field mt-1"
+            className={styles.fieldInput}
             value={form[key]}
             onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
             placeholder={t("placeholder")}
@@ -125,53 +126,53 @@ export function CvEditor({ initial }: Props) {
         </label>
       ))}
 
-      <label className="block text-sm font-semibold">
+      <label className={styles.fieldLabel}>
         {t("about")}
         <textarea
-          className="input-field mt-1 min-h-28"
+          className={styles.bioTextarea}
           value={form.bio}
           onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))}
           placeholder={t("placeholder")}
         />
       </label>
 
-      <label className="block text-sm font-semibold">
+      <label className={styles.fieldLabel}>
         {t("toolsHint")}
         <input
-          className="input-field mt-1"
+          className={styles.fieldInput}
           value={form.tools}
           onChange={(e) => setForm((f) => ({ ...f, tools: e.target.value }))}
           placeholder={tOn("toolsPlaceholder")}
         />
       </label>
 
-      <label className="block text-sm font-semibold">
+      <label className={styles.fieldLabel}>
         {t("hobbiesHint")}
         <input
-          className="input-field mt-1"
+          className={styles.fieldInput}
           value={form.hobbies}
           onChange={(e) => setForm((f) => ({ ...f, hobbies: e.target.value }))}
           placeholder={tOn("hobbiesPlaceholder")}
         />
       </label>
 
-      <label className="block text-sm font-semibold">
+      <label className={styles.fieldLabel}>
         {t("languagesHint")}
         <input
-          className="input-field mt-1"
+          className={styles.fieldInput}
           value={form.languages}
           onChange={(e) => setForm((f) => ({ ...f, languages: e.target.value }))}
           placeholder={t("languagesPlaceholder")}
         />
       </label>
 
-      <div className="flex gap-2">
-        <button type="button" className="btn-secondary flex-1" onClick={() => setOpen(false)}>
+      <div className={styles.editorActions}>
+        <button type="button" className={styles.cancelButton} onClick={() => setOpen(false)}>
           {tc("cancel")}
         </button>
         <button
           type="button"
-          className="btn-primary flex-1"
+          className={styles.saveButton}
           disabled={pending}
           onClick={() => {
             setMsg(null);
@@ -215,7 +216,7 @@ export function CvEditor({ initial }: Props) {
           {tc("save")}
         </button>
       </div>
-      {msg && <p className="text-sm font-semibold text-brand">{msg}</p>}
+      {msg && <p className={styles.saveNotice}>{msg}</p>}
     </div>
   );
 }

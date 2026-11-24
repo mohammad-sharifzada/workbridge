@@ -1,0 +1,17 @@
+@use "../../../styles/design";
+
+.registerPage {
+  @include design.stack(1.25rem);
+}
+
+.backPrompt {
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  color: var(--wb-ink-soft);
+}
+
+.backToStartLink {
+  font-weight: 600;
+  color: var(--wb-brand);
+}

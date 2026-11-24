@@ -9,6 +9,8 @@ import { localizeText } from "@/lib/i18n-content";
 import { localizeCity } from "@/lib/localize-job";
 import { Languages } from "lucide-react";
 import { RatingForm } from "@/components/trust";
+import clsx from "clsx";
+import styles from "./conversation-thread.module.scss";
 
 export type ThreadMessage = {
   id: string;
@@ -151,17 +153,17 @@ export function ConversationThread({
   };
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <Link href="/messages" className="text-sm font-semibold text-brand">
+    <div className={styles.conversation}>
+      <div className={styles.threadHeader}>
+        <Link href="/messages" className={styles.messagesLink}>
           ← {t("title")}
         </Link>
-        <h1 className="font-display text-lg font-bold">{peerName}</h1>
+        <h1 className={styles.title}>{peerName}</h1>
       </div>
 
-      <div className="surface flex max-h-[60vh] flex-col gap-3 overflow-y-auto p-4">
+      <div className={styles.messages}>
         {messages.length === 0 && (
-          <p className="text-center text-sm text-ink-soft">{t("emptyThread")}</p>
+          <p className={styles.emptyThread}>{t("emptyThread")}</p>
         )}
         {messages.map((m) => {
           const mine = m.senderId === currentUserId;
@@ -178,7 +180,7 @@ export function ConversationThread({
                   ? t("systemDeclined")
                   : m.body;
             return (
-              <p key={m.id} className="text-center text-xs font-semibold text-ink-soft">
+              <p key={m.id} className={styles.dayDivider}>
                 {label}
               </p>
             );
@@ -200,14 +202,14 @@ export function ConversationThread({
             return (
               <div
                 key={m.id}
-                className={`rounded-2xl border-2 p-4 ${mine ? "ms-6 border-brand bg-[#e7f4f3]" : "me-6 border-accent bg-accent-soft"}`}
+                className={clsx(styles.offerCard, mine ? styles.sentOffer : styles.receivedOffer)}
               >
-                <p className="text-xs font-extrabold uppercase tracking-wide text-accent">
+                <p className={styles.offerBadge}>
                   🟢 {t("offerBadge")}
                 </p>
-                <p className="mt-1 font-display text-lg font-bold">{title}</p>
-                <p className="text-sm text-ink-soft">{o.companyName}</p>
-                <ul className="mt-3 space-y-1 text-sm font-semibold">
+                <p className={styles.offerTitle}>{title}</p>
+                <p className={styles.companyName}>{o.companyName}</p>
+                <ul className={styles.offerDetails}>
                   <li>📍 {localizeCity(o.city, locale)}</li>
                   <li>🕐 {o.workHours || t("hoursUnknown")}</li>
                   <li>
@@ -217,22 +219,22 @@ export function ConversationThread({
                     <li>📅 {new Date(o.startDate).toLocaleDateString(locale)}</li>
                   )}
                 </ul>
-                <p className="mt-2 text-sm">{desc || tCommon("notSpecified")}</p>
-                <div className="mt-2 flex flex-wrap gap-1">
+                <p className={styles.notSpecified}>{desc || tCommon("notSpecified")}</p>
+                <div className={styles.offerTags}>
                   {parseJsonArray(o.requirements).map((r) => (
-                    <span key={r} className="rounded-lg bg-white/70 px-2 py-0.5 text-xs font-semibold">
+                    <span key={r} className={styles.offerTag}>
                       {reqLabel(r)}
                     </span>
                   ))}
                 </div>
-                <p className="mt-3 text-sm font-bold">
+                <p className={styles.status}>
                   {t("status")}: {statusLabel}
                 </p>
                 {!mine && o.status === "SENT" && (
-                  <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                  <div className={styles.offerActions}>
                     <button
                       type="button"
-                      className="btn-primary flex-1 !min-h-11 !text-sm"
+                      className={styles.acceptButton}
                       disabled={pending}
                       onClick={() =>
                         startTransition(async () => {
@@ -245,7 +247,7 @@ export function ConversationThread({
                     </button>
                     <button
                       type="button"
-                      className="btn-secondary flex-1 !min-h-11 !text-sm"
+                      className={styles.declineButton}
                       disabled={pending}
                       onClick={() =>
                         startTransition(async () => {
@@ -259,7 +261,7 @@ export function ConversationThread({
                   </div>
                 )}
                 {o.status === "ACCEPTED" && (
-                  <div className="mt-3">
+                  <div className={styles.offerFollowup}>
                     <RatingForm offerId={o.id} />
                   </div>
                 )}
@@ -270,25 +272,25 @@ export function ConversationThread({
           return (
             <div
               key={m.id}
-              className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${mine ? "ms-auto bg-brand text-white" : "bg-paper-2 text-ink"}`}
+              className={clsx(styles.message, mine ? styles.sentMessage : styles.receivedMessage)}
             >
-              <p className="whitespace-pre-wrap">{usingTranslation && tr ? tr.text : m.body}</p>
+              <p className={styles.messageText}>{usingTranslation && tr ? tr.text : m.body}</p>
               {!mine && (
-                <div className="mt-2 flex flex-wrap gap-2">
+                <div className={styles.translationActions}>
                   {!tr || tr.error ? (
                     <button
                       type="button"
-                      className="inline-flex items-center gap-1 text-xs font-bold underline text-brand"
+                      className={styles.translateButton}
                       disabled={pending}
                       onClick={() => translate(m.id)}
                     >
-                      <Languages className="h-3.5 w-3.5" />
+                      <Languages className={styles.languagesIcon} />
                       {t("translate")}
                     </button>
                   ) : (
                     <button
                       type="button"
-                      className="inline-flex items-center gap-1 text-xs font-bold underline text-brand"
+                      className={styles.translateButton}
                       onClick={() =>
                         setShowTranslated((prev) => ({
                           ...prev,
@@ -302,19 +304,19 @@ export function ConversationThread({
                 </div>
               )}
               {usingTranslation && tr?.disclaimer && (
-                <p className="mt-1 text-[10px] leading-snug text-ink-soft">{t("translateDisclaimer")}</p>
+                <p className={styles.translateDisclaimer}>{t("translateDisclaimer")}</p>
               )}
               {tr?.error && (
-                <p className="mt-1 text-[10px] text-bad">{errorLabel(tr.error)}</p>
+                <p className={styles.translationError}>{errorLabel(tr.error)}</p>
               )}
             </div>
           );
         })}
       </div>
 
-      <div className="flex gap-2">
+      <div className={styles.composer}>
         <input
-          className="input-field flex-1"
+          className={styles.messageInput}
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={t("placeholder")}
@@ -322,7 +324,7 @@ export function ConversationThread({
             if (e.key === "Enter") send();
           }}
         />
-        <button type="button" className="btn-primary !px-4" disabled={pending || !text.trim()} onClick={send}>
+        <button type="button" className={styles.sendButton} disabled={pending || !text.trim()} onClick={send}>
           {t("send")}
         </button>
       </div>

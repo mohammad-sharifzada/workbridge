@@ -1,0 +1,47 @@
+@use "../styles/design";
+
+.form {
+  position: relative;
+}
+
+.searchIcon {
+  pointer-events: none;
+  position: absolute;
+  inset-inline-start: 0.75rem;
+  top: calc(1 / 2 * 100%);
+  height: 1.25rem;
+  width: 1.25rem;
+  translate: 0 calc(calc(1 / 2 * 100%) * -1);
+  color: var(--wb-ink-soft);
+}
+
+.searchInput {
+  @include design.input;
+  min-height: 3rem;
+  padding-block: 0.75rem;
+  padding-inline-start: 2.75rem;
+  padding-inline-end: 2.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.clearSearch {
+  position: absolute;
+  inset-inline-end: 0.75rem;
+  top: calc(1 / 2 * 100%);
+  translate: 0 calc(calc(1 / 2 * 100%) * -1);
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+  color: var(--wb-ink-soft);
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--wb-paper-2);
+    }
+  }
+}
+
+.xIcon {
+  height: 1.25rem;
+  width: 1.25rem;
+}

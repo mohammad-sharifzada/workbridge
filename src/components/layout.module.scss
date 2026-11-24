@@ -1,0 +1,293 @@
+@use "../styles/design";
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-color: color-mix(in oklab, var(--wb-line) 70%, transparent);
+  background-color: color-mix(in oklab, #f7faf8 95%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.headerContent {
+  margin-inline: auto;
+  display: flex;
+  width: 100%;
+  max-width: 64rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-inline: 1rem;
+  padding-block: 0.625rem;
+
+  @media (min-width: design.$sm) {
+    padding-inline: 1.5rem;
+    padding-block: 0.75rem;
+  }
+}
+
+.wordmark {
+  @include design.display-font;
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  line-height: var(--wb-leading-xl);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--wb-brand-deep);
+}
+
+.desktopSearch {
+  display: none;
+  min-width: 0;
+  flex: 1;
+  padding-inline: 0.5rem;
+
+  @media (min-width: design.$md) {
+    display: block;
+    max-width: 24rem;
+  }
+
+  @media (min-width: design.$lg) {
+    max-width: 28rem;
+  }
+}
+
+.desktopNavigation {
+  display: none;
+  align-items: center;
+  justify-content: space-evenly;
+
+  @media (min-width: design.$md) {
+    display: flex;
+  }
+}
+
+.navIcon {
+  height: 1.25rem;
+  width: 1.25rem;
+}
+
+.wideNavIcon {
+  height: 1.25rem;
+  width: 3.75rem;
+}
+
+.accountActions {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+
+  @media (min-width: design.$sm) {
+    gap: 0.5rem;
+  }
+}
+
+.registerLink {
+  @include design.primary-button;
+  min-height: 2.5rem;
+  padding-inline: 0.75rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.avatarLink {
+  display: flex;
+  height: 2.5rem;
+  width: 2.5rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 9999px;
+  border: 2px solid color-mix(in oklab, var(--wb-brand) 40%, transparent);
+  background-color: var(--wb-brand);
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 800;
+  color: #fff;
+}
+
+.image {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.companyLogoutButton {
+  border-radius: 0.5rem;
+  padding-inline: 0.5rem;
+  padding-block: 0.5rem;
+  font-size: 0.75rem;
+  line-height: var(--wb-leading-xs);
+  font-weight: 600;
+  color: var(--wb-ink-soft);
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: #fff;
+    }
+  }
+
+  @media (min-width: design.$sm) {
+    font-size: 0.875rem;
+    line-height: var(--wb-leading-sm);
+  }
+}
+
+.seekerLogoutForm {
+  display: none;
+
+  @media (min-width: design.$sm) {
+    display: block;
+  }
+}
+
+.seekerLogoutButton {
+  border-radius: 0.5rem;
+  padding-inline: 0.5rem;
+  padding-block: 0.5rem;
+  font-size: 0.75rem;
+  line-height: var(--wb-leading-xs);
+  font-weight: 600;
+  color: var(--wb-ink-soft);
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: #fff;
+    }
+  }
+}
+
+.mobileSearch {
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-color: color-mix(in oklab, var(--wb-line) 50%, transparent);
+  padding-inline: 1rem;
+  padding-block: 0.5rem;
+
+  @media (min-width: design.$sm) {
+    padding-inline: 1.5rem;
+  }
+
+  @media (min-width: design.$md) {
+    display: none;
+  }
+}
+
+.mobileNavigation {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 40;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-color: var(--wb-line);
+  background-color: color-mix(in oklab, #fff 95%, transparent);
+  padding-bottom: env(safe-area-inset-bottom);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+
+  @media (min-width: design.$md) {
+    display: none;
+  }
+}
+
+.mobileNavigationContent {
+  margin-inline: auto;
+  display: flex;
+  width: 100%;
+  max-width: 64rem;
+  align-items: stretch;
+  justify-content: space-around;
+  padding-inline: 1rem;
+  padding-block: 0.25rem;
+
+  @media (min-width: design.$sm) {
+    padding-inline: 1.5rem;
+  }
+}
+
+.mobileNavLink {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+  border-radius: 0.75rem;
+  padding-inline: 0.25rem;
+  padding-block: 0.5rem;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--wb-ink-soft);
+}
+
+.desktopNavLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+  border-radius: 0.75rem;
+  padding-inline: 0.625rem;
+  padding-block: 0.375rem;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--wb-ink-soft);
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: #fff;
+      color: var(--wb-brand);
+    }
+  }
+}
+
+.footer {
+  margin-top: auto;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-color: color-mix(in oklab, var(--wb-line) 60%, transparent);
+  background-color: color-mix(in oklab, #fff 50%, transparent);
+  padding-bottom: 5rem;
+
+  @media (min-width: design.$md) {
+    padding-bottom: 0;
+  }
+}
+
+.footerContent {
+  margin-inline: auto;
+  display: flex;
+  width: 100%;
+  max-width: 64rem;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-inline: 1rem;
+  padding-block: 2rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  color: var(--wb-ink-soft);
+
+  @media (min-width: design.$sm) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: 1.5rem;
+  }
+}
+
+.legalLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.legalLink {
+  @media (hover: hover) {
+    &:hover {
+      color: var(--wb-brand);
+    }
+  }
+}

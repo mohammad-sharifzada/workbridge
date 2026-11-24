@@ -6,6 +6,7 @@ import { useRouter } from "@/i18n/routing";
 import { Camera } from "lucide-react";
 import { compressImageFile } from "@/lib/image-upload";
 import { saveCvPhoto } from "@/actions";
+import styles from "./cv-photo-upload.module.scss";
 
 /** Foto-Kreis im Lebenslauf – Tippen öffnet Upload. */
 export function CvPhotoUpload({
@@ -43,21 +44,21 @@ export function CvPhotoUpload({
   };
 
   return (
-    <div className="relative mx-auto mb-5">
+    <div className={styles.photoUpload}>
       <button
         type="button"
         disabled={pending}
         onClick={() => inputRef.current?.click()}
-        className="relative flex h-40 w-40 items-center justify-center overflow-hidden rounded-full border-[5px] border-[#9ec9c4]/35 bg-[#2a3d50] shadow-[0_10px_30px_rgba(0,0,0,0.35)] focus:outline-none focus:ring-2 focus:ring-[#9ec9c4]"
+        className={styles.photoPicker}
         aria-label={t("photoUpload")}
       >
         {preview ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={preview} alt="" className="h-full w-full object-cover" />
+          <img src={preview} alt="" className={styles.image} />
         ) : (
-          <div className="flex flex-col items-center gap-1.5 px-3 text-center text-white/55">
-            <Camera className="h-9 w-9" />
-            <span className="text-[10px] font-medium leading-tight">{placeholder}</span>
+          <div className={styles.photoPlaceholder}>
+            <Camera className={styles.cameraIcon} />
+            <span className={styles.placeholderText}>{placeholder}</span>
           </div>
         )}
       </button>
@@ -66,14 +67,14 @@ export function CvPhotoUpload({
         type="file"
         accept="image/*"
         capture="user"
-        className="hidden"
+        className={styles.fileInput}
         onChange={(e) => {
           void onPick(e.target.files?.[0] ?? null);
           e.target.value = "";
         }}
       />
       {error && (
-        <p className="mt-2 text-center text-[11px] font-semibold text-[#ffb4b4]">{error}</p>
+        <p className={styles.uploadError}>{error}</p>
       )}
     </div>
   );

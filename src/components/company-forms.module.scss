@@ -1,0 +1,47 @@
+@use "../styles/design";
+
+.jobForm {
+  @include design.surface;
+
+  padding: 1.25rem;
+  @include design.stack(0.75rem);
+}
+
+.newJobHeading {
+  @include design.display-font;
+  font-size: 1.125rem;
+  line-height: var(--wb-leading-lg);
+  font-weight: 700;
+}
+
+.jobInput {
+  @include design.input;
+}
+
+.jobDescTextarea {
+  @include design.input;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.publishButton {
+  @include design.primary-button;
+  width: 100%;
+}
+
+.creditActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.buyCreditsButton {
+  @include design.secondary-button;
+  min-height: 2.75rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}

@@ -10,6 +10,7 @@ import type { ReadinessStatus } from "@/prisma/types";
 import { listVisibleJobs } from "@/lib/job-p8";
 import { requireSeekerOnboardingDone } from "@/lib/onboarding-guard";
 import { db } from "@/prisma/db";
+import styles from "./page.module.scss";
 
 export default async function JobsPage({
   params,
@@ -84,16 +85,16 @@ export default async function JobsPage({
   );
 
   return (
-    <div className="space-y-6">
+    <div className={styles.jobsPage}>
       <JobSearchBar initialQuery={searchQuery} />
 
       <div>
-        <h1 className="font-display text-2xl font-extrabold">
+        <h1 className={styles.matchedTitle}>
           {profileReady ? t("matchedTitle") : t("allTitle")}
         </h1>
-        <p className="mt-1 text-sm text-ink-soft">{t("trustHint")}</p>
+        <p className={styles.trustHint}>{t("trustHint")}</p>
         {searchQuery && (
-          <p className="mt-2 text-sm font-semibold text-brand">
+          <p className={styles.results}>
             {filteredJobs.length > 0
               ? tSearch("results", { count: filteredJobs.length, query: searchQuery })
               : tSearch("noResults", { query: searchQuery })}
@@ -102,11 +103,11 @@ export default async function JobsPage({
       </div>
 
       {filteredJobs.length === 0 ? (
-        <p className="surface p-6 text-center font-semibold text-ink-soft">
+        <p className={styles.noResults}>
           {searchQuery ? tSearch("noResults", { query: searchQuery }) : t("empty")}
         </p>
       ) : (
-        <div className="grid gap-4">
+        <div className={styles.jobList}>
           {filteredJobs.map((job) => {
             const meta = metaById.get(job.id);
             return (

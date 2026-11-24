@@ -1,0 +1,14 @@
+@use "../../../../styles/design";
+
+.jobDetails {
+  margin-inline: auto;
+  max-width: 32rem;
+  @include design.stack(1rem);
+}
+
+.jobsLink {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-brand);
+}

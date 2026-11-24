@@ -14,6 +14,7 @@ import {
   Languages,
   ChevronRight,
 } from "lucide-react";
+import styles from "./page.module.scss";
 
 async function logoutAction() {
   "use server";
@@ -35,73 +36,73 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
   const t = await getTranslations("settings");
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-extrabold">{t("title")}</h1>
-        <Link href="/profile" className="text-sm font-bold text-brand">
+    <div className={styles.settingsPage}>
+      <div className={styles.settingsHeader}>
+        <h1 className={styles.title}>{t("title")}</h1>
+        <Link href="/profile" className={styles.toProfileLink}>
           {t("toProfile")} →
         </Link>
       </div>
 
-      <section className="surface divide-y divide-line overflow-hidden p-0">
-        <Link href="/profile" className="flex items-center gap-3 px-4 py-4 hover:bg-paper-2">
-          <UserRound className="h-5 w-5 text-brand" />
-          <div className="flex-1">
-            <p className="font-bold">👤 {t("myProfile")}</p>
-            <p className="text-xs text-ink-soft">{t("myProfileHint")}</p>
+      <section className={styles.settingsList}>
+        <Link href="/profile" className={styles.settingLink}>
+          <UserRound className={styles.settingIcon} />
+          <div className={styles.settingDetails}>
+            <p className={styles.settingLabel}>👤 {t("myProfile")}</p>
+            <p className={styles.settingHint}>{t("myProfileHint")}</p>
           </div>
-          <ChevronRight className="h-4 w-4 text-ink-soft" />
+          <ChevronRight className={styles.chevronRightIcon} />
         </Link>
-        <Row icon={<Languages className="h-5 w-5" />} title={t("language")} hint={t("languageHint")}>
+        <Row icon={<Languages className={styles.languagesIcon} />} title={t("language")} hint={t("languageHint")}>
           <LanguageSwitcher />
         </Row>
-        <Row icon={<Bell className="h-5 w-5" />} title={t("notifications")} hint={t("notificationsHint")}>
-          <span className="text-xs font-semibold text-ink-soft">{t("soon")}</span>
+        <Row icon={<Bell className={styles.languagesIcon} />} title={t("notifications")} hint={t("notificationsHint")}>
+          <span className={styles.soon}>{t("soon")}</span>
         </Row>
-        <Link href="/legal/privacy" className="flex items-center gap-3 px-4 py-4 hover:bg-paper-2">
-          <Shield className="h-5 w-5 text-brand" />
-          <div className="flex-1">
-            <p className="font-bold">{t("privacy")}</p>
-            <p className="text-xs text-ink-soft">{t("privacyHint")}</p>
+        <Link href="/legal/privacy" className={styles.settingLink}>
+          <Shield className={styles.settingIcon} />
+          <div className={styles.settingDetails}>
+            <p className={styles.settingLabel}>{t("privacy")}</p>
+            <p className={styles.settingHint}>{t("privacyHint")}</p>
           </div>
-          <ChevronRight className="h-4 w-4 text-ink-soft" />
+          <ChevronRight className={styles.chevronRightIcon} />
         </Link>
-        <div className="flex items-center gap-3 px-4 py-4">
-          <KeyRound className="h-5 w-5 text-brand" />
-          <div className="flex-1">
-            <p className="font-bold">{t("account")}</p>
-            <p className="text-xs text-ink-soft">
+        <div className={styles.settingRow}>
+          <KeyRound className={styles.settingIcon} />
+          <div className={styles.settingDetails}>
+            <p className={styles.settingLabel}>{t("account")}</p>
+            <p className={styles.settingHint}>
               {user.phone || user.email || t("accountHint")}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3 px-4 py-4">
-          <KeyRound className="h-5 w-5 text-brand" />
-          <div className="flex-1">
-            <p className="font-bold">{t("loginSecurity")}</p>
-            <p className="text-xs text-ink-soft">{t("loginSecurityHint")}</p>
+        <div className={styles.settingRow}>
+          <KeyRound className={styles.settingIcon} />
+          <div className={styles.settingDetails}>
+            <p className={styles.settingLabel}>{t("loginSecurity")}</p>
+            <p className={styles.settingHint}>{t("loginSecurityHint")}</p>
           </div>
         </div>
-        <Link href="/profile" className="flex items-center gap-3 px-4 py-4 hover:bg-paper-2">
-          <UserRound className="h-5 w-5 text-brand" />
-          <div className="flex-1">
-            <p className="font-bold">{t("editProfile")}</p>
-            <p className="text-xs text-ink-soft">{t("editProfileHint")}</p>
+        <Link href="/profile" className={styles.settingLink}>
+          <UserRound className={styles.settingIcon} />
+          <div className={styles.settingDetails}>
+            <p className={styles.settingLabel}>{t("editProfile")}</p>
+            <p className={styles.settingHint}>{t("editProfileHint")}</p>
           </div>
-          <ChevronRight className="h-4 w-4 text-ink-soft" />
+          <ChevronRight className={styles.chevronRightIcon} />
         </Link>
-        <Link href="/onboarding" className="flex items-center gap-3 px-4 py-4 hover:bg-paper-2">
-          <UserRound className="h-5 w-5 text-brand" />
-          <div className="flex-1">
-            <p className="font-bold">{t("editOnboarding")}</p>
+        <Link href="/onboarding" className={styles.settingLink}>
+          <UserRound className={styles.settingIcon} />
+          <div className={styles.settingDetails}>
+            <p className={styles.settingLabel}>{t("editOnboarding")}</p>
           </div>
-          <ChevronRight className="h-4 w-4 text-ink-soft" />
+          <ChevronRight className={styles.chevronRightIcon} />
         </Link>
       </section>
 
       <form action={logoutAction}>
-        <button type="submit" className="btn-secondary flex w-full items-center justify-center gap-2 !min-h-12">
-          <LogOut className="h-4 w-4" />
+        <button type="submit" className={styles.logoutButton}>
+          <LogOut className={styles.logOutIcon} />
           {t("logout")}
         </button>
       </form>
@@ -121,11 +122,11 @@ function Row({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-3 px-4 py-4">
-      <span className="text-brand">{icon}</span>
-      <div className="min-w-0 flex-1">
-        <p className="font-bold">{title}</p>
-        <p className="text-xs text-ink-soft">{hint}</p>
+    <div className={styles.settingRow}>
+      <span className={styles.languageGlyph}>{icon}</span>
+      <div className={styles.languageDetails}>
+        <p className={styles.settingLabel}>{title}</p>
+        <p className={styles.settingHint}>{hint}</p>
       </div>
       {children}
     </div>

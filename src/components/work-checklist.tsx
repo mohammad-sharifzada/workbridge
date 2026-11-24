@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { updateStatusChecks } from "@/actions";
 import { ExternalLink } from "lucide-react";
+import clsx from "clsx";
+import styles from "./work-checklist.module.scss";
 
 type Tri = "yes" | "no" | "unsure" | null;
 
@@ -109,11 +111,11 @@ export function WorkChecklist({
 
   if (!started) {
     return (
-      <section className="surface space-y-4 p-5">
-        <h2 className="font-display text-xl font-extrabold">{t("introTitle")}</h2>
-        <p className="text-sm leading-relaxed text-ink-soft">{t("introText")}</p>
-        <p className="text-base font-bold">{t("hello")}</p>
-        <button type="button" className="btn-primary w-full !min-h-12" onClick={() => setStarted(true)}>
+      <section className={styles.introPanel}>
+        <h2 className={styles.introTitle}>{t("introTitle")}</h2>
+        <p className={styles.introText}>{t("introText")}</p>
+        <p className={styles.hello}>{t("hello")}</p>
+        <button type="button" className={styles.startButton} onClick={() => setStarted(true)}>
           {t("start")}
         </button>
       </section>
@@ -121,14 +123,14 @@ export function WorkChecklist({
   }
 
   return (
-    <section className="space-y-4">
-      <div className="surface space-y-2 p-5">
-        <h2 className="font-display text-xl font-extrabold">{t("introTitle")}</h2>
-        <p className="text-sm leading-relaxed text-ink-soft">{t("introText")}</p>
-        <p className="text-sm font-semibold">{t("checklistTitle")}</p>
-        <ul className="space-y-1.5 text-sm">
+    <section className={styles.checklist}>
+      <div className={styles.summaryPanel}>
+        <h2 className={styles.introTitle}>{t("introTitle")}</h2>
+        <p className={styles.introText}>{t("introText")}</p>
+        <p className={styles.checklistTitle}>{t("checklistTitle")}</p>
+        <ul className={styles.checklistItems}>
           {steps.map((s) => (
-            <li key={s} className="font-semibold">
+            <li key={s} className={styles.item}>
               {answers[s] === "yes" ? "✅" : answers[s] == null ? "⬜" : "🟡"} {t(`q_${s}`)}
             </li>
           ))}
@@ -136,12 +138,12 @@ export function WorkChecklist({
       </div>
 
       {steps.map((step) => (
-        <div key={step} id={`wg-${step}`} className="surface scroll-mt-24 space-y-3 p-5">
-          <p className="text-base font-extrabold">
+        <div key={step} id={`wg-${step}`} className={styles.questionCard}>
+          <p className={styles.questionText}>
             {answers[step] === "yes" ? "✅ " : ""}
             {t(`q_${step}`)}
           </p>
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className={styles.answerChoices}>
             <ChoiceBtn active={answers[step] === "yes"} disabled={pending} onClick={() => answer(step, "yes")}>
               {t("yes")}
             </ChoiceBtn>
@@ -160,9 +162,9 @@ export function WorkChecklist({
           </div>
 
           {activeHelp === step && answers[step] !== "yes" && (
-            <div className="space-y-3 rounded-xl bg-paper-2 p-4">
+            <div className={styles.nextStepPanel}>
               <HelpBits step={step} t={t} />
-              <button type="button" className="btn-primary w-full !min-h-11 !text-sm" onClick={nextAfterHelp}>
+              <button type="button" className={styles.nextStepButton} onClick={nextAfterHelp}>
                 {t("nextStep")}
               </button>
             </div>
@@ -170,20 +172,20 @@ export function WorkChecklist({
         </div>
       ))}
 
-      <div className="surface space-y-2 p-5">
-        <p className="text-sm font-extrabold uppercase tracking-wide text-ink-soft">{t("statusTitle")}</p>
+      <div className={styles.summaryPanel}>
+        <p className={styles.statusTitle}>{t("statusTitle")}</p>
         {ready && (
-          <p className="font-display text-xl font-extrabold text-ok">🟢 {t("statusReady")}</p>
+          <p className={styles.statusReady}>🟢 {t("statusReady")}</p>
         )}
         {!ready && cannotWork && (
-          <p className="font-display text-xl font-extrabold text-bad">🔴 {t("statusCannot")}</p>
+          <p className={styles.statusCannot}>🔴 {t("statusCannot")}</p>
         )}
         {!ready && !cannotWork && (unsureWork || missingCount > 0) && (
-          <p className="font-display text-xl font-extrabold text-[#f57f17]">
+          <p className={styles.statusMissing}>
             🟡 {t("statusMissing", { count: missingCount })}
           </p>
         )}
-        <p className="text-xs text-ink-soft">{t("legalNote")}</p>
+        <p className={styles.legalNote}>{t("legalNote")}</p>
       </div>
     </section>
   );
@@ -218,23 +220,23 @@ function HelpBits({
       <Block title={t("what")} text={t(`help_${step}_what`)} />
       <Block title={t("why")} text={t(`help_${step}_why`)} />
       <Block title={t("doNow")} text={t(`help_${step}_do`)} />
-      <p className="text-sm font-bold">{t("where")}</p>
-      <div className="flex flex-wrap gap-2">
+      <p className={styles.where}>{t("where")}</p>
+      <div className={styles.resourceLinks}>
         {links.map((l) => (
           <a
             key={l.href}
             href={l.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-brand px-3 py-2 text-sm font-bold text-white"
+            className={styles.resourceLink}
           >
             {l.label}
-            <ExternalLink className="h-3.5 w-3.5" />
+            <ExternalLink className={styles.externalLinkIcon} />
           </a>
         ))}
       </div>
-      {step === "permit" && <p className="text-xs text-ink-soft">{t("permitDisclaimer")}</p>}
-      {step === "bank" && <p className="text-xs text-ink-soft">{t("bankDisclaimer")}</p>}
+      {step === "permit" && <p className={styles.legalNote}>{t("permitDisclaimer")}</p>}
+      {step === "bank" && <p className={styles.legalNote}>{t("bankDisclaimer")}</p>}
     </>
   );
 }
@@ -242,8 +244,8 @@ function HelpBits({
 function Block({ title, text }: { title: string; text: string }) {
   return (
     <div>
-      <p className="font-bold">{title}</p>
-      <p className="mt-1 text-sm leading-relaxed text-ink-soft">{text}</p>
+      <p className={styles.guidanceTitle}>{title}</p>
+      <p className={styles.guidanceText}>{text}</p>
     </div>
   );
 }
@@ -264,9 +266,7 @@ function ChoiceBtn({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`min-h-12 rounded-xl border-2 px-3 text-sm font-extrabold ${
-        active ? "border-brand bg-[#e7f4f3] text-brand" : "border-line bg-white text-ink"
-      }`}
+      className={clsx(styles.answerButton, active ? styles.selectedAnswer : styles.unselectedAnswer)}
     >
       {children}
     </button>

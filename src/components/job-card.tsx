@@ -7,6 +7,7 @@ import { applyToJob } from "@/actions";
 import { formatWage, parseJsonArray } from "@/lib/utils";
 import { localizeJobFields } from "@/lib/localize-job";
 import { Building2, MapPin, Clock, CheckCircle2 } from "lucide-react";
+import styles from "./job-card.module.scss";
 
 export type JobCardData = {
   id: string;
@@ -63,49 +64,49 @@ export function JobCard({ job }: { job: JobCardData }) {
   };
 
   return (
-    <article className="surface animate-rise overflow-hidden p-0">
-      <div className="border-b border-line/70 bg-gradient-to-r from-[#e7f4f3] to-transparent px-4 py-3">
-        <div className="flex items-start justify-between gap-3">
+    <article className={styles.card}>
+      <div className={styles.cardHeader}>
+        <div className={styles.summary}>
           <div>
-            <h3 className="font-display text-lg font-bold leading-tight">{loc.title}</h3>
-            <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-soft">
-              <Building2 className="h-4 w-4" />
+            <h3 className={styles.title}>{loc.title}</h3>
+            <p className={styles.companyName}>
+              <Building2 className={styles.building2Icon} />
               {loc.companyName}
-              {job.verified && <CheckCircle2 className="h-4 w-4 text-ok" />}
+              {job.verified && <CheckCircle2 className={styles.checkCircle2Icon} />}
             </p>
           </div>
-          <div className="text-end">
-            <p className="font-display text-xl font-extrabold text-brand">
+          <div className={styles.compensation}>
+            <p className={styles.hourlyWage}>
               {formatWage(job.hourlyWage, locale)}
-              <span className="text-sm font-semibold text-ink-soft">{t("hourly")}</span>
+              <span className={styles.hourly}>{t("hourly")}</span>
             </p>
             {job.matchScore != null && (
-              <p className="text-xs font-bold text-accent">{t("match", { score: Math.round(job.matchScore) })}</p>
+              <p className={styles.match}>{t("match", { score: Math.round(job.matchScore) })}</p>
             )}
           </div>
         </div>
       </div>
-      <div className="space-y-3 px-4 py-4">
-        <p className="text-sm leading-relaxed text-ink-soft">{loc.description}</p>
-        <div className="flex flex-wrap gap-3 text-sm font-semibold">
-          <span className="inline-flex items-center gap-1">
-            <MapPin className="h-4 w-4 text-brand" />
+      <div className={styles.cardBody}>
+        <p className={styles.description}>{loc.description}</p>
+        <div className={styles.jobFacts}>
+          <span className={styles.jobFact}>
+            <MapPin className={styles.mapPinIcon} />
             {loc.city}
             {job.distanceKm != null && ` · ${t("distance", { km: job.distanceKm.toFixed(1) })}`}
           </span>
           {job.startDate && (
-            <span className="inline-flex items-center gap-1">
-              <Clock className="h-4 w-4 text-brand" />
+            <span className={styles.jobFact}>
+              <Clock className={styles.mapPinIcon} />
               {t("start")}: {new Date(job.startDate).toLocaleDateString(locale)}
             </span>
           )}
         </div>
         {reqs.length > 0 && (
           <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-wide text-ink-soft">{t("requirements")}</p>
-            <div className="flex flex-wrap gap-2">
+            <p className={styles.requirements}>{t("requirements")}</p>
+            <div className={styles.requirementTags}>
               {reqs.map((r) => (
-                <span key={r} className="rounded-lg bg-paper-2 px-2.5 py-1 text-xs font-semibold">
+                <span key={r} className={styles.requirementTag}>
                   {tagLabel(r)}
                 </span>
               ))}
@@ -113,15 +114,15 @@ export function JobCard({ job }: { job: JobCardData }) {
           </div>
         )}
         {job.locked ? (
-          <p className="text-sm font-semibold text-bad">{t("locked")}</p>
+          <p className={styles.locked}>{t("locked")}</p>
         ) : (
-          <div className="flex gap-2">
-            <Link href={`/jobs/${job.id}`} className="btn-secondary flex-1 !min-h-12 !text-sm">
+          <div className={styles.cardActions}>
+            <Link href={`/jobs/${job.id}`} className={styles.detailsLink}>
               {t("details")}
             </Link>
             <button
               type="button"
-              className="btn-primary flex-1 !min-h-12 !text-sm"
+              className={styles.appliedButton}
               disabled={applied || pending}
               onClick={apply}
             >

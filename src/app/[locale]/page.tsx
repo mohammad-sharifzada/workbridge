@@ -14,6 +14,7 @@ import { formatWage } from "@/lib/utils";
 import { getNextOpenOnboardingPath } from "@/lib/onboarding-flow";
 import { getSeekerProfileByUserId } from "@/lib/seeker-profile-p8";
 import { redirect } from "next/navigation";
+import styles from "./home.module.scss";
 
 const CAT_ICON: Record<string, string> = {
   WAREHOUSE: "📦",
@@ -47,11 +48,11 @@ export default async function HomePage({
   if (user?.role === "COMPANY") {
     const t = await getTranslations("home");
     return (
-      <div className="mx-auto max-w-lg space-y-4 text-center">
-        <h1 className="font-display text-2xl font-extrabold">
+      <div className={styles.companyWelcome}>
+        <h1 className={styles.welcomeHeading}>
           {t("hello", { name: user.name || "" })}
         </h1>
-        <Link href="/company" className="btn-primary inline-flex">
+        <Link href="/company" className={styles.welcomeAction}>
           {t("goCompany")}
         </Link>
       </div>
@@ -79,12 +80,12 @@ async function SeekerHome({
   const profile = await getSeekerProfileByUserId(userId);
   if (!profile?.onboardingDone) {
     return (
-      <div className="surface mx-auto max-w-lg space-y-4 p-6 text-center">
-        <h1 className="font-display text-2xl font-extrabold">
+      <div className={styles.onboardingPrompt}>
+        <h1 className={styles.welcomeHeading}>
           {t("hello", { name: name || "" })}
         </h1>
-        <p className="text-ink-soft">{t("needOnboarding")}</p>
-        <Link href="/onboarding" className="btn-primary inline-flex">
+        <p className={styles.needOnboarding}>{t("needOnboarding")}</p>
+        <Link href="/onboarding" className={styles.welcomeAction}>
           {t("startOnboarding")}
         </Link>
       </div>
@@ -117,87 +118,87 @@ async function SeekerHome({
           : null;
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-2xl border-2 border-brand/20 bg-[#eef8f7] p-5">
-        <h2 className="font-display text-2xl font-extrabold">{t("welcomeTitle")}</h2>
-        <p className="mt-2 text-sm font-semibold text-ink-soft">{t("howItWorks")}</p>
-        <ol className="mt-3 space-y-2 text-sm">
-          <li><span className="font-bold">1. {t("dashboardStep1Title")}</span> – {t("dashboardStep1Desc")}</li>
-          <li><span className="font-bold">2. {t("dashboardStep2Title")}</span> – {t("dashboardStep2Desc")}</li>
-          <li><span className="font-bold">3. {t("dashboardStep3Title")}</span> – {t("dashboardStep3Desc")}</li>
-          <li><span className="font-bold">4. {t("dashboardStep4Title")}</span> – {t("dashboardStep4Desc")}</li>
-          <li><span className="font-bold">5. {t("dashboardStep5Title")}</span> – {t("dashboardStep5Desc")}</li>
+    <div className={styles.dashboard}>
+      <section className={styles.introPanel}>
+        <h2 className={styles.welcomeHeading}>{t("welcomeTitle")}</h2>
+        <p className={styles.introDescription}>{t("howItWorks")}</p>
+        <ol className={styles.introSteps}>
+          <li><span className={styles.emphasis}>1. {t("dashboardStep1Title")}</span> – {t("dashboardStep1Desc")}</li>
+          <li><span className={styles.emphasis}>2. {t("dashboardStep2Title")}</span> – {t("dashboardStep2Desc")}</li>
+          <li><span className={styles.emphasis}>3. {t("dashboardStep3Title")}</span> – {t("dashboardStep3Desc")}</li>
+          <li><span className={styles.emphasis}>4. {t("dashboardStep4Title")}</span> – {t("dashboardStep4Desc")}</li>
+          <li><span className={styles.emphasis}>5. {t("dashboardStep5Title")}</span> – {t("dashboardStep5Desc")}</li>
         </ol>
       </section>
 
       <div>
-        <h1 className="font-display text-2xl font-extrabold">
+        <h1 className={styles.welcomeHeading}>
           {t("hello", { name: name?.trim() || t("friend") })} 👋
         </h1>
       </div>
 
-      <section className="rounded-2xl border-2 border-[#cde6ff] bg-[linear-gradient(180deg,#f4f9ff_0%,#ecf4ff_100%)] p-5 shadow-[0_8px_24px_rgba(40,88,160,0.08)]">
-        <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#24507c]">
+      <section className={styles.readinessPanel}>
+        <p className={styles.readinessEyebrow}>
           {t("workStatus")}
         </p>
-        <p className="mt-1 font-display text-xl font-extrabold text-[#13314e]">
+        <p className={styles.readinessTitle}>
           {statusEmoji} {status === "GREEN" ? t("readyToApply") : statusLabel}
         </p>
-        <p className="mt-2 text-sm text-[#2c5376]">
+        <p className={styles.readinessDescription}>
           {status === "GREEN" ? t("statusComplete") : t("statusProgress")}
         </p>
         {status !== "GREEN" && missingHint && (
-          <p className="mt-2 text-sm font-semibold text-[#2c5376]">
+          <p className={styles.readinessHint}>
             🟡 {missingHint}
           </p>
         )}
-        <div className="mt-3">
+        <div className={styles.readinessAction}>
           {status !== "GREEN" && (
-            <Link href="/help" className="btn-secondary w-full !min-h-11 !text-sm">
+            <Link href="/help" className={styles.helpAction}>
               🆘 {t("openHelp")}
             </Link>
           )}
           {status === "GREEN" && (
-            <Link href="/jobs" className="btn-primary w-full !min-h-11 !text-sm">
+            <Link href="/jobs" className={styles.jobsAction}>
               {t("seeJobs")}
             </Link>
           )}
         </div>
       </section>
 
-      <section className="surface space-y-3 p-4">
-        <h2 className="font-display text-lg font-extrabold">{t("newsSection")}</h2>
-        <div className="grid gap-2 text-sm">
-          <div className="flex items-center gap-2 font-semibold text-ink-soft">
-            <CheckCircle2 className="h-4 w-4 text-brand" />
+      <section className={styles.activityPanel}>
+        <h2 className={styles.panelHeading}>{t("newsSection")}</h2>
+        <div className={styles.activityList}>
+          <div className={styles.activityItem}>
+            <CheckCircle2 className={styles.activityIcon} />
             {t("pendingApps", { count: pendingApps })}
           </div>
-          <div className="flex items-center gap-2 font-semibold text-ink-soft">
-            <MailCheck className="h-4 w-4 text-brand" />
+          <div className={styles.activityItem}>
+            <MailCheck className={styles.activityIcon} />
             {t("recentMessages", { count: unreadConvs })}
           </div>
         </div>
-        <div className="flex gap-2">
-          <Link href="/applications" className="btn-secondary flex-1 !min-h-11 !text-sm">{tNav("applications")}</Link>
-          <Link href="/messages" className="btn-primary flex-1 !min-h-11 !text-sm">{tNav("messages")}</Link>
+        <div className={styles.activityActions}>
+          <Link href="/applications" className={styles.applicationsAction}>{tNav("applications")}</Link>
+          <Link href="/messages" className={styles.messagesAction}>{tNav("messages")}</Link>
         </div>
       </section>
 
-      <section className="space-y-3">
-        <h2 className="font-display text-xl font-extrabold">{t("jobsForYou")}</h2>
+      <section className={styles.dashboardSection}>
+        <h2 className={styles.recommendedJobsHeading}>{t("jobsForYou")}</h2>
         {matched.length === 0 ? (
-          <p className="surface p-4 text-center text-sm font-semibold text-ink-soft">{tJobs("empty")}</p>
+          <p className={styles.emptyJobs}>{tJobs("empty")}</p>
         ) : (
-          <ul className="space-y-3">
+          <ul className={styles.dashboardSection}>
             {matched.map((job) => {
               const loc = localizeJobFields(job, locale);
               const icon = CAT_ICON[job.category] || "💼";
               return (
-                <li key={job.id} className="surface p-4">
-                  <p className="font-display text-lg font-extrabold">
+                <li key={job.id} className={styles.jobCard}>
+                  <p className={styles.panelHeading}>
                     {icon} {loc.title}
                   </p>
-                  <ul className="mt-2 space-y-1 text-sm font-bold">
+                  <ul className={styles.jobDetails}>
                     <li>
                       📍{" "}
                       {job.distanceKm != null
@@ -207,11 +208,11 @@ async function SeekerHome({
                     <li>
                       💶 {formatWage(job.hourlyWage, locale)} / {tSimple("perHour")}
                     </li>
-                    <li className="text-brand">
+                    <li className={styles.brandAccent}>
                       ⭐ {job.matchScore} % {tJobs("matchLabel")}
                     </li>
                   </ul>
-                  <Link href={`/jobs/${job.id}`} className="btn-primary mt-3 w-full !min-h-11 !text-sm">
+                  <Link href={`/jobs/${job.id}`} className={styles.viewJob}>
                     {t("viewJob")}
                   </Link>
                 </li>
@@ -219,40 +220,40 @@ async function SeekerHome({
             })}
           </ul>
         )}
-        <Link href="/jobs" className="block text-center text-sm font-bold text-brand">
+        <Link href="/jobs" className={styles.allJobs}>
           {t("allJobs")} →
         </Link>
       </section>
 
-      <section className="space-y-3">
-        <Link href="/applications" className="surface flex items-center justify-between gap-3 p-4 hover:border-brand">
+      <section className={styles.dashboardSection}>
+        <Link href="/applications" className={styles.shortcut}>
           <div>
-            <p className="font-bold">📄 {t("myApplications")}</p>
-            <p className="mt-1 text-sm text-ink-soft">
+            <p className={styles.emphasis}>📄 {t("myApplications")}</p>
+            <p className={styles.shortcutDescription}>
               {t("pendingApps", { count: pendingApps })}
             </p>
           </div>
-          <span className="text-brand">→</span>
+          <span className={styles.brandAccent}>→</span>
         </Link>
 
-        <Link href="/messages" className="surface flex items-center justify-between gap-3 p-4 hover:border-brand">
+        <Link href="/messages" className={styles.shortcut}>
           <div>
-            <p className="font-bold">💬 {t("messages")}</p>
-            <p className="mt-1 text-sm text-ink-soft">
+            <p className={styles.emphasis}>💬 {t("messages")}</p>
+            <p className={styles.shortcutDescription}>
               {t("recentMessages", { count: unreadConvs })}
             </p>
           </div>
-          <span className="text-brand">→</span>
+          <span className={styles.brandAccent}>→</span>
         </Link>
 
-        <Link href="/help" className="surface flex items-center justify-between gap-3 p-4 hover:border-brand">
+        <Link href="/help" className={styles.shortcut}>
           <div>
-            <p className="font-bold">🆘 {t("help")}</p>
-            <p className="mt-1 text-sm text-ink-soft">
+            <p className={styles.emphasis}>🆘 {t("help")}</p>
+            <p className={styles.shortcutDescription}>
               {missingHint || t("helpReady")}
             </p>
           </div>
-          <span className="btn-secondary !min-h-10 !px-3 !text-sm">{t("openHelp")}</span>
+          <span className={styles.shortcutButton}>{t("openHelp")}</span>
         </Link>
       </section>
     </div>
@@ -263,24 +264,24 @@ async function MarketingHome() {
   const t = await getTranslations("home");
 
   return (
-    <div className="space-y-5">
-      <section className="rounded-3xl bg-[linear-gradient(135deg,#0a4f4f_0%,#0d6e6e_45%,#153a3a_100%)] p-6 text-white sm:p-8">
-        <p className="font-display text-3xl font-extrabold sm:text-4xl">{t("brand")}</p>
-        <h1 className="mt-2 font-display text-2xl font-extrabold sm:text-3xl">
+    <div className={styles.marketing}>
+      <section className={styles.hero}>
+        <p className={styles.heroBrand}>{t("brand")}</p>
+        <h1 className={styles.heroTitle}>
           {t("welcomeTitle")}
         </h1>
-        <p className="mt-3 text-sm text-white/90 sm:text-base">
+        <p className={styles.heroDescription}>
           {t("roleQuestion")}
         </p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <Link href="/register?role=seeker" className="btn-primary w-full !min-h-12 !text-base">
+        <div className={styles.heroActions}>
+          <Link href="/register?role=seeker" className={styles.seekerCta}>
             👤 {t("ctaSeeker")}
           </Link>
-          <Link href="/register?role=company" className="btn-secondary w-full !min-h-12 !text-base !bg-white !text-ink">
+          <Link href="/register?role=company" className={styles.companyCta}>
             🏢 {t("ctaCompany")}
           </Link>
         </div>
-        <p className="mt-4 text-xs text-white/80 sm:text-sm">
+        <p className={styles.heroNote}>
           {t("connectText")}
         </p>
       </section>

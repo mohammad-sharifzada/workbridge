@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { completeOnboarding } from "@/actions";
 import { OnboardingDoneRedirect } from "@/components/onboarding-done-redirect";
 import { getSeekerProfileByUserId } from "@/lib/seeker-profile-p8";
+import styles from "./page.module.scss";
 
 export default async function OnboardingDonePage({
   params,
@@ -33,8 +34,8 @@ export default async function OnboardingDonePage({
   const t = await getTranslations("onboarding");
 
   return (
-    <div className="surface mx-auto max-w-lg p-6 text-center">
-      <h1 className="font-display text-3xl font-extrabold">{t("doneTitle")}</h1>
+    <div className={styles.panel}>
+      <h1 className={styles.doneTitle}>{t("doneTitle")}</h1>
       <OnboardingDoneRedirect />
     </div>
   );

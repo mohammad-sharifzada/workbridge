@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { unlockContact } from "@/actions";
 import { useRouter } from "@/i18n/routing";
+import styles from "./unlock-button.module.scss";
 
 export function UnlockButton({ seekerId }: { seekerId: string }) {
   const t = useTranslations("company");
@@ -13,14 +14,14 @@ export function UnlockButton({ seekerId }: { seekerId: string }) {
   const [pending, startTransition] = useTransition();
 
   if (phone) {
-    return <p className="text-sm font-bold text-ok">{t("unlocked")}: {phone}</p>;
+    return <p className={styles.unlocked}>{t("unlocked")}: {phone}</p>;
   }
 
   return (
     <div>
       <button
         type="button"
-        className="btn-primary !min-h-11 !px-4 !text-sm"
+        className={styles.unlockButton}
         disabled={pending}
         onClick={() => {
           setError(false);
@@ -37,7 +38,7 @@ export function UnlockButton({ seekerId }: { seekerId: string }) {
       >
         {t("unlock")}
       </button>
-      {error && <p className="mt-1 text-xs font-semibold text-bad">Credits?</p>}
+      {error && <p className={styles.unlockError}>Credits?</p>}
     </div>
   );
 }

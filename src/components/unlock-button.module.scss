@@ -1,0 +1,24 @@
+@use "../styles/design";
+
+.unlocked {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 700;
+  color: var(--wb-ok);
+}
+
+.unlockButton {
+  @include design.primary-button;
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.unlockError {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  line-height: var(--wb-leading-xs);
+  font-weight: 600;
+  color: var(--wb-bad);
+}

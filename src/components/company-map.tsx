@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { MapPin, ExternalLink, Navigation } from "lucide-react";
+import styles from "./company-map.module.scss";
 
 export function CompanyMap({
   latitude,
@@ -20,38 +21,38 @@ export function CompanyMap({
   const googleNav = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
 
   return (
-    <div className="space-y-3">
-      <div className="overflow-hidden rounded-2xl border border-line">
+    <div className={styles.mapPanel}>
+      <div className={styles.mapFrame}>
         <iframe
           title={label}
           src={embed}
-          className="h-56 w-full"
+          className={styles.map}
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
         />
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className={styles.mapActions}>
         <a
           href={openMaps}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-secondary !min-h-11 !px-3 !text-sm"
+          className={styles.openMapLink}
         >
-          <MapPin className="h-4 w-4" />
+          <MapPin className={styles.mapPinIcon} />
           {t("openMap")}
-          <ExternalLink className="h-3.5 w-3.5" />
+          <ExternalLink className={styles.externalLinkIcon} />
         </a>
         <a
           href={googleNav}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-primary !min-h-11 !px-3 !text-sm"
+          className={styles.navigateLink}
         >
-          <Navigation className="h-4 w-4" />
+          <Navigation className={styles.mapPinIcon} />
           {t("navigate")}
         </a>
       </div>
-      <p className="text-xs text-ink-soft">{t("mapSource")}</p>
+      <p className={styles.mapSource}>{t("mapSource")}</p>
     </div>
   );
 }

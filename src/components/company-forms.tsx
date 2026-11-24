@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { createJob, buyContactCredits, requestCompanyVerification } from "@/actions";
 import type { Availability, JobCategory, PhysicalLevel } from "@/prisma/types";
+import styles from "./company-forms.module.scss";
 
 export function CreateJobForm() {
   const t = useTranslations("company");
@@ -21,7 +22,7 @@ export function CreateJobForm() {
 
   return (
     <form
-      className="surface space-y-3 p-5"
+      className={styles.jobForm}
       onSubmit={(e) => {
         e.preventDefault();
         startTransition(async () => {
@@ -41,33 +42,33 @@ export function CreateJobForm() {
         });
       }}
     >
-      <h2 className="font-display text-lg font-bold">{t("newJob")}</h2>
-      <input className="input-field" placeholder={t("jobTitle")} value={title} onChange={(e) => setTitle(e.target.value)} required />
-      <textarea className="input-field min-h-24" placeholder={t("jobDesc")} value={description} onChange={(e) => setDescription(e.target.value)} required />
-      <div className="grid grid-cols-2 gap-2">
-        <input className="input-field" placeholder={t("city")} value={city} onChange={(e) => setCity(e.target.value)} required />
-        <input className="input-field" type="number" step="0.1" placeholder={t("wage")} value={wage} onChange={(e) => setWage(e.target.value)} required />
+      <h2 className={styles.newJobHeading}>{t("newJob")}</h2>
+      <input className={styles.jobInput} placeholder={t("jobTitle")} value={title} onChange={(e) => setTitle(e.target.value)} required />
+      <textarea className={styles.jobDescTextarea} placeholder={t("jobDesc")} value={description} onChange={(e) => setDescription(e.target.value)} required />
+      <div className={styles.fieldGrid}>
+        <input className={styles.jobInput} placeholder={t("city")} value={city} onChange={(e) => setCity(e.target.value)} required />
+        <input className={styles.jobInput} type="number" step="0.1" placeholder={t("wage")} value={wage} onChange={(e) => setWage(e.target.value)} required />
       </div>
-      <select className="input-field" value={category} onChange={(e) => setCategory(e.target.value as JobCategory)}>
+      <select className={styles.jobInput} value={category} onChange={(e) => setCategory(e.target.value as JobCategory)}>
         <option value="WAREHOUSE">{tOn("warehouse")}</option>
         <option value="CLEANING">{tOn("cleaning")}</option>
         <option value="DELIVERY">{tOn("delivery")}</option>
         <option value="CONSTRUCTION">{tOn("construction")}</option>
       </select>
-      <div className="grid grid-cols-2 gap-2">
-        <select className="input-field" value={physical} onChange={(e) => setPhysical(e.target.value as PhysicalLevel)}>
+      <div className={styles.fieldGrid}>
+        <select className={styles.jobInput} value={physical} onChange={(e) => setPhysical(e.target.value as PhysicalLevel)}>
           <option value="LIGHT">{tOn("light")}</option>
           <option value="MEDIUM">{tOn("medium")}</option>
           <option value="HEAVY">{tOn("heavy")}</option>
         </select>
-        <select className="input-field" value={availability} onChange={(e) => setAvailability(e.target.value as Availability)}>
+        <select className={styles.jobInput} value={availability} onChange={(e) => setAvailability(e.target.value as Availability)}>
           <option value="FULL_TIME">{tOn("fullTime")}</option>
           <option value="PART_TIME">{tOn("partTime")}</option>
           <option value="WEEKENDS">{tOn("weekends")}</option>
           <option value="FLEXIBLE">{tOn("flexible")}</option>
         </select>
       </div>
-      <button type="submit" className="btn-primary w-full" disabled={pending}>
+      <button type="submit" className={styles.publishButton} disabled={pending}>
         {t("publish")}
       </button>
     </form>
@@ -80,10 +81,10 @@ export function CompanyBillingActions() {
   const [pending, startTransition] = useTransition();
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={styles.creditActions}>
       <button
         type="button"
-        className="btn-secondary !min-h-11 !text-sm"
+        className={styles.buyCreditsButton}
         disabled={pending}
         onClick={() =>
           startTransition(async () => {
@@ -96,7 +97,7 @@ export function CompanyBillingActions() {
       </button>
       <button
         type="button"
-        className="btn-secondary !min-h-11 !text-sm"
+        className={styles.buyCreditsButton}
         disabled={pending}
         onClick={() =>
           startTransition(async () => {

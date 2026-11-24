@@ -1,0 +1,87 @@
+@use "../../../../styles/design";
+
+.examplePage {
+  @include design.stack(1.5rem);
+}
+
+.pageHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.profileLink {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-brand);
+}
+
+.title {
+  @include design.display-font;
+  margin-top: 0.5rem;
+  font-size: 1.5rem;
+  line-height: var(--wb-leading-2xl);
+  font-weight: 800;
+}
+
+.subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  color: var(--wb-ink-soft);
+}
+
+.badge {
+  border-radius: 9999px;
+  background-color: #fff3e0;
+  padding-inline: 0.75rem;
+  padding-block: 0.25rem;
+  font-size: 0.75rem;
+  line-height: var(--wb-leading-xs);
+  font-weight: 800;
+  color: #ef6c00;
+  text-transform: uppercase;
+}
+
+.demoNotice {
+  border-radius: 0.75rem;
+  background-color: #fff8e1;
+  padding-inline: 1rem;
+  padding-block: 0.75rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 700;
+  color: #f57f17;
+}
+
+.sampleDetails {
+  @include design.surface;
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+
+  @media (min-width: design.$sm) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.hint {
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  color: var(--wb-ink-soft);
+}
+
+.detailLabel {
+  font-weight: 700;
+  color: var(--wb-ink-soft);
+}
+
+.detailValue {
+  font-weight: 600;
+}

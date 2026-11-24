@@ -1,0 +1,54 @@
+@use "../styles/design";
+
+.mapPanel {
+  @include design.stack(0.75rem);
+}
+
+.mapFrame {
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid var(--wb-line);
+}
+
+.map {
+  height: 14rem;
+  width: 100%;
+}
+
+.mapActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.openMapLink {
+  @include design.secondary-button;
+  min-height: 2.75rem;
+  padding-inline: 0.75rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.mapPinIcon {
+  height: 1rem;
+  width: 1rem;
+}
+
+.externalLinkIcon {
+  height: 0.875rem;
+  width: 0.875rem;
+}
+
+.navigateLink {
+  @include design.primary-button;
+  min-height: 2.75rem;
+  padding-inline: 0.75rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.mapSource {
+  font-size: 0.75rem;
+  line-height: var(--wb-leading-xs);
+  color: var(--wb-ink-soft);
+}

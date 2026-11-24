@@ -1,0 +1,125 @@
+@use "../../../styles/design";
+
+.applications {
+  @include design.stack(1.5rem);
+}
+
+.title {
+  @include design.display-font;
+  font-size: 1.5rem;
+  line-height: var(--wb-leading-2xl);
+  font-weight: 800;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  color: var(--wb-ink-soft);
+}
+
+.emptyPanel {
+  @include design.surface;
+  padding: 2rem;
+  text-align: center;
+}
+
+.empty {
+  font-weight: 700;
+  color: var(--wb-ink-soft);
+}
+
+.seeJobsLink {
+  @include design.primary-button;
+  margin-top: 1rem;
+}
+
+.applicationList {
+  @include design.stack(0.75rem);
+}
+
+.realTitle {
+  @include design.display-font;
+  font-size: 1.125rem;
+  line-height: var(--wb-leading-lg);
+  font-weight: 800;
+}
+
+.pendingBadge {
+  background-color: #fff8e1;
+  color: #f57f17;
+}
+
+.positiveBadge {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.declinedBadge {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.applicationCard {
+  @include design.surface;
+  padding: 1rem;
+}
+
+.applicationSummary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.jobTitle {
+  @include design.display-font;
+  font-size: 1.125rem;
+  line-height: var(--wb-leading-lg);
+  font-weight: 700;
+}
+
+.applicationDate {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  line-height: var(--wb-leading-xs);
+  color: var(--wb-ink-soft);
+}
+
+.hourlyWage {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-brand);
+}
+
+.statusBadge {
+  border-radius: 9999px;
+  padding-inline: 0.75rem;
+  padding-block: 0.25rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 800;
+}
+
+.applicationActions {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.viewJobLink {
+  @include design.secondary-button;
+  min-height: 2.75rem;
+  flex: 1;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.openMessagesLink {
+  @include design.primary-button;
+  min-height: 2.75rem;
+  flex: 1;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}

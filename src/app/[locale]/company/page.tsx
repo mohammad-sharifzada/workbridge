@@ -9,6 +9,7 @@ import { CheckCircle2 } from "lucide-react";
 import { localizeText } from "@/lib/i18n-content";
 import { localizeCity } from "@/lib/localize-job";
 import { getCompanyDashboardByUserId } from "@/lib/company-p8";
+import styles from "./page.module.scss";
 
 export default async function CompanyDashboardPage({
   params,
@@ -29,24 +30,24 @@ export default async function CompanyDashboardPage({
   const t = await getTranslations("company");
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className={styles.dashboard}>
+      <div className={styles.dashboardHeader}>
         <div>
-          <h1 className="font-display text-2xl font-extrabold">{t("dashboard")}</h1>
-          <p className="mt-1 text-ink-soft">{t("welcome", { name: company.companyName })}</p>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold">
+          <h1 className={styles.dashboardHeading}>{t("dashboard")}</h1>
+          <p className={styles.welcome}>{t("welcome", { name: company.companyName })}</p>
+          <div className={styles.companyStats}>
             {company.verified ? (
-              <span className="inline-flex items-center gap-1 text-ok">
-                <CheckCircle2 className="h-4 w-4" />
+              <span className={styles.verified}>
+                <CheckCircle2 className={styles.checkCircle2Icon} />
                 {t("verified")}
               </span>
             ) : (
-              <span className="text-warn">{t("notVerified")} — {t("verifyHint")}</span>
+              <span className={styles.notVerified}>{t("notVerified")} — {t("verifyHint")}</span>
             )}
-            <span className="rounded-lg bg-paper-2 px-2 py-1">
+            <span className={styles.credits}>
               {t("credits", { count: company.contactCredits })}
             </span>
-            <span className="rounded-lg bg-paper-2 px-2 py-1">
+            <span className={styles.credits}>
               {t("plan")}:{" "}
               {company.subscription === "NONE"
                 ? t("planNone")
@@ -59,31 +60,31 @@ export default async function CompanyDashboardPage({
         <CompanyBillingActions />
       </div>
 
-      <div className="flex gap-3">
-        <Link href="/company/candidates" className="btn-primary">
+      <div className={styles.dashboardActions}>
+        <Link href="/company/candidates" className={styles.candidatesLink}>
           {t("candidates")}
         </Link>
       </div>
 
       <CreateJobForm />
 
-      <section className="space-y-3">
-        <h2 className="font-display text-xl font-bold">{t("jobs")}</h2>
+      <section className={styles.jobList}>
+        <h2 className={styles.jobsHeading}>{t("jobs")}</h2>
         {company.jobs.length === 0 ? (
-          <p className="text-ink-soft">—</p>
+          <p className={styles.emptyJobs}>—</p>
         ) : (
-          <ul className="space-y-3">
+          <ul className={styles.jobList}>
             {company.jobs.map((job) => (
-              <li key={job.id} className="surface flex items-center justify-between gap-3 p-4">
+              <li key={job.id} className={styles.jobCard}>
                 <div>
-                  <p className="font-bold">{localizeText(job.titleI18n, job.title, locale)}</p>
-                  <p className="text-sm text-ink-soft">
+                  <p className={styles.jobTitle}>{localizeText(job.titleI18n, job.title, locale)}</p>
+                  <p className={styles.jobStatus}>
                     {formatWage(job.hourlyWage, locale)} · {localizeCity(job.city, locale)} ·{" "}
                     {job.active ? t("active") : t("inactive")} · {t("applications")}:{" "}
                     {job.applications}
                   </p>
                 </div>
-                <Link href={`/jobs/${job.id}`} className="text-sm font-semibold text-brand">
+                <Link href={`/jobs/${job.id}`} className={styles.jobLink}>
                   →
                 </Link>
               </li>

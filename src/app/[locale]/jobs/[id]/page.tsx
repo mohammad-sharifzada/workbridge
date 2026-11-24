@@ -10,6 +10,7 @@ import { requireSeekerOnboardingDone } from "@/lib/onboarding-guard";
 import { db } from "@/prisma/db";
 import { getSeekerProfileByUserId } from "@/lib/seeker-profile-p8";
 import { getJobWithCompanySelect } from "@/lib/job-p8";
+import styles from "./page.module.scss";
 
 export default async function JobDetailPage({
   params,
@@ -63,8 +64,8 @@ export default async function JobDetailPage({
   const t = await getTranslations("jobs");
 
   return (
-    <div className="mx-auto max-w-lg space-y-4">
-      <Link href="/jobs" className="text-sm font-semibold text-brand">
+    <div className={styles.jobDetails}>
+      <Link href="/jobs" className={styles.jobsLink}>
         ← {t("title")}
       </Link>
       <SimpleJobCard

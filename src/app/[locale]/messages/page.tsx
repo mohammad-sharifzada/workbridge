@@ -9,6 +9,7 @@ import { requireSeekerOnboardingDone } from "@/lib/onboarding-guard";
 import { localizeCompany } from "@/lib/localize-job";
 import { listConversationsForUser } from "@/lib/conversation-p8";
 import { db } from "@/prisma/db";
+import styles from "./page.module.scss";
 
 export default async function MessagesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -66,36 +67,36 @@ export default async function MessagesPage({ params }: { params: Promise<{ local
   );
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center gap-3">
-        <MessageCircle className="h-7 w-7 text-brand" />
-        <h1 className="font-display text-2xl font-extrabold">💬 {t("title")}</h1>
+    <div className={styles.inbox}>
+      <div className={styles.inboxHeader}>
+        <MessageCircle className={styles.messageCircleIcon} />
+        <h1 className={styles.title}>💬 {t("title")}</h1>
       </div>
-      <p className="text-sm text-ink-soft">{t("subtitle")}</p>
+      <p className={styles.subtitle}>{t("subtitle")}</p>
 
       <DemoMessagesList />
 
       {rows.length > 0 && (
         <>
-          <h2 className="font-display text-lg font-extrabold">{t("realTitle")}</h2>
-          <ul className="space-y-3">
+          <h2 className={styles.realTitle}>{t("realTitle")}</h2>
+          <ul className={styles.threadList}>
             {rows.map((row) => (
-              <li key={row.id} className="surface space-y-3 p-4">
-                <div className="flex items-start justify-between gap-3">
+              <li key={row.id} className={styles.threadCard}>
+                <div className={styles.threadSummary}>
                   <div>
-                    <p className="font-display text-lg font-bold">💬 {row.peerName}</p>
-                    <p className="mt-0.5 text-xs font-semibold text-ink-soft">{row.when}</p>
+                    <p className={styles.threadTitle}>💬 {row.peerName}</p>
+                    <p className={styles.when}>{row.when}</p>
                   </div>
                   {row.isNewOffer && (
-                    <span className="rounded-full bg-[#e8f5e9] px-2.5 py-1 text-xs font-extrabold text-ok">
+                    <span className={styles.newOffer}>
                       🟢 {t("newOffer")}
                     </span>
                   )}
                 </div>
-                <p className="text-sm leading-relaxed text-ink-soft">„{row.preview}“</p>
+                <p className={styles.threadPreview}>„{row.preview}“</p>
                 <Link
                   href={`/messages/${row.id}`}
-                  className="btn-primary w-full !min-h-11 !text-sm"
+                  className={styles.openOfferLink}
                 >
                   {row.isNewOffer ? t("openOffer") : t("open")}
                 </Link>

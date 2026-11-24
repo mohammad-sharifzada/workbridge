@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import { VisualCv } from "@/components/visual-cv";
 import { buildDemoVisualCvData, DEMO_CV_PERSON } from "@/lib/demo-cv";
+import styles from "./page.module.scss";
 
 export default async function ExampleCvPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -32,25 +33,25 @@ export default async function ExampleCvPage({ params }: { params: Promise<{ loca
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className={styles.examplePage}>
+      <div className={styles.pageHeader}>
         <div>
-          <Link href="/profile" className="text-sm font-semibold text-brand">
+          <Link href="/profile" className={styles.profileLink}>
             ← {t("title")}
           </Link>
-          <h1 className="mt-2 font-display text-2xl font-extrabold">👤 {tExample("title")}</h1>
-          <p className="mt-1 text-sm text-ink-soft">{tExample("subtitle")}</p>
+          <h1 className={styles.title}>👤 {tExample("title")}</h1>
+          <p className={styles.subtitle}>{tExample("subtitle")}</p>
         </div>
-        <span className="rounded-full bg-[#fff3e0] px-3 py-1 text-xs font-extrabold uppercase text-[#ef6c00]">
+        <span className={styles.badge}>
           {tExample("badge")}
         </span>
       </div>
 
-      <div className="rounded-xl bg-[#fff8e1] px-4 py-3 text-sm font-bold text-[#f57f17]">
+      <div className={styles.demoNotice}>
         {tExample("banner")}
       </div>
 
-      <section className="surface grid gap-3 p-4 text-sm sm:grid-cols-2">
+      <section className={styles.sampleDetails}>
         <InfoRow label={t("name")} value={DEMO_CV_PERSON.name} />
         <InfoRow label={t("city")} value={DEMO_CV_PERSON.city} />
         <InfoRow label={t("availability")} value={tExample("availability")} />
@@ -59,7 +60,7 @@ export default async function ExampleCvPage({ params }: { params: Promise<{ loca
 
       <VisualCv data={cvData} />
 
-      <p className="text-center text-sm text-ink-soft">{tExample("hint")}</p>
+      <p className={styles.hint}>{tExample("hint")}</p>
     </div>
   );
 }
@@ -67,8 +68,8 @@ export default async function ExampleCvPage({ params }: { params: Promise<{ loca
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <p>
-      <span className="font-bold text-ink-soft">{label}: </span>
-      <span className="font-semibold">{value}</span>
+      <span className={styles.detailLabel}>{label}: </span>
+      <span className={styles.detailValue}>{value}</span>
     </p>
   );
 }

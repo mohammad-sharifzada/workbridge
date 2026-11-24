@@ -1,0 +1,36 @@
+@use "../styles/design";
+
+.offerForm {
+  margin-top: 0.75rem;
+  border-radius: 0.75rem;
+  background-color: var(--wb-paper-2);
+  padding: 0.75rem;
+  @include design.stack(0.5rem);
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+}
+
+.jobSelect {
+  @include design.input;
+  margin-top: 0.25rem;
+}
+
+.sendButton {
+  @include design.primary-button;
+  min-height: 2.75rem;
+  width: 100%;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.sentNotice {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-brand);
+}

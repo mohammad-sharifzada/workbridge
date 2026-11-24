@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { compressImageFile } from "@/lib/image-upload";
 import { buildAutoBio, splitToolsAndTraits, TRAIT_IDS } from "@/lib/profile-content";
+import styles from "./onboarding-wizard.module.scss";
 
 const SKILLS = [
   { id: "warehouse", icon: Package },
@@ -261,28 +262,28 @@ export function OnboardingWizard({
   };
 
   return (
-    <div className="mx-auto max-w-lg space-y-5">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-extrabold">{t("title")}</h1>
-        <span className="shrink-0 text-sm font-semibold text-ink-soft">
+    <div className={styles.wizard}>
+      <div className={styles.wizardHeader}>
+        <h1 className={styles.title}>{t("title")}</h1>
+        <span className={styles.step}>
           {t("step", { current: step + 1, total })}
         </span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-line">
+      <div className={styles.progressTrack}>
         <div
-          className="h-full rounded-full bg-brand transition-all"
+          className={styles.progressBar}
           style={{ width: `${((step + 1) / total) * 100}%` }}
         />
       </div>
-      <p className="text-sm text-ink-soft">{t("cvBuildHint")}</p>
+      <p className={styles.cvBuildHint}>{t("cvBuildHint")}</p>
 
       {step === 0 && (
-        <div className="space-y-2 rounded-xl border border-[#ffcc80] bg-[#fff8e1] px-4 py-3">
-          <p className="text-xs font-extrabold uppercase tracking-wide text-[#ef6c00]">
+        <div className={styles.exampleNotice}>
+          <p className={styles.exampleBadge}>
             {t("exampleBadge")}
           </p>
-          <p className="text-sm font-bold text-[#e65100]">{t("exampleBanner")}</p>
-          <Link href="/profile/example" className="inline-block text-sm font-bold text-brand underline">
+          <p className={styles.exampleBanner}>{t("exampleBanner")}</p>
+          <Link href="/profile/example" className={styles.exampleLink}>
             {t("exampleLink")} →
           </Link>
         </div>
@@ -290,24 +291,24 @@ export function OnboardingWizard({
 
       {/* 0 Foto + Name */}
       {step === 0 && (
-        <section className="space-y-4 animate-rise">
-          <h2 className="text-lg font-bold">{t("personalTitle")}</h2>
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-brand/30 bg-paper-2">
+        <section className={styles.standardStep}>
+          <h2 className={styles.stepTitle}>{t("personalTitle")}</h2>
+          <div className={styles.photoStepContent}>
+            <div className={styles.photoFrame}>
               {photoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={photoUrl} alt="" className="h-full w-full object-cover" />
+                <img src={photoUrl} alt="" className={styles.image} />
               ) : (
-                <Camera className="h-10 w-10 text-ink-soft" />
+                <Camera className={styles.cameraIcon} />
               )}
             </div>
-            <label className="btn-secondary !min-h-11 cursor-pointer !px-4 !text-sm">
+            <label className={styles.choosePhoto}>
               {tCv("photoUpload")}
               <input
                 type="file"
                 accept="image/*"
                 capture="user"
-                className="hidden"
+                className={styles.photoInput}
                 onChange={(e) => {
                   void onPhoto(e.target.files?.[0] ?? null);
                   e.target.value = "";
@@ -324,13 +325,13 @@ export function OnboardingWizard({
 
       {/* 1 Geburt + Adresse */}
       {step === 1 && (
-        <section className="space-y-4 animate-rise">
-          <h2 className="text-lg font-bold">{t("birthTitle")}</h2>
-          <p className="text-xs text-ink-soft">{t("optionalStep")}</p>
+        <section className={styles.standardStep}>
+          <h2 className={styles.stepTitle}>{t("birthTitle")}</h2>
+          <p className={styles.optionalStep}>{t("optionalStep")}</p>
           <Field label={tCv("birthDate")} value={birthDate} onChange={setBirthDate} placeholder={t("birthDatePlaceholder")} />
           <Field label={tCv("birthPlace")} value={birthPlace} onChange={setBirthPlace} placeholder={t("birthPlacePlaceholder")} />
           <Field label={tCv("address")} value={address} onChange={setAddress} placeholder={t("addressPlaceholder")} />
-          <button type="button" className="btn-secondary w-full !min-h-10 !text-sm" onClick={skipOptionalStep}>
+          <button type="button" className={styles.skipButton} onClick={skipOptionalStep}>
             {t("skip")}
           </button>
         </section>
@@ -338,30 +339,30 @@ export function OnboardingWizard({
 
       {/* 2 Fähigkeiten */}
       {step === 2 && (
-        <section className="space-y-3 animate-rise">
-          <h2 className="text-lg font-bold">{t("skillsTitle")}</h2>
-          <p className="text-sm text-ink-soft">{t("skillsHint")}</p>
-          <div className="grid grid-cols-2 gap-3">
+        <section className={styles.compactStep}>
+          <h2 className={styles.stepTitle}>{t("skillsTitle")}</h2>
+          <p className={styles.cvBuildHint}>{t("skillsHint")}</p>
+          <div className={styles.twoColumnChoices}>
             {SKILLS.map(({ id, icon: Icon }) => (
               <button
                 key={id}
                 type="button"
-                className="icon-tile"
+                className={styles.choiceTile}
                 data-active={skills.includes(id)}
                 onClick={() => toggleSkill(id)}
               >
-                <Icon className="h-8 w-8 text-brand" />
+                <Icon className={styles.mobilityIcon} />
                 {t(id)}
               </button>
             ))}
           </div>
           <button
             type="button"
-            className="icon-tile w-full"
+            className={styles.hasBikeButton}
             data-active={skills.includes("bike")}
             onClick={() => toggleSkill("bike")}
           >
-            <Bike className="h-8 w-8 text-brand" />
+            <Bike className={styles.mobilityIcon} />
             {t("hasBike")}
           </button>
         </section>
@@ -369,36 +370,36 @@ export function OnboardingWizard({
 
       {/* 3 Körper + Zeit */}
       {step === 3 && (
-        <section className="space-y-5 animate-rise">
-          <div className="space-y-3">
-            <h2 className="text-lg font-bold">{t("physicalTitle")}</h2>
-            <div className="grid grid-cols-3 gap-3">
+        <section className={styles.availabilityStep}>
+          <div className={styles.stepFields}>
+            <h2 className={styles.stepTitle}>{t("physicalTitle")}</h2>
+            <div className={styles.threeColumnChoices}>
               {PHYSICAL.map(({ id, icon: Icon }) => (
                 <button
                   key={id}
                   type="button"
-                  className="icon-tile"
+                  className={styles.choiceTile}
                   data-active={physical === id}
                   onClick={() => setPhysical(id)}
                 >
-                  <Icon className="h-7 w-7 text-brand" />
+                  <Icon className={styles.choiceIcon} />
                   {t(id === "LIGHT" ? "light" : id === "MEDIUM" ? "medium" : "heavy")}
                 </button>
               ))}
             </div>
           </div>
-          <div className="space-y-3">
-            <h2 className="text-lg font-bold">{t("availabilityTitle")}</h2>
-            <div className="grid grid-cols-2 gap-3">
+          <div className={styles.stepFields}>
+            <h2 className={styles.stepTitle}>{t("availabilityTitle")}</h2>
+            <div className={styles.twoColumnChoices}>
               {AVAIL.map(({ id, icon: Icon }) => (
                 <button
                   key={id}
                   type="button"
-                  className="icon-tile"
+                  className={styles.choiceTile}
                   data-active={availability === id}
                   onClick={() => setAvailability(id)}
                 >
-                  <Icon className="h-7 w-7 text-brand" />
+                  <Icon className={styles.choiceIcon} />
                   {t(
                     id === "FULL_TIME"
                       ? "fullTime"
@@ -412,37 +413,37 @@ export function OnboardingWizard({
               ))}
             </div>
           </div>
-          <p className="text-xs text-ink-soft">{t("optionalStep")}</p>
+          <p className={styles.optionalStep}>{t("optionalStep")}</p>
         </section>
       )}
 
       {/* 4 Standort */}
       {step === 4 && (
-        <section className="space-y-3 animate-rise">
-          <h2 className="text-lg font-bold">{t("locationTitle")}</h2>
+        <section className={styles.compactStep}>
+          <h2 className={styles.stepTitle}>{t("locationTitle")}</h2>
           <Field label={t("cityLabel")} value={city} onChange={setCity} placeholder={t("cityPlaceholder")} />
-          <button type="button" className="btn-secondary w-full" onClick={useGps}>
-            <MapPin className="h-5 w-5" />
+          <button type="button" className={styles.useGpsButton} onClick={useGps}>
+            <MapPin className={styles.mapPinIcon} />
             {t("useGps")}
           </button>
           {lat != null && lng != null && (
-            <p className="text-sm font-medium text-ok">
+            <p className={styles.locationSuccess}>
               GPS: {lat.toFixed(3)}, {lng.toFixed(3)}
             </p>
           )}
-          {gpsError && <p className="text-sm text-bad">{gpsError}</p>}
+          {gpsError && <p className={styles.locationError}>{gpsError}</p>}
         </section>
       )}
 
       {/* 5 Sprachen */}
       {step === 5 && (
-        <section className="space-y-4 animate-rise">
-          <h2 className="text-lg font-bold">{tCv("languages")}</h2>
-          <p className="text-sm text-ink-soft">{t("languagesStepHint")}</p>
+        <section className={styles.standardStep}>
+          <h2 className={styles.stepTitle}>{tCv("languages")}</h2>
+          <p className={styles.cvBuildHint}>{t("languagesStepHint")}</p>
           {languages.map((lang, i) => (
-            <div key={i} className="surface grid grid-cols-[1fr_100px_auto] gap-2 p-3">
+            <div key={i} className={styles.languageRow}>
               <input
-                className="input-field !min-h-11"
+                className={styles.compactInput}
                 placeholder={t("langNamePlaceholder")}
                 value={lang.name}
                 onChange={(e) => {
@@ -452,7 +453,7 @@ export function OnboardingWizard({
                 }}
               />
               <input
-                className="input-field !min-h-11"
+                className={styles.compactInput}
                 placeholder={t("langLevelPlaceholder")}
                 value={lang.level}
                 onChange={(e) => {
@@ -463,19 +464,19 @@ export function OnboardingWizard({
               />
               <button
                 type="button"
-                className="rounded-xl px-2 text-bad"
+                className={styles.removeLanguage}
                 onClick={() => setLanguages(languages.filter((_, j) => j !== i))}
                 aria-label="remove"
               >
-                <Trash2 className="h-5 w-5" />
+                <Trash2 className={styles.mapPinIcon} />
               </button>
             </div>
           ))}
-          <button type="button" className="btn-secondary w-full" onClick={() => setLanguages([...languages, emptyLang()])}>
-            <Plus className="h-4 w-4" />
+          <button type="button" className={styles.useGpsButton} onClick={() => setLanguages([...languages, emptyLang()])}>
+            <Plus className={styles.plusIcon} />
             {t("addLanguage")}
           </button>
-          <button type="button" className="btn-secondary w-full !min-h-10 !text-sm" onClick={skipOptionalStep}>
+          <button type="button" className={styles.skipButton} onClick={skipOptionalStep}>
             {t("skip")}
           </button>
         </section>
@@ -483,20 +484,20 @@ export function OnboardingWizard({
 
       {/* 6 Kenntnisse + Hobbys */}
       {step === 6 && (
-        <section className="space-y-4 animate-rise">
-          <h2 className="text-lg font-bold">{t("traitsTitle")}</h2>
-          <p className="text-sm text-ink-soft">{t("traitsHint")}</p>
-          <div className="grid grid-cols-2 gap-2">
+        <section className={styles.standardStep}>
+          <h2 className={styles.stepTitle}>{t("traitsTitle")}</h2>
+          <p className={styles.cvBuildHint}>{t("traitsHint")}</p>
+          <div className={styles.interestGrid}>
             {TRAITS.map((id) => (
-              <button key={id} type="button" className="icon-tile !min-h-12 !text-sm" data-active={traits.includes(id)} onClick={() => toggleTrait(id)}>
+              <button key={id} type="button" className={styles.interestTile} data-active={traits.includes(id)} onClick={() => toggleTrait(id)}>
                 {t(id)}
               </button>
             ))}
           </div>
-          <h3 className="text-sm font-bold">{t("toolsHobbiesTitle")}</h3>
+          <h3 className={styles.toolsHobbiesTitle}>{t("toolsHobbiesTitle")}</h3>
           <Field label={tCv("toolsHint")} value={tools} onChange={setTools} placeholder={t("toolsPlaceholder")} />
           <Field label={tCv("hobbiesHint")} value={hobbies} onChange={setHobbies} placeholder={t("hobbiesPlaceholder")} />
-          <button type="button" className="btn-secondary w-full !min-h-10 !text-sm" onClick={skipOptionalStep}>
+          <button type="button" className={styles.skipButton} onClick={skipOptionalStep}>
             {t("skip")}
           </button>
         </section>
@@ -504,16 +505,16 @@ export function OnboardingWizard({
 
       {/* 7 Über mich */}
       {step === 7 && (
-        <section className="space-y-4 animate-rise">
-          <h2 className="text-lg font-bold">{tCv("about")}</h2>
-          <p className="text-sm text-ink-soft">{t("bioHint")}</p>
+        <section className={styles.standardStep}>
+          <h2 className={styles.stepTitle}>{tCv("about")}</h2>
+          <p className={styles.cvBuildHint}>{t("bioHint")}</p>
           <textarea
-            className="input-field min-h-36"
+            className={styles.bioPlaceholderTextarea}
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             placeholder={t("bioPlaceholder")}
           />
-          <button type="button" className="btn-secondary w-full !min-h-10 !text-sm" onClick={skipOptionalStep}>
+          <button type="button" className={styles.skipButton} onClick={skipOptionalStep}>
             {t("skip")}
           </button>
         </section>
@@ -521,8 +522,8 @@ export function OnboardingWizard({
 
       {/* 8 Erfahrung / Schule / Nebenjobs */}
       {step === 8 && (
-        <section className="space-y-6 animate-rise">
-          <p className="text-sm text-ink-soft">{t("experienceBlockHint")}</p>
+        <section className={styles.reviewStep}>
+          <p className={styles.cvBuildHint}>{t("experienceBlockHint")}</p>
           <EntryList
             title={tCv("experience")}
             hint={t("experienceHint")}
@@ -566,16 +567,16 @@ export function OnboardingWizard({
         </section>
       )}
 
-      <div className="flex gap-3 pt-2">
+      <div className={styles.wizardActions}>
         {step > 0 && (
-          <button type="button" className="btn-secondary flex-1" onClick={() => setStep((s) => s - 1)}>
+          <button type="button" className={styles.backButton} onClick={() => setStep((s) => s - 1)}>
             {t("back")}
           </button>
         )}
         {step < total - 1 ? (
           <button
             type="button"
-            className="btn-primary flex-1"
+            className={styles.nextButton}
             disabled={!canNext || pending}
             onClick={() =>
               startTransition(async () => {
@@ -587,7 +588,7 @@ export function OnboardingWizard({
             {t("next")}
           </button>
         ) : (
-          <button type="button" className="btn-primary flex-1" disabled={!canNext || pending} onClick={finish}>
+          <button type="button" className={styles.nextButton} disabled={!canNext || pending} onClick={finish}>
             {t("finish")}
           </button>
         )}
@@ -610,11 +611,11 @@ function Field({
   required?: boolean;
 }) {
   return (
-    <label className="block text-sm font-semibold">
+    <label className={styles.fieldLabel}>
       {label}
-      {required && <span className="text-bad"> *</span>}
+      {required && <span className={styles.requiredMarker}> *</span>}
       <input
-        className="input-field mt-1"
+        className={styles.fieldInput}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
@@ -639,22 +640,22 @@ function EntryList({
   labels: { title: string; company: string; period: string; bullets: string; add: string };
 }) {
   return (
-    <div className="space-y-3">
-      <h2 className="text-lg font-bold">{title}</h2>
-      <p className="text-sm text-ink-soft">{hint}</p>
+    <div className={styles.stepFields}>
+      <h2 className={styles.stepTitle}>{title}</h2>
+      <p className={styles.cvBuildHint}>{hint}</p>
       {items.map((item, i) => (
-        <div key={i} className="surface space-y-2 p-3">
-          <div className="flex justify-end">
+        <div key={i} className={styles.historyEntry}>
+          <div className={styles.historyActions}>
             <button
               type="button"
-              className="text-bad"
+              className={styles.requiredMarker}
               onClick={() => onChange(items.filter((_, j) => j !== i))}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className={styles.plusIcon} />
             </button>
           </div>
           <input
-            className="input-field !min-h-11"
+            className={styles.compactInput}
             placeholder={labels.period}
             value={item.period}
             onChange={(e) => {
@@ -664,7 +665,7 @@ function EntryList({
             }}
           />
           <input
-            className="input-field !min-h-11"
+            className={styles.compactInput}
             placeholder={labels.title}
             value={item.title}
             onChange={(e) => {
@@ -674,7 +675,7 @@ function EntryList({
             }}
           />
           <input
-            className="input-field !min-h-11"
+            className={styles.compactInput}
             placeholder={labels.company}
             value={item.company}
             onChange={(e) => {
@@ -684,7 +685,7 @@ function EntryList({
             }}
           />
           <textarea
-            className="input-field min-h-20"
+            className={styles.historyNotes}
             placeholder={labels.bullets}
             value={item.bullets}
             onChange={(e) => {
@@ -695,8 +696,8 @@ function EntryList({
           />
         </div>
       ))}
-      <button type="button" className="btn-secondary w-full" onClick={onAdd}>
-        <Plus className="h-4 w-4" />
+      <button type="button" className={styles.useGpsButton} onClick={onAdd}>
+        <Plus className={styles.plusIcon} />
         {labels.add}
       </button>
     </div>
@@ -717,21 +718,21 @@ function EduList({
   labels: { title: string; school: string; period: string; add: string };
 }) {
   return (
-    <div className="space-y-3">
-      <h2 className="text-lg font-bold">{title}</h2>
+    <div className={styles.stepFields}>
+      <h2 className={styles.stepTitle}>{title}</h2>
       {items.map((item, i) => (
-        <div key={i} className="surface space-y-2 p-3">
-          <div className="flex justify-end">
+        <div key={i} className={styles.historyEntry}>
+          <div className={styles.historyActions}>
             <button
               type="button"
-              className="text-bad"
+              className={styles.requiredMarker}
               onClick={() => onChange(items.filter((_, j) => j !== i))}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className={styles.plusIcon} />
             </button>
           </div>
           <input
-            className="input-field !min-h-11"
+            className={styles.compactInput}
             placeholder={labels.period}
             value={item.period}
             onChange={(e) => {
@@ -741,7 +742,7 @@ function EduList({
             }}
           />
           <input
-            className="input-field !min-h-11"
+            className={styles.compactInput}
             placeholder={labels.title}
             value={item.title}
             onChange={(e) => {
@@ -751,7 +752,7 @@ function EduList({
             }}
           />
           <input
-            className="input-field !min-h-11"
+            className={styles.compactInput}
             placeholder={labels.school}
             value={item.school}
             onChange={(e) => {
@@ -762,8 +763,8 @@ function EduList({
           />
         </div>
       ))}
-      <button type="button" className="btn-secondary w-full" onClick={onAdd}>
-        <Plus className="h-4 w-4" />
+      <button type="button" className={styles.useGpsButton} onClick={onAdd}>
+        <Plus className={styles.plusIcon} />
         {labels.add}
       </button>
     </div>

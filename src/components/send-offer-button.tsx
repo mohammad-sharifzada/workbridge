@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { sendJobOffer } from "@/actions/messaging";
 import { localizeText } from "@/lib/i18n-content";
+import styles from "./send-offer-button.module.scss";
 
 export function SendOfferButton({
   seekerId,
@@ -24,10 +25,10 @@ export function SendOfferButton({
   if (jobs.length === 0) return null;
 
   return (
-    <div className="mt-3 space-y-2 rounded-xl bg-paper-2 p-3">
-      <label className="block text-sm font-semibold">
+    <div className={styles.offerForm}>
+      <label className={styles.fieldLabel}>
         {t("selectJob")}
-        <select className="input-field mt-1" value={jobId} onChange={(e) => setJobId(e.target.value)}>
+        <select className={styles.jobSelect} value={jobId} onChange={(e) => setJobId(e.target.value)}>
           {jobs.map((j) => (
             <option key={j.id} value={j.id}>
               {localizeText(j.titleI18n, j.title, locale)}
@@ -37,7 +38,7 @@ export function SendOfferButton({
       </label>
       <button
         type="button"
-        className="btn-primary w-full !min-h-11 !text-sm"
+        className={styles.sendButton}
         disabled={pending || !jobId}
         onClick={() => {
           setMsg(null);
@@ -56,7 +57,7 @@ export function SendOfferButton({
       >
         {t("send")}
       </button>
-      {msg && <p className="text-sm font-semibold text-brand">{msg}</p>}
+      {msg && <p className={styles.sentNotice}>{msg}</p>}
     </div>
   );
 }

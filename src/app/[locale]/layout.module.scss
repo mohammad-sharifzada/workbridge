@@ -1,0 +1,32 @@
+@use "../../styles/design";
+
+.document {
+  height: 100%;
+}
+
+.body {
+  @include design.grain;
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.shell {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+}
+
+.content {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 64rem;
+  flex: 1;
+  padding-inline: 1rem;
+  padding-block: 1.5rem;
+
+  @media (min-width: design.$sm) {
+    padding-inline: 1.5rem;
+    padding-block: 2rem;
+  }
+}

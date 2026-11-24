@@ -8,6 +8,7 @@ import { formatWage, parseJsonArray } from "@/lib/utils";
 import type { MatchGapKey, MatchReasonKey } from "@/lib/matching";
 import { applyToJob } from "@/actions";
 import { useState, useTransition } from "react";
+import styles from "./simple-job-card.module.scss";
 
 export type SimpleJobCardData = {
   id: string;
@@ -115,19 +116,19 @@ export function SimpleJobCard({ job }: { job: SimpleJobCardData }) {
   };
 
   return (
-    <article className="surface animate-rise space-y-5 p-5">
+    <article className={styles.card}>
       <div>
-        <p className="text-4xl leading-none">{icon}</p>
-        <h3 className="mt-2 font-display text-2xl font-extrabold leading-tight">{loc.title}</h3>
+        <p className={styles.categoryEmoji}>{icon}</p>
+        <h3 className={styles.title}>{loc.title}</h3>
         {job.companyId && (
-          <Link href={`/companies/${job.companyId}`} className="mt-1 text-sm font-semibold text-brand">
+          <Link href={`/companies/${job.companyId}`} className={styles.companyLink}>
             {loc.companyName}
             {job.verified ? " ✓" : ""}
           </Link>
         )}
       </div>
 
-      <ul className="space-y-2.5 text-base font-bold">
+      <ul className={styles.jobFacts}>
         <li>
           📍 {loc.city}
           {job.distanceKm != null ? ` · ${job.distanceKm.toFixed(0)} km` : ""}
@@ -142,81 +143,81 @@ export function SimpleJobCard({ job }: { job: SimpleJobCardData }) {
       </ul>
 
       <div>
-        <p className="text-sm font-extrabold uppercase tracking-wide text-ink-soft">{tSimple("whatTitle")}</p>
-        <p className="mt-1 text-lg font-semibold leading-snug">
+        <p className={styles.sectionLabel}>{tSimple("whatTitle")}</p>
+        <p className={styles.jobSummary}>
           {icon} {what}
         </p>
-        {need ? <p className="mt-2 text-sm text-ink-soft">{need}</p> : null}
+        {need ? <p className={styles.jobDescription}>{need}</p> : null}
         {needsBike && !showMatch && (
-          <p className="mt-2 text-sm font-semibold text-ink-soft">🚲 {t("bikeRequired")}</p>
+          <p className={styles.bikeRequired}>🚲 {t("bikeRequired")}</p>
         )}
       </div>
 
       {showMatch && (
         <>
-          <hr className="border-line" />
+          <hr className={styles.divider} />
           <div>
-            <p className="text-sm font-extrabold uppercase tracking-wide text-ink-soft">
+            <p className={styles.sectionLabel}>
               ⭐ {t("yourMatch")}
             </p>
-            <p className="mt-2 font-display text-2xl font-extrabold text-brand">
+            <p className={styles.matchPercent}>
               {job.matchScore} % {t("matchPercent")}
             </p>
-            <ul className="mt-3 space-y-1.5 text-base font-bold">
-              {reasons.includes("bikeOk") && <li className="text-ok">✅ {tMatch("bikeOk")}</li>}
-              {gaps.includes("bikeMissing") && <li className="text-bad">❌ {tGaps("bikeMissing")}</li>}
+            <ul className={styles.matchReasons}>
+              {reasons.includes("bikeOk") && <li className={styles.matchReason}>✅ {tMatch("bikeOk")}</li>}
+              {gaps.includes("bikeMissing") && <li className={styles.missingReason}>❌ {tGaps("bikeMissing")}</li>}
               {(reasons.includes("sameCity") || reasons.includes("near")) && (
-                <li className="text-ok">✅ {loc.city}</li>
+                <li className={styles.matchReason}>✅ {loc.city}</li>
               )}
               {reasons
                 .filter((r) => r !== "sameCity" && r !== "near" && r !== "bikeOk")
                 .map((r) => (
-                  <li key={r} className="text-ok">
+                  <li key={r} className={styles.matchReason}>
                     ✅ {tMatch(r)}
                   </li>
                 ))}
               {gaps
                 .filter((g) => g !== "bikeMissing")
                 .map((g) => (
-                  <li key={g} className="text-bad">
+                  <li key={g} className={styles.missingReason}>
                     ❌ {tGaps(g)}
                   </li>
                 ))}
             </ul>
             {job.matchScore != null && job.matchScore >= 70 && gaps.length === 0 && (
-              <p className="mt-3 font-display text-lg font-extrabold text-brand">{t("greatMatch")}</p>
+              <p className={styles.greatMatch}>{t("greatMatch")}</p>
             )}
           </div>
         </>
       )}
 
       {job.locked ? (
-        <p className="rounded-xl bg-[#ffebee] px-4 py-3 text-center font-bold text-bad">{t("locked")}</p>
+        <p className={styles.locked}>{t("locked")}</p>
       ) : justApplied || applied ? (
-        <div className="space-y-2">
-          <p className="rounded-xl bg-[#e8f5e9] px-4 py-4 text-center text-lg font-extrabold text-ok">
+        <div className={styles.applicationActions}>
+          <p className={styles.applySuccess}>
             ✅ {t("applySuccess")}
           </p>
-          <p className="text-center text-sm font-semibold text-ink-soft">{t("applyCvSent")}</p>
-          <Link href="/messages" className="btn-primary w-full">
+          <p className={styles.applyCvSent}>{t("applyCvSent")}</p>
+          <Link href="/messages" className={styles.openMessagesLink}>
             {t("openMessages")}
           </Link>
-          <Link href="/applications" className="btn-secondary w-full">
+          <Link href="/applications" className={styles.myApplicationsLink}>
             {t("myApplications")}
           </Link>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className={styles.applicationActions}>
           <button
             type="button"
-            className="btn-primary w-full !min-h-14 !text-lg"
+            className={styles.applyNowButton}
             disabled={pending}
             onClick={apply}
           >
             🟢 {t("applyNow")}
           </button>
           {applyError && (
-            <p className="text-center text-sm font-bold text-bad">{applyError}</p>
+            <p className={styles.applicationError}>{applyError}</p>
           )}
         </div>
       )}

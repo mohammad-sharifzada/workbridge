@@ -21,6 +21,7 @@ import { splitToolsAndTraits } from "@/lib/profile-content";
 import { PRESENTATION_READY_PHONE } from "@/lib/presentation-constants";
 import { buildDemoVisualCvData } from "@/lib/demo-cv";
 import { localizeCity } from "@/lib/localize-job";
+import styles from "./page.module.scss";
 
 export default async function ProfilePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -111,29 +112,29 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
           : tOn("flexible");
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-extrabold">👤 {t("title")}</h1>
-        <div className="flex flex-wrap gap-2">
-          <Link href="/profile/example" className="btn-primary !min-h-10 !px-3 !text-sm">
+    <div className={styles.profilePage}>
+      <div className={styles.pageHeader}>
+        <h1 className={styles.title}>👤 {t("title")}</h1>
+        <div className={styles.profileActions}>
+          <Link href="/profile/example" className={styles.viewExampleCvLink}>
             {t("viewExampleCv")}
           </Link>
-          <Link href="/settings" className="btn-secondary !min-h-10 !px-3 !text-sm">
+          <Link href="/settings" className={styles.settingsLink}>
             {t("settings")}
           </Link>
-          <Link href="/onboarding" className="btn-secondary !min-h-10 !px-3 !text-sm">
+          <Link href="/onboarding" className={styles.settingsLink}>
             {t("edit")}
           </Link>
         </div>
       </div>
 
       {isPresentationDemo && (
-        <div className="rounded-xl border border-[#ffcc80] bg-[#fff8e1] px-4 py-3 text-sm font-bold text-[#e65100]">
+        <div className={styles.profileNotice}>
           {t("demoContentLocalized")}
         </div>
       )}
 
-      <section className="surface grid gap-3 p-4 text-sm sm:grid-cols-2">
+      <section className={styles.profileDetails}>
         <StatusRow label={t("name")} value={user.name || tCommon("notSpecified")} />
         <StatusRow label={t("city")} value={displayCity || tCommon("notSpecified")} />
         <StatusRow label={t("availability")} value={availLabel} />
@@ -154,8 +155,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
           label={t("skills")}
           value={displaySkills.length ? displaySkills.join(", ") : tCommon("notSpecified")}
         />
-        <div className="sm:col-span-2">
-          <Link href="/help" className="btn-secondary w-full !min-h-11 !text-sm">
+        <div className={styles.helpRow}>
+          <Link href="/help" className={styles.openHelpLink}>
             🆘 {t("openHelp")}
           </Link>
         </div>
@@ -213,8 +214,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
 function StatusRow({ label, value }: { label: string; value: string }) {
   return (
     <p>
-      <span className="font-bold text-ink-soft">{label}: </span>
-      <span className="font-semibold">{value}</span>
+      <span className={styles.detailLabel}>{label}: </span>
+      <span className={styles.detailValue}>{value}</span>
     </p>
   );
 }

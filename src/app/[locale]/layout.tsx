@@ -7,6 +7,8 @@ import { AppFooter, AppHeader } from "@/components/layout";
 import { HelpChatbot } from "@/components/help-chatbot";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/prisma/db";
+import clsx from "clsx";
+import styles from "./layout.module.scss";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -62,17 +64,16 @@ export default async function LocaleLayout({
     };
   }
   const dir = rtlLocales.includes(locale) ? "rtl" : "ltr";
-  const isRtl = dir === "rtl";
 
   return (
-    <html lang={locale} dir={dir} className="h-full">
+    <html lang={locale} dir={dir} className={styles.document}>
       <body
-        className={`${outfit.variable} ${lexend.variable} ${notoArabic.variable} wb-grain h-full antialiased ${isRtl ? "font-[family-name:var(--font-rtl)]" : ""}`}
+        className={clsx(outfit.variable, lexend.variable, notoArabic.variable, styles.body)}
       >
-        <div className="flex min-h-full flex-col">
+        <div className={styles.shell}>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <AppHeader user={headerUser} />
-            <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+            <main className={styles.content}>{children}</main>
             <AppFooter />
             <HelpChatbot />
           </NextIntlClientProvider>

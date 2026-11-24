@@ -1,0 +1,106 @@
+@use "../../../styles/design";
+
+.statusPage {
+  margin-inline: auto;
+  max-width: 32rem;
+  @include design.stack(1.5rem);
+}
+
+.title {
+  @include design.display-font;
+  font-size: 1.5rem;
+  line-height: var(--wb-leading-2xl);
+  font-weight: 800;
+}
+
+.statusCard {
+  @include design.pulse-soft;
+  border-radius: 1.5rem;
+  border-style: solid;
+  border-width: 2px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.statusIcon {
+  margin-inline: auto;
+  margin-bottom: 0.75rem;
+  display: flex;
+  height: 4rem;
+  width: 4rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-size: 1.875rem;
+  line-height: var(--wb-leading-3xl);
+  font-weight: 900;
+  color: #fff;
+}
+
+.statusDescription {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 500;
+  opacity: 90%;
+}
+
+.missingItems {
+  @include design.surface;
+
+  padding: 1.25rem;
+  @include design.stack(0.75rem);
+}
+
+.missingHeading {
+  font-weight: 700;
+}
+
+.list {
+  @include design.stack(0.5rem);
+}
+
+.missingItemLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 0.75rem;
+  background-color: var(--wb-paper-2);
+  padding-inline: 1rem;
+  padding-block: 0.75rem;
+  font-weight: 600;
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: #e7f4f3;
+    }
+  }
+}
+
+.missingItemArrow {
+  color: var(--wb-brand);
+}
+
+.statusActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.seeJobsLink {
+  @include design.primary-button;
+  width: 100%;
+}
+
+.updateLink {
+  @include design.secondary-button;
+  width: 100%;
+}
+
+.skipToJobsLink {
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-brand);
+}

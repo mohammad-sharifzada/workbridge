@@ -10,29 +10,31 @@ import {
   type DemoThread,
 } from "@/lib/demo-threads";
 import type { Locale } from "@/i18n/config";
+import clsx from "clsx";
+import styles from "./demo-messages.module.scss";
 
 export function DemoMessagesList() {
   const t = useTranslations("messages");
   const locale = useLocale();
 
   return (
-    <section className="space-y-3">
-      <div className="rounded-xl bg-[#fff8e1] px-4 py-3 text-sm font-bold text-[#f57f17]">
+    <section className={styles.demoList}>
+      <div className={styles.demoNotice}>
         {t("demoBanner")}
       </div>
-      <ul className="space-y-3">
+      <ul className={styles.demoList}>
         {DEMO_THREADS.map((d) => (
-          <li key={d.id} className="surface space-y-3 p-4">
-            <div className="flex items-start justify-between gap-2">
-              <p className="font-display text-lg font-bold">💬 {d.company}</p>
-              <span className="rounded-full bg-[#fff3e0] px-2 py-0.5 text-[10px] font-extrabold uppercase text-[#ef6c00]">
+          <li key={d.id} className={styles.threadCard}>
+            <div className={styles.cardHeader}>
+              <p className={styles.threadTitle}>💬 {d.company}</p>
+              <span className={styles.demoBadge}>
                 {t("demoBadge")}
               </span>
             </div>
-            <p className="text-sm leading-relaxed text-ink-soft">
+            <p className={styles.threadPreview}>
               „{demoText(d.preview, locale)}“
             </p>
-            <Link href={`/messages/examples/${d.id}`} className="btn-primary w-full !min-h-11 !text-sm">
+            <Link href={`/messages/examples/${d.id}`} className={styles.openLink}>
               {t("open")}
             </Link>
           </li>
@@ -78,46 +80,46 @@ export function DemoChat({ thread }: { thread: DemoThread }) {
   };
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-4">
-      <div className="flex items-center justify-between gap-2">
-        <Link href="/messages" className="text-sm font-semibold text-brand">
+    <div className={styles.demoThread}>
+      <div className={styles.threadHeader}>
+        <Link href="/messages" className={styles.messagesLink}>
           ← {t("title")}
         </Link>
-        <span className="rounded-full bg-[#fff3e0] px-2.5 py-1 text-[10px] font-extrabold uppercase text-[#ef6c00]">
+        <span className={styles.threadBadge}>
           {t("demoBadge")}
         </span>
       </div>
-      <h1 className="font-display text-lg font-bold">{thread.company}</h1>
-      <p className="text-xs font-semibold text-ink-soft">{t("demoBanner")}</p>
+      <h1 className={styles.threadTitle}>{thread.company}</h1>
+      <p className={styles.demoBanner}>{t("demoBanner")}</p>
 
       {locale !== "de" && (
         <button
           type="button"
-          className="inline-flex items-center gap-1.5 self-start text-sm font-bold text-brand underline"
+          className={styles.showTranslationButton}
           onClick={() => setShowOriginal((v) => !v)}
         >
-          <Languages className="h-4 w-4" />
+          <Languages className={styles.languagesIcon} />
           {showOriginal ? t("showTranslation") : t("showOriginal")}
         </button>
       )}
 
-      <div className="surface flex max-h-[60vh] flex-col gap-3 overflow-y-auto p-4">
+      <div className={styles.messages}>
         {display.map((m, idx) => {
           const mine = m.from === "you";
           return (
             <div
               key={`${idx}-${m.from}`}
-              className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${mine ? "ms-auto bg-brand text-white" : "bg-paper-2 text-ink"}`}
+              className={clsx(styles.message, mine ? styles.sentMessage : styles.receivedMessage)}
             >
-              <p className="whitespace-pre-wrap">{m.text}</p>
+              <p className={styles.messageText}>{m.text}</p>
             </div>
           );
         })}
       </div>
 
-      <div className="flex gap-2">
+      <div className={styles.composer}>
         <input
-          className="input-field flex-1"
+          className={styles.messageInput}
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={t("placeholder")}
@@ -125,7 +127,7 @@ export function DemoChat({ thread }: { thread: DemoThread }) {
             if (e.key === "Enter") send();
           }}
         />
-        <button type="button" className="btn-primary !px-4" disabled={!text.trim()} onClick={send}>
+        <button type="button" className={styles.sendButton} disabled={!text.trim()} onClick={send}>
           {t("send")}
         </button>
       </div>

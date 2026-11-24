@@ -1,0 +1,69 @@
+@use "../styles/reset";
+
+:root {
+  --wb-ink: #14212b;
+  --wb-ink-soft: #3a4a57;
+  --wb-paper: #f3f6f4;
+  --wb-paper-2: #e7eee9;
+  --wb-brand: #0d6e6e;
+  --wb-brand-deep: #0a4f4f;
+  --wb-accent: #c45c26;
+  --wb-accent-soft: #f3e0d4;
+  --wb-line: #c9d5ce;
+  --wb-ok: #2e7d32;
+  --wb-warn: #f9a825;
+  --wb-bad: #c62828;
+  --wb-ok-bg: #e8f5e9;
+  --wb-warn-bg: #fff8e1;
+  --wb-bad-bg: #ffebee;
+  --background: var(--wb-paper);
+  --foreground: var(--wb-ink);
+
+  // Keep these ratios unitless so nested text scales with its own font size.
+  --wb-leading-xs: calc(1 / 0.75);
+  --wb-leading-sm: calc(1.25 / 0.875);
+  --wb-leading-lg: calc(1.75 / 1.125);
+  --wb-leading-xl: 1.4;
+  --wb-leading-2xl: calc(2 / 1.5);
+  --wb-leading-3xl: 1.2;
+  --wb-leading-4xl: calc(2.5 / 2.25);
+
+  // Shared keyframes keep their global names when referenced by CSS Modules.
+  --wb-rise: wb-rise 0.55s ease-out both;
+  --wb-rise-delayed: wb-rise 0.7s ease-out 0.12s both;
+  --wb-pulse-soft: wb-pulse-soft 2.8s ease-in-out infinite;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #d7ebe6 0%, transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, #f0e2d6 0%, transparent 50%),
+    linear-gradient(180deg, #f7faf8 0%, #eef3f0 100%);
+  color: var(--foreground);
+  font-family: var(--font-body), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+@keyframes wb-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wb-pulse-soft {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}

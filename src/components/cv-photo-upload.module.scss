@@ -1,0 +1,63 @@
+.photoUpload {
+  position: relative;
+  margin-inline: auto;
+  margin-bottom: 1.25rem;
+}
+
+.photoPicker {
+  position: relative;
+  display: flex;
+  height: 10rem;
+  width: 10rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 9999px;
+  border: 5px solid color-mix(in oklab, #9ec9c4 35%, transparent);
+  background-color: #2a3d50;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+  &:focus {
+    box-shadow: 0 0 0 2px #9ec9c4, 0 10px 30px rgba(0, 0, 0, 0.35);
+    outline-style: none;
+  }
+}
+
+.image {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.photoPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  padding-inline: 0.75rem;
+  text-align: center;
+  color: color-mix(in oklab, #fff 55%, transparent);
+}
+
+.cameraIcon {
+  height: 2.25rem;
+  width: 2.25rem;
+}
+
+.placeholderText {
+  font-size: 10px;
+  line-height: 1.25;
+  font-weight: 500;
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadError {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffb4b4;
+}

@@ -13,6 +13,7 @@ import {
 import { PRESENTATION_READY_PHONE } from "@/lib/presentation-constants";
 import { localeNames, locales, type Locale } from "@/i18n/config";
 import { Link } from "@/i18n/routing";
+import styles from "./auth-forms.module.scss";
 
 export function LanguagePicker({ compact = false }: { compact?: boolean }) {
   const locale = useLocale() as Locale;
@@ -20,15 +21,15 @@ export function LanguagePicker({ compact = false }: { compact?: boolean }) {
   const t = useTranslations("auth");
 
   return (
-    <div className={compact ? "" : "surface p-5"}>
-      {!compact && <p className="mb-3 font-display text-lg font-bold">{t("chooseLanguage")}</p>}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+    <div className={compact ? "" : styles.formCard}>
+      {!compact && <p className={styles.chooseLanguage}>{t("chooseLanguage")}</p>}
+      <div className={styles.languageGrid}>
         {locales.map((l) => (
           <button
             key={l}
             type="button"
             onClick={() => router.replace("/register", { locale: l })}
-            className="icon-tile !min-h-[3.5rem] !flex-row !gap-2 text-sm"
+            className={styles.languageChoice}
             data-active={locale === l}
           >
             {localeNames[l]}
@@ -109,35 +110,35 @@ export function SeekerAuthForm({ freshStart = false }: { freshStart?: boolean })
   };
 
   return (
-    <div className="surface space-y-4 p-5">
+    <div className={styles.authPanel}>
       {freshStart && (
-        <div className="rounded-xl bg-[#e7f4f3] px-4 py-3 text-sm font-semibold text-brand-deep">
+        <div className={styles.infoNotice}>
           {t("freshStartHint")}
         </div>
       )}
-      <h2 className="font-display text-xl font-bold">
+      <h2 className={styles.authTitle}>
         {step === "intro" ? t("checkTitle") : step === "phone" ? t("phoneTitle") : t("codeTitle")}
       </h2>
       {step === "intro" ? (
         <>
-          <p className="text-ink-soft">{t("checkIntro")}</p>
-          <ul className="space-y-1 text-sm text-ink-soft">
+          <p className={styles.authDescription}>{t("checkIntro")}</p>
+          <ul className={styles.instructions}>
             <li>✓ {t("checkOut1")}</li>
             <li>✓ {t("checkOut2")}</li>
             <li>✓ {t("checkOut3")}</li>
             <li>✓ {t("checkOut4")}</li>
           </ul>
-          <button type="button" className="btn-primary w-full" onClick={() => setStep("phone")}>
+          <button type="button" className={styles.submitButton} onClick={() => setStep("phone")}>
             {t("letsGo")}
           </button>
         </>
       ) : step === "phone" ? (
         <>
-          <p className="text-ink-soft">{t("phoneHint")}</p>
-          <label className="block text-sm font-semibold">
+          <p className={styles.authDescription}>{t("phoneHint")}</p>
+          <label className={styles.fieldLabel}>
             {t("phoneLabel")}
             <input
-              className="input-field mt-1"
+              className={styles.fieldInput}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+491701234567"
@@ -145,11 +146,11 @@ export function SeekerAuthForm({ freshStart = false }: { freshStart?: boolean })
               autoComplete="tel"
             />
           </label>
-          <button type="button" className="btn-primary w-full" disabled={pending} onClick={send}>
+          <button type="button" className={styles.submitButton} disabled={pending} onClick={send}>
             {t("sendCode")}
           </button>
           {!freshStart && (
-            <button type="button" className="btn-secondary w-full" disabled={pending} onClick={demoLogin}>
+            <button type="button" className={styles.demoLoginButton} disabled={pending} onClick={demoLogin}>
               {t("demoLogin")}
             </button>
           )}
@@ -157,29 +158,29 @@ export function SeekerAuthForm({ freshStart = false }: { freshStart?: boolean })
       ) : (
         <>
           {mockCode && (
-            <p className="rounded-xl bg-accent-soft px-3 py-2 text-sm font-semibold text-accent">
+            <p className={styles.devCode}>
               {t("devCode")}: {mockCode}
             </p>
           )}
-          <label className="block text-sm font-semibold">
+          <label className={styles.fieldLabel}>
             {t("codeLabel")}
             <input
-              className="input-field mt-1 tracking-[0.35em]"
+              className={styles.codeInput}
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
               inputMode="numeric"
               maxLength={6}
             />
           </label>
-          <button type="button" className="btn-primary w-full" disabled={pending || code.length < 6} onClick={verify}>
+          <button type="button" className={styles.submitButton} disabled={pending || code.length < 6} onClick={verify}>
             {t("verify")}
           </button>
-          <button type="button" className="btn-secondary w-full" onClick={() => setStep("phone")}>
+          <button type="button" className={styles.demoLoginButton} onClick={() => setStep("phone")}>
             ←
           </button>
         </>
       )}
-      {error && <p className="text-sm font-semibold text-bad">{error}</p>}
+      {error && <p className={styles.formError}>{error}</p>}
     </div>
   );
 }
@@ -214,12 +215,12 @@ export function CompanyAuthForm() {
   };
 
   return (
-    <div className="surface space-y-4 p-5">
-      <h2 className="font-display text-xl font-bold">{t("emailTitle")}</h2>
-      <div className="flex gap-2">
+    <div className={styles.authPanel}>
+      <h2 className={styles.authTitle}>{t("emailTitle")}</h2>
+      <div className={styles.authTabs}>
         <button
           type="button"
-          className="icon-tile !min-h-12 flex-1 !flex-row text-sm"
+          className={styles.authTab}
           data-active={mode === "login"}
           onClick={() => setMode("login")}
         >
@@ -227,7 +228,7 @@ export function CompanyAuthForm() {
         </button>
         <button
           type="button"
-          className="icon-tile !min-h-12 flex-1 !flex-row text-sm"
+          className={styles.authTab}
           data-active={mode === "register"}
           onClick={() => setMode("register")}
         >
@@ -236,42 +237,42 @@ export function CompanyAuthForm() {
       </div>
       {mode === "register" && (
         <>
-          <label className="block text-sm font-semibold">
+          <label className={styles.fieldLabel}>
             {t("companyName")}
-            <input className="input-field mt-1" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+            <input className={styles.fieldInput} value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
           </label>
-          <label className="block text-sm font-semibold">
+          <label className={styles.fieldLabel}>
             {tOn("cityLabel")}
-            <input className="input-field mt-1" value={city} onChange={(e) => setCity(e.target.value)} />
+            <input className={styles.fieldInput} value={city} onChange={(e) => setCity(e.target.value)} />
           </label>
         </>
       )}
-      <label className="block text-sm font-semibold">
+      <label className={styles.fieldLabel}>
         {t("emailLabel")}
         <input
-          className="input-field mt-1"
+          className={styles.fieldInput}
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
         />
       </label>
-      <label className="block text-sm font-semibold">
+      <label className={styles.fieldLabel}>
         {t("passwordLabel")}
         <input
-          className="input-field mt-1"
+          className={styles.fieldInput}
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           autoComplete={mode === "login" ? "current-password" : "new-password"}
         />
       </label>
-      <button type="button" className="btn-primary w-full" disabled={pending} onClick={submit}>
+      <button type="button" className={styles.submitButton} disabled={pending} onClick={submit}>
         {mode === "login" ? t("loginCompany") : t("registerCompany")}
       </button>
-      {error && <p className="text-sm font-semibold text-bad">{error}</p>}
-      <p className="text-center text-sm text-ink-soft">
-        <Link href="/" className="font-semibold text-brand">
+      {error && <p className={styles.formError}>{error}</p>}
+      <p className={styles.backPrompt}>
+        <Link href="/" className={styles.backLink}>
           WorkBridge
         </Link>
       </p>

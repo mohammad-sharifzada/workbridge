@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { updateStatusChecks } from "@/actions";
 import { ExternalLink } from "lucide-react";
+import styles from "./help-choices.module.scss";
 
 export function HelpBankChoice() {
   const t = useTranslations("help");
@@ -21,12 +22,12 @@ export function HelpBankChoice() {
   };
 
   return (
-    <div className="space-y-3 rounded-xl bg-paper-2 p-4">
-      <p className="text-sm font-semibold leading-relaxed">{t("bankIntro")}</p>
-      <div className="flex flex-col gap-2 sm:flex-row">
+    <div className={styles.choices}>
+      <p className={styles.intro}>{t("bankIntro")}</p>
+      <div className={styles.choiceActions}>
         <button
           type="button"
-          className="btn-primary flex-1 !min-h-12 !text-sm"
+          className={styles.bankHaveButton}
           disabled={pending}
           onClick={saveYes}
         >
@@ -34,7 +35,7 @@ export function HelpBankChoice() {
         </button>
         <button
           type="button"
-          className="btn-secondary flex-1 !min-h-12 !text-sm"
+          className={styles.bankDontHaveButton}
           disabled={pending}
           onClick={() => setChoice("no")}
         >
@@ -43,15 +44,15 @@ export function HelpBankChoice() {
       </div>
 
       {choice === "yes" && (
-        <p className="rounded-xl bg-[#e8f5e9] px-3 py-2 text-sm font-bold text-ok">{t("bankSaved")}</p>
+        <p className={styles.savedNotice}>{t("bankSaved")}</p>
       )}
 
       {choice === "no" && (
-        <div className="space-y-3 border-t border-line pt-3">
-          <p className="text-sm leading-relaxed text-ink-soft">{t("bankNoExplain")}</p>
-          <p className="text-sm font-bold">{t("bankNext")}</p>
-          <p className="text-sm text-ink-soft">{t("bankNote")}</p>
-          <div className="flex flex-wrap gap-2">
+        <div className={styles.guidance}>
+          <p className={styles.guidanceText}>{t("bankNoExplain")}</p>
+          <p className={styles.guidanceHeading}>{t("bankNext")}</p>
+          <p className={styles.bankNote}>{t("bankNote")}</p>
+          <div className={styles.resourceLinks}>
             <Ext href="https://www.sparkasse.de/">{t("bankLinkSparkasse")}</Ext>
             <Ext href="https://www.n26.com/de-de">{t("bankLinkN26")}</Ext>
             <Ext href="https://www.dkb.de/">{t("bankLinkDkb")}</Ext>
@@ -67,24 +68,24 @@ export function HelpPermitChoice() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="space-y-3 rounded-xl bg-paper-2 p-4">
-      <p className="text-sm font-semibold leading-relaxed">{t("permitIntro")}</p>
+    <div className={styles.choices}>
+      <p className={styles.intro}>{t("permitIntro")}</p>
       <button
         type="button"
-        className="btn-secondary w-full !min-h-12 !text-sm"
+        className={styles.permitUnsureButton}
         onClick={() => setOpen(true)}
       >
         {t("permitUnsureBtn")}
       </button>
       {open && (
-        <div className="space-y-3 border-t border-line pt-3">
-          <p className="text-sm leading-relaxed text-ink-soft">{t("permitUnsureText")}</p>
-          <p className="text-sm font-bold">{t("permitDocsTitle")}</p>
-          <ul className="space-y-1 text-sm text-ink-soft">
+        <div className={styles.guidance}>
+          <p className={styles.guidanceText}>{t("permitUnsureText")}</p>
+          <p className={styles.guidanceHeading}>{t("permitDocsTitle")}</p>
+          <ul className={styles.list}>
             <li>• {t("permitDoc1")}</li>
             <li>• {t("permitDoc2")}</li>
           </ul>
-          <p className="text-xs text-ink-soft">{t("permitLegalNote")}</p>
+          <p className={styles.permitLegalNote}>{t("permitLegalNote")}</p>
           <Ext href="https://www.bamf.de/DE/Themen/MigrationAufenthalt/PrivateHaushalte/Arbeit/arbeit-node.html">
             {t("permitLink")}
           </Ext>
@@ -100,10 +101,10 @@ function Ext({ href, children }: { href: string; children: React.ReactNode }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 rounded-xl bg-brand px-3 py-2 text-sm font-bold text-white hover:bg-brand-deep"
+      className={styles.resourceLink}
     >
       {children}
-      <ExternalLink className="h-3.5 w-3.5" />
+      <ExternalLink className={styles.externalLinkIcon} />
     </a>
   );
 }

@@ -1,0 +1,16 @@
+@use "../../../../styles/design";
+
+.panel {
+  @include design.surface;
+  margin-inline: auto;
+  max-width: 32rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.doneTitle {
+  @include design.display-font;
+  font-size: 1.875rem;
+  line-height: var(--wb-leading-3xl);
+  font-weight: 800;
+}

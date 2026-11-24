@@ -1,0 +1,121 @@
+@use "../../../styles/design";
+
+.settingsPage {
+  @include design.stack(1.25rem);
+}
+
+.settingsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.title {
+  @include design.display-font;
+  font-size: 1.5rem;
+  line-height: var(--wb-leading-2xl);
+  font-weight: 800;
+}
+
+.toProfileLink {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 700;
+  color: var(--wb-brand);
+}
+
+.settingsList {
+  @include design.surface;
+
+  overflow: hidden;
+  padding: 0;
+
+  :where(& > :not(:last-child)) {
+    border-bottom-style: solid;
+    border-top-style: solid;
+    border-top-width: 0;
+    border-bottom-width: 1px;
+    border-color: var(--wb-line);
+  }
+}
+
+.settingLink {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-inline: 1rem;
+  padding-block: 1rem;
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--wb-paper-2);
+    }
+  }
+}
+
+.settingIcon {
+  height: 1.25rem;
+  width: 1.25rem;
+  color: var(--wb-brand);
+}
+
+.settingDetails {
+  flex: 1;
+}
+
+.settingLabel {
+  font-weight: 700;
+}
+
+.settingHint {
+  font-size: 0.75rem;
+  line-height: var(--wb-leading-xs);
+  color: var(--wb-ink-soft);
+}
+
+.chevronRightIcon {
+  height: 1rem;
+  width: 1rem;
+  color: var(--wb-ink-soft);
+}
+
+.languagesIcon {
+  height: 1.25rem;
+  width: 1.25rem;
+}
+
+.soon {
+  font-size: 0.75rem;
+  line-height: var(--wb-leading-xs);
+  font-weight: 600;
+  color: var(--wb-ink-soft);
+}
+
+.settingRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-inline: 1rem;
+  padding-block: 1rem;
+}
+
+.logoutButton {
+  @include design.secondary-button;
+  min-height: 3rem;
+  width: 100%;
+}
+
+.logOutIcon {
+  height: 1rem;
+  width: 1rem;
+}
+
+.languageGlyph {
+  color: var(--wb-brand);
+}
+
+.languageDetails {
+  min-width: 0;
+  flex: 1;
+}

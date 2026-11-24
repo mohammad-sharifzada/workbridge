@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { LanguagePicker, SeekerAuthForm, CompanyAuthForm } from "@/components/auth-forms";
 import { destroySession, getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import styles from "./page.module.scss";
 
 export default async function RegisterPage({
   params,
@@ -31,7 +32,7 @@ export default async function RegisterPage({
   }
 
   return (
-    <div className="space-y-5">
+    <div className={styles.registerPage}>
       {isSeeker && (
         <>
           <LanguagePicker />
@@ -39,8 +40,8 @@ export default async function RegisterPage({
         </>
       )}
       {isCompany && <CompanyAuthForm />}
-      <p className="text-center text-sm text-ink-soft">
-        <a href={`/${locale}`} className="font-semibold text-brand">
+      <p className={styles.backPrompt}>
+        <a href={`/${locale}`} className={styles.backToStartLink}>
           ← {t("backToStart")}
         </a>
       </p>

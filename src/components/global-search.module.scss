@@ -1,0 +1,31 @@
+@use "../styles/design";
+
+.searchField {
+  position: relative;
+  display: block;
+}
+
+.screenReaderLabel {
+  @include design.visually-hidden;
+}
+
+.searchIcon {
+  pointer-events: none;
+  position: absolute;
+  inset-inline-start: 0.75rem;
+  top: calc(1 / 2 * 100%);
+  height: 1rem;
+  width: 1rem;
+  translate: 0 calc(calc(1 / 2 * 100%) * -1);
+  color: var(--wb-ink-soft);
+}
+
+.searchInput {
+  @include design.input;
+  min-height: 2.5rem;
+  padding-block: 0.5rem;
+  padding-inline-start: 2.25rem;
+  padding-inline-end: 0.75rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}

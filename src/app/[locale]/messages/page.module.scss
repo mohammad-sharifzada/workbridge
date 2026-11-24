@@ -1,0 +1,95 @@
+@use "../../../styles/design";
+
+.inbox {
+  @include design.stack(1.25rem);
+}
+
+.inboxHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.messageCircleIcon {
+  height: 1.75rem;
+  width: 1.75rem;
+  color: var(--wb-brand);
+}
+
+.title {
+  @include design.display-font;
+  font-size: 1.5rem;
+  line-height: var(--wb-leading-2xl);
+  font-weight: 800;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  color: var(--wb-ink-soft);
+}
+
+.realTitle {
+  @include design.display-font;
+  font-size: 1.125rem;
+  line-height: var(--wb-leading-lg);
+  font-weight: 800;
+}
+
+.threadList {
+  @include design.stack(0.75rem);
+}
+
+.threadCard {
+  @include design.surface;
+
+  padding: 1rem;
+  @include design.stack(0.75rem);
+}
+
+.threadSummary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.threadTitle {
+  @include design.display-font;
+  font-size: 1.125rem;
+  line-height: var(--wb-leading-lg);
+  font-weight: 700;
+}
+
+.when {
+  margin-top: 0.125rem;
+  font-size: 0.75rem;
+  line-height: var(--wb-leading-xs);
+  font-weight: 600;
+  color: var(--wb-ink-soft);
+}
+
+.newOffer {
+  border-radius: 9999px;
+  background-color: #e8f5e9;
+  padding-inline: 0.625rem;
+  padding-block: 0.25rem;
+  font-size: 0.75rem;
+  line-height: var(--wb-leading-xs);
+  font-weight: 800;
+  color: var(--wb-ok);
+}
+
+.threadPreview {
+  font-size: 0.875rem;
+  line-height: 1.625;
+  color: var(--wb-ink-soft);
+}
+
+.openOfferLink {
+  @include design.primary-button;
+  min-height: 2.75rem;
+  width: 100%;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}

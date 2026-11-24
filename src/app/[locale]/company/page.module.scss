@@ -1,0 +1,113 @@
+@use "../../../styles/design";
+
+.dashboard {
+  @include design.stack(2rem);
+}
+
+.dashboardHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  @media (min-width: design.$sm) {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+}
+
+.dashboardHeading {
+  @include design.display-font;
+  font-size: 1.5rem;
+  line-height: var(--wb-leading-2xl);
+  font-weight: 800;
+}
+
+.welcome {
+  margin-top: 0.25rem;
+  color: var(--wb-ink-soft);
+}
+
+.companyStats {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+}
+
+.verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--wb-ok);
+}
+
+.checkCircle2Icon {
+  height: 1rem;
+  width: 1rem;
+}
+
+.notVerified {
+  color: var(--wb-warn);
+}
+
+.credits {
+  border-radius: 0.5rem;
+  background-color: var(--wb-paper-2);
+  padding-inline: 0.5rem;
+  padding-block: 0.25rem;
+}
+
+.dashboardActions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.candidatesLink {
+  @include design.primary-button;
+}
+
+.jobList {
+  @include design.stack(0.75rem);
+}
+
+.jobsHeading {
+  @include design.display-font;
+  font-size: 1.25rem;
+  line-height: var(--wb-leading-xl);
+  font-weight: 700;
+}
+
+.emptyJobs {
+  color: var(--wb-ink-soft);
+}
+
+.jobCard {
+  @include design.surface;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.jobTitle {
+  font-weight: 700;
+}
+
+.jobStatus {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  color: var(--wb-ink-soft);
+}
+
+.jobLink {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-brand);
+}

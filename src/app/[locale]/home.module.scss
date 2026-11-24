@@ -1,0 +1,351 @@
+@use "../../styles/design";
+
+.companyWelcome {
+  margin-inline: auto;
+  max-width: 32rem;
+  text-align: center;
+  @include design.stack(1rem);
+}
+
+.welcomeHeading {
+  @include design.display-font;
+  font-size: 1.5rem;
+  line-height: var(--wb-leading-2xl);
+  font-weight: 800;
+}
+
+.welcomeAction {
+  @include design.primary-button;
+}
+
+.onboardingPrompt {
+  @include design.surface;
+  margin-inline: auto;
+  max-width: 32rem;
+  padding: 1.5rem;
+  text-align: center;
+  @include design.stack(1rem);
+}
+
+.needOnboarding {
+  color: var(--wb-ink-soft);
+}
+
+.dashboard {
+  @include design.stack(1.5rem);
+}
+
+.introPanel {
+  border-radius: 1rem;
+  border: 2px solid color-mix(in oklab, var(--wb-brand) 20%, transparent);
+  background-color: #eef8f7;
+  padding: 1.25rem;
+}
+
+.introDescription {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-ink-soft);
+}
+
+.introSteps {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  @include design.stack(0.5rem);
+}
+
+.emphasis {
+  font-weight: 700;
+}
+
+.readinessPanel {
+  border-radius: 1rem;
+  border: 2px solid #cde6ff;
+  background-image: linear-gradient(180deg, #f4f9ff 0%, #ecf4ff 100%);
+  padding: 1.25rem;
+  box-shadow: 0 8px 24px rgba(40, 88, 160, 0.08);
+}
+
+.readinessEyebrow {
+  font-size: 0.75rem;
+  line-height: var(--wb-leading-xs);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #24507c;
+  text-transform: uppercase;
+}
+
+.readinessTitle {
+  @include design.display-font;
+  margin-top: 0.25rem;
+  font-size: 1.25rem;
+  line-height: var(--wb-leading-xl);
+  font-weight: 800;
+  color: #13314e;
+}
+
+.readinessDescription {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  color: #2c5376;
+}
+
+.readinessHint {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: #2c5376;
+}
+
+.readinessAction {
+  margin-top: 0.75rem;
+}
+
+.helpAction {
+  @include design.secondary-button;
+  min-height: 2.75rem;
+  width: 100%;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.jobsAction {
+  @include design.primary-button;
+  min-height: 2.75rem;
+  width: 100%;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.activityPanel {
+  @include design.surface;
+
+  padding: 1rem;
+  @include design.stack(0.75rem);
+}
+
+.panelHeading {
+  @include design.display-font;
+  font-size: 1.125rem;
+  line-height: var(--wb-leading-lg);
+  font-weight: 800;
+}
+
+.activityList {
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.activityItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--wb-ink-soft);
+}
+
+.activityIcon {
+  height: 1rem;
+  width: 1rem;
+  color: var(--wb-brand);
+}
+
+.activityActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.applicationsAction {
+  @include design.secondary-button;
+  min-height: 2.75rem;
+  flex: 1;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.messagesAction {
+  @include design.primary-button;
+  min-height: 2.75rem;
+  flex: 1;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.dashboardSection {
+  @include design.stack(0.75rem);
+}
+
+.recommendedJobsHeading {
+  @include design.display-font;
+  font-size: 1.25rem;
+  line-height: var(--wb-leading-xl);
+  font-weight: 800;
+}
+
+.emptyJobs {
+  @include design.surface;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-ink-soft);
+}
+
+.jobCard {
+  @include design.surface;
+  padding: 1rem;
+}
+
+.jobDetails {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 700;
+  @include design.stack(0.25rem);
+}
+
+.brandAccent {
+  color: var(--wb-brand);
+}
+
+.viewJob {
+  @include design.primary-button;
+  margin-top: 0.75rem;
+  min-height: 2.75rem;
+  width: 100%;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.allJobs {
+  display: block;
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 700;
+  color: var(--wb-brand);
+}
+
+.shortcut {
+  @include design.surface;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.shortcutDescription {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  color: var(--wb-ink-soft);
+}
+
+.shortcutButton {
+  @include design.secondary-button;
+  min-height: 2.5rem;
+  padding-inline: 0.75rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}
+
+.marketing {
+  @include design.stack(1.25rem);
+}
+
+.hero {
+  border-radius: 1.5rem;
+  background-image: linear-gradient(135deg, #0a4f4f 0%, #0d6e6e 45%, #153a3a 100%);
+  padding: 1.5rem;
+  color: #fff;
+
+  @media (min-width: design.$sm) {
+    padding: 2rem;
+  }
+}
+
+.heroBrand {
+  @include design.display-font;
+  font-size: 1.875rem;
+  line-height: var(--wb-leading-3xl);
+  font-weight: 800;
+
+  @media (min-width: design.$sm) {
+    font-size: 2.25rem;
+    line-height: var(--wb-leading-4xl);
+  }
+}
+
+.heroTitle {
+  @include design.display-font;
+  margin-top: 0.5rem;
+  font-size: 1.5rem;
+  line-height: var(--wb-leading-2xl);
+  font-weight: 800;
+
+  @media (min-width: design.$sm) {
+    font-size: 1.875rem;
+    line-height: var(--wb-leading-3xl);
+  }
+}
+
+.heroDescription {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  color: color-mix(in oklab, #fff 90%, transparent);
+
+  @media (min-width: design.$sm) {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+}
+
+.heroActions {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.75rem;
+
+  @media (min-width: design.$sm) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.seekerCta {
+  @include design.primary-button;
+  min-height: 3rem;
+  width: 100%;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.companyCta {
+  @include design.secondary-button;
+  min-height: 3rem;
+  width: 100%;
+  background-color: #fff !important;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--wb-ink);
+}
+
+.heroNote {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  line-height: var(--wb-leading-xs);
+  color: color-mix(in oklab, #fff 80%, transparent);
+
+  @media (min-width: design.$sm) {
+    font-size: 0.875rem;
+    line-height: var(--wb-leading-sm);
+  }
+}

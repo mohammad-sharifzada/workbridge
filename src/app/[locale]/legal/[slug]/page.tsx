@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isLocale } from "@/i18n/config";
 import { notFound } from "next/navigation";
+import styles from "./page.module.scss";
 
 export default async function LegalPage({
   params,
@@ -21,9 +22,9 @@ export default async function LegalPage({
   if (!page) notFound();
 
   return (
-    <article className="surface mx-auto max-w-2xl space-y-4 p-6 sm:p-8">
-      <h1 className="font-display text-3xl font-extrabold">{page.title}</h1>
-      <div className="whitespace-pre-line text-sm leading-relaxed text-ink-soft">{page.body}</div>
+    <article className={styles.card}>
+      <h1 className={styles.title}>{page.title}</h1>
+      <div className={styles.legalText}>{page.body}</div>
     </article>
   );
 }

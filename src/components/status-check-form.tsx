@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { saveStatusCheck } from "@/actions";
 import { Landmark, FileText, IdCard } from "lucide-react";
+import clsx from "clsx";
+import styles from "./status-check-form.module.scss";
 
 /** true=yes, false=no, "unsure"=unknown, undefined=not answered */
 type Answer = boolean | "unsure" | undefined;
@@ -58,14 +60,14 @@ export function StatusCheckForm() {
   };
 
   return (
-    <div className="mx-auto max-w-lg space-y-6">
+    <div className={styles.checkForm}>
       <div>
-        <h1 className="font-display text-2xl font-extrabold">{t("title")}</h1>
-        <p className="mt-1 text-ink-soft">{t("subtitle")}</p>
+        <h1 className={styles.title}>{t("title")}</h1>
+        <p className={styles.subtitle}>{t("subtitle")}</p>
       </div>
 
       <Question
-        icon={<Landmark className="h-7 w-7 text-brand" />}
+        icon={<Landmark className={styles.checkIcon} />}
         label={t("bank")}
         value={bank}
         onChange={(v) => answer("bank", v)}
@@ -75,7 +77,7 @@ export function StatusCheckForm() {
         active={active === 0}
       />
       <Question
-        icon={<FileText className="h-7 w-7 text-brand" />}
+        icon={<FileText className={styles.checkIcon} />}
         label={t("taxId")}
         value={tax}
         onChange={(v) => answer("tax", v)}
@@ -85,7 +87,7 @@ export function StatusCheckForm() {
         active={active === 1}
       />
       <Question
-        icon={<IdCard className="h-7 w-7 text-brand" />}
+        icon={<IdCard className={styles.checkIcon} />}
         label={t("workPermit")}
         value={permit}
         onChange={(v) => answer("permit", v)}
@@ -95,11 +97,11 @@ export function StatusCheckForm() {
         active={active === 2}
       />
 
-      <p className="rounded-xl border border-line bg-white/70 px-4 py-3 text-sm text-ink-soft">
+      <p className={styles.legalNote}>
         {t("legalNote")}
       </p>
       {pending && (
-        <p className="text-center text-sm font-semibold text-ink-soft">{t("submit")}</p>
+        <p className={styles.submit}>{t("submit")}</p>
       )}
     </div>
   );
@@ -125,21 +127,21 @@ function Question({
   active?: boolean;
 }) {
   return (
-    <div className={`surface space-y-3 p-4 ${active ? "ring-2 ring-brand/30" : ""}`}>
-      <div className="flex items-start gap-3">
+    <div className={clsx(styles.checkCard, active && styles.activeCard)}>
+      <div className={styles.questionHeader}>
         {icon}
-        <p className="font-bold leading-snug">{label}</p>
+        <p className={styles.questionText}>{label}</p>
       </div>
-      <div className="grid grid-cols-3 gap-2">
-        <button type="button" className="icon-tile !min-h-14 text-sm" data-active={value === true} onClick={() => onChange(true)}>
+      <div className={styles.answers}>
+        <button type="button" className={styles.choice} data-active={value === true} onClick={() => onChange(true)}>
           {yes}
         </button>
-        <button type="button" className="icon-tile !min-h-14 text-sm" data-active={value === false} onClick={() => onChange(false)}>
+        <button type="button" className={styles.choice} data-active={value === false} onClick={() => onChange(false)}>
           {no}
         </button>
         <button
           type="button"
-          className="icon-tile !min-h-14 text-sm"
+          className={styles.choice}
           data-active={value === "unsure"}
           onClick={() => onChange("unsure")}
         >

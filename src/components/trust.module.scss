@@ -1,0 +1,90 @@
+@use "../styles/design";
+
+.thanks {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-ok);
+}
+
+.reportButton {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-bad);
+  text-decoration-line: underline;
+}
+
+.panel {
+  @include design.surface;
+
+  padding: 1rem;
+  @include design.stack(0.75rem);
+}
+
+.reportTitle {
+  font-weight: 700;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+}
+
+.select {
+  @include design.input;
+  margin-top: 0.25rem;
+}
+
+.textarea {
+  @include design.input;
+  margin-top: 0.25rem;
+}
+
+.formActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.cancelButton {
+  @include design.secondary-button;
+  flex: 1;
+}
+
+.submitButton {
+  @include design.primary-button;
+  flex: 1;
+}
+
+.onlyAfterWork {
+  font-size: 0.75rem;
+  line-height: var(--wb-leading-xs);
+  color: var(--wb-ink-soft);
+}
+
+.ratingSlider {
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.ratingValue {
+  color: var(--wb-brand);
+}
+
+.ratingComment {
+  @include design.input;
+}
+
+.submitRating {
+  @include design.primary-button;
+  width: 100%;
+}
+
+.error {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-bad);
+}

@@ -1,0 +1,3 @@
+/* Opt-in only. See README.md for setup. WorkBridge provides its own reset. */
+@import "tailwindcss/theme.css" layer(theme) prefix(tw);
+@import "tailwindcss/utilities.css" layer(utilities) prefix(tw);

@@ -15,6 +15,7 @@ import {
 import { redirect } from "next/navigation";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { GlobalSearch } from "@/components/global-search";
+import styles from "./layout.module.scss";
 
 async function logoutFormAction() {
   "use server";
@@ -33,54 +34,54 @@ export async function AppHeader({ user }: { user: HeaderUser | null }) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-line/70 bg-[#f7faf8]/95 backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-2 px-4 py-2.5 sm:px-6 sm:py-3">
-          <Link href="/" className="shrink-0 font-display text-xl font-extrabold tracking-tight text-brand-deep">
+      <header className={styles.header}>
+        <div className={styles.headerContent}>
+          <Link href="/" className={styles.wordmark}>
             WorkBridge
           </Link>
 
           {seekerReady && (
-            <div className="hidden min-w-0 flex-1 px-2 md:block md:max-w-sm lg:max-w-md">
+            <div className={styles.desktopSearch}>
               <GlobalSearch />
             </div>
           )}
 
-          <nav className="hidden items-center justify-evenly md:flex">
+          <nav className={styles.desktopNavigation}>
             {seekerReady && (
               <>
-                <NavIcon href="/" label={t("home")} icon={<Home className="h-5 w-5" />} />
-                <NavIcon href="/jobs" label={t("jobs")} icon={<Briefcase className="h-5 w-15" />} />
-                <NavIcon href="/applications" label={t("applications")} icon={<ClipboardList className="h-5 w-15" />} />
-                <NavIcon href="/messages" label={t("messages")} icon={<MessageCircle className="h-5 w-15" />} />
-                <NavIcon href="/help" label={t("help")} icon={<CircleHelp className="h-5 w-15" />} />
-                <NavIcon href="/settings" label={t("settings")} icon={<Settings className="h-5 w-15" />} />
+                <NavIcon href="/" label={t("home")} icon={<Home className={styles.navIcon} />} />
+                <NavIcon href="/jobs" label={t("jobs")} icon={<Briefcase className={styles.wideNavIcon} />} />
+                <NavIcon href="/applications" label={t("applications")} icon={<ClipboardList className={styles.wideNavIcon} />} />
+                <NavIcon href="/messages" label={t("messages")} icon={<MessageCircle className={styles.wideNavIcon} />} />
+                <NavIcon href="/help" label={t("help")} icon={<CircleHelp className={styles.wideNavIcon} />} />
+                <NavIcon href="/settings" label={t("settings")} icon={<Settings className={styles.wideNavIcon} />} />
               </>
             )}
             {user?.role === "COMPANY" && (
               <>
-                <NavIcon href="/company" label={t("dashboard")} icon={<LayoutDashboard className="h-5 w-5" />} />
-                <NavIcon href="/messages" label={t("messages")} icon={<MessageCircle className="h-5 w-5" />} />
-                <NavIcon href="/company/candidates" label={t("candidates")} icon={<UserRound className="h-5 w-5" />} />
+                <NavIcon href="/company" label={t("dashboard")} icon={<LayoutDashboard className={styles.navIcon} />} />
+                <NavIcon href="/messages" label={t("messages")} icon={<MessageCircle className={styles.navIcon} />} />
+                <NavIcon href="/company/candidates" label={t("candidates")} icon={<UserRound className={styles.navIcon} />} />
               </>
             )}
           </nav>
 
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className={styles.accountActions}>
             <LanguageSwitcher />
             {!user && (
-              <Link href="/register" className="btn-primary !min-h-10 !px-3 !text-sm">
+              <Link href="/register" className={styles.registerLink}>
                 {t("register")}
               </Link>
             )}
             {seekerReady && (
               <Link
                 href="/profile"
-                className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-brand/40 bg-brand text-sm font-extrabold text-white"
+                className={styles.avatarLink}
                 aria-label={t("profile")}
               >
                 {user.photoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={user.photoUrl} alt="" className="h-full w-full object-cover" />
+                  <img src={user.photoUrl} alt="" className={styles.image} />
                 ) : (
                   (user.name?.trim()?.[0] || "👤").toUpperCase()
                 )}
@@ -88,14 +89,14 @@ export async function AppHeader({ user }: { user: HeaderUser | null }) {
             )}
             {user?.role === "COMPANY" && (
               <form action={logoutFormAction}>
-                <button type="submit" className="rounded-lg px-2 py-2 text-xs font-semibold text-ink-soft hover:bg-white sm:text-sm">
+                <button type="submit" className={styles.companyLogoutButton}>
                   {t("logout")}
                 </button>
               </form>
             )}
             {user?.role === "SEEKER" && (
-              <form action={logoutFormAction} className="hidden sm:block">
-                <button type="submit" className="rounded-lg px-2 py-2 text-xs font-semibold text-ink-soft hover:bg-white">
+              <form action={logoutFormAction} className={styles.seekerLogoutForm}>
+                <button type="submit" className={styles.seekerLogoutButton}>
                   {t("logout")}
                 </button>
               </form>
@@ -103,21 +104,21 @@ export async function AppHeader({ user }: { user: HeaderUser | null }) {
           </div>
         </div>
         {seekerReady && (
-          <div className="border-t border-line/50 px-4 py-2 md:hidden sm:px-6">
+          <div className={styles.mobileSearch}>
             <GlobalSearch />
           </div>
         )}
       </header>
 
       {seekerReady && (
-        <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden">
-          <div className="mx-auto flex w-full max-w-5xl items-stretch justify-around px-4 py-1 sm:px-6">
-            <NavIcon href="/" label={t("home")} icon={<Home className="h-5 w-5" />} mobile />
-            <NavIcon href="/jobs" label={t("jobs")} icon={<Briefcase className="h-5 w-5" />} mobile />
-            <NavIcon href="/applications" label={t("applications")} icon={<ClipboardList className="h-5 w-5" />} mobile />
-            <NavIcon href="/messages" label={t("messages")} icon={<MessageCircle className="h-5 w-5" />} mobile />
-            <NavIcon href="/help" label={t("help")} icon={<CircleHelp className="h-5 w-5" />} mobile />
-            <NavIcon href="/settings" label={t("settings")} icon={<Settings className="h-5 w-5" />} mobile />
+        <nav className={styles.mobileNavigation}>
+          <div className={styles.mobileNavigationContent}>
+            <NavIcon href="/" label={t("home")} icon={<Home className={styles.navIcon} />} mobile />
+            <NavIcon href="/jobs" label={t("jobs")} icon={<Briefcase className={styles.navIcon} />} mobile />
+            <NavIcon href="/applications" label={t("applications")} icon={<ClipboardList className={styles.navIcon} />} mobile />
+            <NavIcon href="/messages" label={t("messages")} icon={<MessageCircle className={styles.navIcon} />} mobile />
+            <NavIcon href="/help" label={t("help")} icon={<CircleHelp className={styles.navIcon} />} mobile />
+            <NavIcon href="/settings" label={t("settings")} icon={<Settings className={styles.navIcon} />} mobile />
           </div>
         </nav>
       )}
@@ -150,8 +151,8 @@ function NavIcon({
       href={href}
       className={
         mobile
-          ? "flex flex-1 flex-col items-center gap-0.5 rounded-xl px-1 py-2 text-[10px] font-bold text-ink-soft"
-          : "flex flex-col items-center gap-0.5 rounded-xl px-2.5 py-1.5 text-[11px] font-semibold text-ink-soft hover:bg-white hover:text-brand"
+          ? styles.mobileNavLink
+          : styles.desktopNavLink
       }
       aria-label={label}
     >
@@ -165,17 +166,17 @@ export async function AppFooter() {
   const t = await getTranslations("footer");
   const legal = await getTranslations("legal");
   return (
-    <footer className="mt-auto border-t border-line/60 bg-white/50 pb-20 md:pb-0">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 py-8 text-sm text-ink-soft sm:flex-row sm:items-center sm:justify-between sm:px-6">
+    <footer className={styles.footer}>
+      <div className={styles.footerContent}>
         <p>{t("rights")}</p>
-        <div className="flex flex-wrap gap-4">
-          <Link href="/legal/impressum" className="hover:text-brand">
+        <div className={styles.legalLinks}>
+          <Link href="/legal/impressum" className={styles.legalLink}>
             {legal("impressum")}
           </Link>
-          <Link href="/legal/privacy" className="hover:text-brand">
+          <Link href="/legal/privacy" className={styles.legalLink}>
             {legal("privacy")}
           </Link>
-          <Link href="/legal/terms" className="hover:text-brand">
+          <Link href="/legal/terms" className={styles.legalLink}>
             {legal("terms")}
           </Link>
         </div>

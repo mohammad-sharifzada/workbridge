@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { submitReport } from "@/actions";
 import { submitCollaborationRating } from "@/actions/messaging";
 import type { ReportReason } from "@/prisma/types";
+import styles from "./trust.module.scss";
 
 export function ReportButton({ targetType, targetId }: { targetType: string; targetId: string }) {
   const t = useTranslations("trust");
@@ -15,23 +16,23 @@ export function ReportButton({ targetType, targetId }: { targetType: string; tar
   const [done, setDone] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  if (done) return <p className="text-sm font-semibold text-ok">{t("thanks")}</p>;
+  if (done) return <p className={styles.thanks}>{t("thanks")}</p>;
 
   if (!open) {
     return (
-      <button type="button" className="text-sm font-semibold text-bad underline" onClick={() => setOpen(true)}>
+      <button type="button" className={styles.reportButton} onClick={() => setOpen(true)}>
         {t("report")}
       </button>
     );
   }
 
   return (
-    <div className="surface space-y-3 p-4">
-      <h3 className="font-bold">{t("reportTitle")}</h3>
-      <label className="block text-sm font-semibold">
+    <div className={styles.panel}>
+      <h3 className={styles.reportTitle}>{t("reportTitle")}</h3>
+      <label className={styles.fieldLabel}>
         {t("reason")}
         <select
-          className="input-field mt-1"
+          className={styles.select}
           value={reason}
           onChange={(e) => setReason(e.target.value as ReportReason)}
         >
@@ -42,17 +43,17 @@ export function ReportButton({ targetType, targetId }: { targetType: string; tar
           <option value="OTHER">{t("other")}</option>
         </select>
       </label>
-      <label className="block text-sm font-semibold">
+      <label className={styles.fieldLabel}>
         {t("details")}
-        <textarea className="input-field mt-1 min-h-24" value={details} onChange={(e) => setDetails(e.target.value)} />
+        <textarea className={styles.textarea} value={details} onChange={(e) => setDetails(e.target.value)} />
       </label>
-      <div className="flex gap-2">
-        <button type="button" className="btn-secondary flex-1" onClick={() => setOpen(false)}>
+      <div className={styles.formActions}>
+        <button type="button" className={styles.cancelButton} onClick={() => setOpen(false)}>
           {tc("cancel")}
         </button>
         <button
           type="button"
-          className="btn-primary flex-1"
+          className={styles.submitButton}
           disabled={pending}
           onClick={() => {
             startTransition(async () => {
@@ -77,13 +78,13 @@ export function RatingForm({ offerId }: { offerId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  if (done) return <p className="text-sm font-semibold text-ok">{t("thanks")}</p>;
+  if (done) return <p className={styles.thanks}>{t("thanks")}</p>;
 
   return (
-    <div className="surface space-y-3 p-4">
-      <h3 className="font-bold">{t("rate")}</h3>
-      <p className="text-xs text-ink-soft">{t("onlyAfterWork")}</p>
-      <label className="block text-sm font-semibold">
+    <div className={styles.panel}>
+      <h3 className={styles.reportTitle}>{t("rate")}</h3>
+      <p className={styles.onlyAfterWork}>{t("onlyAfterWork")}</p>
+      <label className={styles.fieldLabel}>
         {t("score")}
         <input
           type="range"
@@ -91,14 +92,14 @@ export function RatingForm({ offerId }: { offerId: string }) {
           max={5}
           value={score}
           onChange={(e) => setScore(Number(e.target.value))}
-          className="mt-2 w-full"
+          className={styles.ratingSlider}
         />
-        <span className="text-brand">{score}/5</span>
+        <span className={styles.ratingValue}>{score}/5</span>
       </label>
-      <textarea className="input-field min-h-20" value={comment} onChange={(e) => setComment(e.target.value)} />
+      <textarea className={styles.ratingComment} value={comment} onChange={(e) => setComment(e.target.value)} />
       <button
         type="button"
-        className="btn-primary w-full"
+        className={styles.submitRating}
         disabled={pending}
         onClick={() => {
           setError(null);
@@ -114,7 +115,7 @@ export function RatingForm({ offerId }: { offerId: string }) {
       >
         {t("submit")}
       </button>
-      {error && <p className="text-sm font-semibold text-bad">{error}</p>}
+      {error && <p className={styles.error}>{error}</p>}
     </div>
   );
 }

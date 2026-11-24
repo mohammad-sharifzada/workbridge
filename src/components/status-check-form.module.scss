@@ -1,0 +1,79 @@
+@use "../styles/design";
+
+.checkForm {
+  margin-inline: auto;
+  max-width: 32rem;
+  @include design.stack(1.5rem);
+}
+
+.title {
+  @include design.display-font;
+  font-size: 1.5rem;
+  line-height: var(--wb-leading-2xl);
+  font-weight: 800;
+}
+
+.subtitle {
+  margin-top: 0.25rem;
+  color: var(--wb-ink-soft);
+}
+
+.checkIcon {
+  height: 1.75rem;
+  width: 1.75rem;
+  color: var(--wb-brand);
+}
+
+.legalNote {
+  border-radius: 0.75rem;
+  border: 1px solid var(--wb-line);
+  background-color: color-mix(in oklab, #fff 70%, transparent);
+  padding-inline: 1rem;
+  padding-block: 0.75rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  color: var(--wb-ink-soft);
+}
+
+.submit {
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-ink-soft);
+}
+
+.checkCard {
+  @include design.surface;
+
+  padding: 1rem;
+  @include design.stack(0.75rem);
+}
+
+.activeCard {
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--wb-brand) 30%, transparent);
+}
+
+.questionHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.questionText {
+  line-height: 1.375;
+  font-weight: 700;
+}
+
+.answers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.choice {
+  @include design.choice-tile;
+  min-height: 3.5rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+}

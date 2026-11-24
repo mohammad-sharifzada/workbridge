@@ -1,0 +1,166 @@
+@use "../styles/design";
+
+.card {
+  @include design.rise;
+  @include design.surface;
+
+  padding: 1.25rem;
+  @include design.stack(1.25rem);
+}
+
+.categoryEmoji {
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.title {
+  @include design.display-font;
+  margin-top: 0.5rem;
+  font-size: 1.5rem;
+  line-height: 1.25;
+  font-weight: 800;
+}
+
+.companyLink {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-brand);
+}
+
+.jobFacts {
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 700;
+  @include design.stack(0.625rem);
+}
+
+.sectionLabel {
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 800;
+  letter-spacing: 0.025em;
+  color: var(--wb-ink-soft);
+  text-transform: uppercase;
+}
+
+.jobSummary {
+  margin-top: 0.25rem;
+  font-size: 1.125rem;
+  line-height: 1.375;
+  font-weight: 600;
+}
+
+.jobDescription {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  color: var(--wb-ink-soft);
+}
+
+.bikeRequired {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-ink-soft);
+}
+
+.divider {
+  border-color: var(--wb-line);
+}
+
+.matchPercent {
+  @include design.display-font;
+  margin-top: 0.5rem;
+  font-size: 1.5rem;
+  line-height: var(--wb-leading-2xl);
+  font-weight: 800;
+  color: var(--wb-brand);
+}
+
+.matchReasons {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 700;
+  @include design.stack(0.375rem);
+}
+
+.matchReason {
+  color: var(--wb-ok);
+}
+
+.missingReason {
+  color: var(--wb-bad);
+}
+
+.greatMatch {
+  @include design.display-font;
+  margin-top: 0.75rem;
+  font-size: 1.125rem;
+  line-height: var(--wb-leading-lg);
+  font-weight: 800;
+  color: var(--wb-brand);
+}
+
+.locked {
+  border-radius: 0.75rem;
+  background-color: #ffebee;
+  padding-inline: 1rem;
+  padding-block: 0.75rem;
+  text-align: center;
+  font-weight: 700;
+  color: var(--wb-bad);
+}
+
+.applicationActions {
+  @include design.stack(0.5rem);
+}
+
+.applySuccess {
+  border-radius: 0.75rem;
+  background-color: #e8f5e9;
+  padding-inline: 1rem;
+  padding-block: 1rem;
+  text-align: center;
+  font-size: 1.125rem;
+  line-height: var(--wb-leading-lg);
+  font-weight: 800;
+  color: var(--wb-ok);
+}
+
+.applyCvSent {
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 600;
+  color: var(--wb-ink-soft);
+}
+
+.openMessagesLink {
+  @include design.primary-button;
+  width: 100%;
+}
+
+.myApplicationsLink {
+  @include design.secondary-button;
+  width: 100%;
+}
+
+.applyNowButton {
+  @include design.primary-button;
+  min-height: 3.5rem;
+  width: 100%;
+  font-size: 1.125rem;
+  line-height: var(--wb-leading-lg);
+}
+
+.applicationError {
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: var(--wb-leading-sm);
+  font-weight: 700;
+  color: var(--wb-bad);
+}
