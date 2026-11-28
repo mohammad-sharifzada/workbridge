@@ -2,8 +2,8 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
-import { updateStatusChecks } from "@/actions";
+import { useRouter } from "@/modules_outsourced/module_localizationRouting";
+import { updateStatusChecks } from "@/modules_outsourced/module_serverIndex";
 import { ExternalLink } from "lucide-react";
 import clsx from "clsx";
 import styles from "./work-checklist.module.scss";

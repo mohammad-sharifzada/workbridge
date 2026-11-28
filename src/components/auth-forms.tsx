@@ -2,17 +2,17 @@
 
 import { useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/modules_outsourced/module_localizationRouting";
 import {
   sendPhoneCode,
   verifyPhoneAndLogin,
   registerCompany,
   loginCompany,
   demoSeekerLogin,
-} from "@/actions";
+} from "@/modules_outsourced/module_serverIndex";
 import { PRESENTATION_READY_PHONE } from "@/lib/presentation-constants";
-import { localeNames, locales, type Locale } from "@/i18n/config";
-import { Link } from "@/i18n/routing";
+import { localeNames, locales, type Locale } from "@/prog_configs/localization_config";
+import { Link } from "@/modules_outsourced/module_localizationRouting";
 import styles from "./auth-forms.module.scss";
 
 export function LanguagePicker({ compact = false }: { compact?: boolean }) {

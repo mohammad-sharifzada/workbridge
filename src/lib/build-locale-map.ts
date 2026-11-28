@@ -1,5 +1,5 @@
-import type { Locale } from "@/i18n/config";
-import { locales } from "@/i18n/config";
+import type { Locale } from "@/prog_configs/localization_config";
+import { locales } from "@/prog_configs/localization_config";
 import { translateText } from "@/lib/translate";
 import { i18nJson } from "@/lib/i18n-content";
 

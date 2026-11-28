@@ -1,8 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { isLocale } from "@/i18n/config";
+import { isLocale } from "@/prog_configs/localization_config";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/modules_outsourced/module_localizationRouting";
 import { MessageCircle } from "lucide-react";
 import { DemoMessagesList } from "@/components/demo-messages";
 import { requireSeekerOnboardingDone } from "@/lib/onboarding-guard";

@@ -1,8 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { isLocale } from "@/i18n/config";
+import { isLocale } from "@/prog_configs/localization_config";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { completeOnboarding } from "@/actions";
+import { completeOnboarding } from "@/modules_outsourced/module_serverIndex";
 import { OnboardingDoneRedirect } from "@/components/onboarding-done-redirect";
 import { getSeekerProfileByUserId } from "@/lib/seeker-profile-p8";
 import styles from "./page.module.scss";

@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Link } from "@/i18n/routing";
-import { isLocale } from "@/i18n/config";
+import { Link } from "@/modules_outsourced/module_localizationRouting";
+import { isLocale } from "@/prog_configs/localization_config";
 import { notFound } from "next/navigation";
 import { CheckCircle2, MailCheck } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";

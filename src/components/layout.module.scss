@@ -30,12 +30,11 @@
 }
 
 .wordmark {
-  @include design.display-font;
+  font-family: var(--font-wordmark), var(--font-adelaide), var(--font-display), system-ui, sans-serif;
   flex-shrink: 0;
   font-size: 1.25rem;
   line-height: var(--wb-leading-xl);
-  font-weight: 800;
-  letter-spacing: -0.025em;
+  font-weight: 400;
   color: var(--wb-brand-deep);
 }
 

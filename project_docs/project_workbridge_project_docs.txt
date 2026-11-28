@@ -1,0 +1,56 @@
+sudo nano "./compose.yaml"
+docker compose up -d
+sudo systemctl start docker
+docker compose up -d
+docker exec -it workbridge-db bash
+psql -U workbridge -d workbridge
+\l
+npm run db:push
+psql -U workbridge -d workbridge
+\dt
+
+
+DATABASE_URL="postgresql://workbridge:workbridge_dev_password@localhost:5432/workbridge"
+#
+
+npm ls prisma @prisma/client
+lists the installed versions of the two Prisma packages in your current Node.js project.
+
+What exactly does it show?
+prisma – Prisma CLI, used for commands such as migrations, schema validation and generation.
+
+@prisma/client – Prisma Client, the library your application uses to communicate with PostgreSQL.
+
+
+services:
+  db:
+    image: postgres:17
+    container_name: workbridge-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: workbridge
+      POSTGRES_PASSWORD: workbridge_dev_password
+      POSTGRES_DB: workbridge
+    ports:
+      - "5432:5432"
+    volumes:
+      - workbridge_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U workbridge -d workbridge"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  workbridge_postgres_data:
+
+
+# to start the container
+sudo systemctl start docker
+docker exec -it workbridge-db bash
+
+# inside the container
+psql -U workbridge -d workbridge
+
+
+ Outfit, Lexend, and Noto Sans Arabic

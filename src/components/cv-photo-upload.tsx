@@ -2,10 +2,10 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/modules_outsourced/module_localizationRouting";
 import { Camera } from "lucide-react";
 import { compressImageFile } from "@/lib/image-upload";
-import { saveCvPhoto } from "@/actions";
+import { saveCvPhoto } from "@/modules_outsourced/module_serverIndex";
 import styles from "./cv-photo-upload.module.scss";
 
 /** Foto-Kreis im Lebenslauf – Tippen öffnet Upload. */

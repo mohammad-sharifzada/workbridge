@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
-import { sendJobOffer } from "@/actions/messaging";
+import { useRouter } from "@/modules_outsourced/module_localizationRouting";
+import { sendJobOffer } from "@/modules_outsourced/module_serverMessaging";
 import { localizeText } from "@/lib/i18n-content";
 import styles from "./send-offer-button.module.scss";
 

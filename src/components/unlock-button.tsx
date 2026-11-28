@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { unlockContact } from "@/actions";
-import { useRouter } from "@/i18n/routing";
+import { unlockContact } from "@/modules_outsourced/module_serverIndex";
+import { useRouter } from "@/modules_outsourced/module_localizationRouting";
 import styles from "./unlock-button.module.scss";
 
 export function UnlockButton({ seekerId }: { seekerId: string }) {

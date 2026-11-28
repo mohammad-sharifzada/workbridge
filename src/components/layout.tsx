@@ -1,4 +1,4 @@
-import { Link } from "@/i18n/routing";
+import { Link } from "@/modules_outsourced/module_localizationRouting";
 import { getTranslations } from "next-intl/server";
 import { destroySession } from "@/lib/auth";
 import type { User } from "@/prisma/types";

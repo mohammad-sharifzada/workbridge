@@ -16,10 +16,11 @@ import {
 import { computeReadiness } from "@/lib/status";
 import { toJsonArray } from "@/lib/utils";
 import { buildCvApplicationMessage } from "@/lib/cv";
-import { getOrCreateConversation } from "@/actions/messaging";
+import { getOrCreateConversation } from "./module_serverMessaging";
 import { buildLocaleMap } from "@/lib/build-locale-map";
 import { isSupportedLocale } from "@/lib/translate";
-import type { Locale } from "@/i18n/config";
+import { defaultLocale, type Locale } from "@/prog_configs/localization_config";
+import {messages} from "@/project_workbridge_main";
 import type {
   Availability,
   JobCategory,
@@ -319,25 +320,9 @@ export async function applyToJob(jobId: string): Promise<ActionResult> {
     return { ok: false, error: "not_ready" };
   }
 
-  const locale = (isSupportedLocale(user.locale) ? user.locale : "de") as Locale;
-  const de = await import("../../messages/de.json");
-  const en = await import("../../messages/en.json");
-  const ar = await import("../../messages/ar.json");
-  const tr = await import("../../messages/tr.json");
-  const fa = await import("../../messages/fa.json");
-  const uk = await import("../../messages/uk.json");
-  const pack =
-    locale === "en"
-      ? en.default
-      : locale === "ar"
-        ? ar.default
-        : locale === "tr"
-          ? tr.default
-          : locale === "fa"
-            ? fa.default
-            : locale === "uk"
-              ? uk.default
-              : de.default;
+  const locale = isSupportedLocale(user.locale) ? user.locale : defaultLocale;
+  const pack = messages[locale];
+  if (!pack) throw new Error(`Missing messages for locale: ${locale}`);
 
   const cvMessage = buildCvApplicationMessage({
     user,
@@ -386,7 +371,7 @@ export async function applyToJob(jobId: string): Promise<ActionResult> {
   revalidatePath("/");
   revalidatePath("/applications");
   revalidatePath("/jobs");
-  revalidatePath("/messages");
+  revalidatePath("/project_files/definitions_data");
   return { ok: true };
 }
 
@@ -494,7 +479,7 @@ export async function submitRating(opts: {
   comment?: string;
 }): Promise<ActionResult> {
   // Nur nach bestätigter Zusammenarbeit – delegiert an Messaging-Logik
-  const { submitCollaborationRating } = await import("@/actions/messaging");
+  const { submitCollaborationRating } = await import("./module_serverMessaging");
   return submitCollaborationRating({
     offerId: opts.offerId,
     score: opts.score,

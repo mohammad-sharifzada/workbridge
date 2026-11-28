@@ -1,11 +1,11 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { usePathname, useRouter } from "@/i18n/routing";
-import { localeNames, locales, type Locale } from "@/i18n/config";
+import { usePathname, useRouter } from "@/modules_outsourced/module_localizationRouting";
+import { localeNames, locales, type Locale } from "@/prog_configs/localization_config";
 import { useState, useRef, useEffect, useTransition, useCallback } from "react";
 import { Languages, Check } from "lucide-react";
-import { updateUserLocale } from "@/actions";
+import { updateUserLocale } from "@/modules_outsourced/module_serverIndex";
 import styles from "./language-switcher.module.scss";
 
 export function LanguageSwitcher() {

@@ -1,12 +1,12 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/routing";
+import { Link, useRouter } from "@/modules_outsourced/module_localizationRouting";
 import { localizeText } from "@/lib/i18n-content";
 import { localizeJobFields } from "@/lib/localize-job";
 import { formatWage, parseJsonArray } from "@/lib/utils";
 import type { MatchGapKey, MatchReasonKey } from "@/lib/matching";
-import { applyToJob } from "@/actions";
+import { applyToJob } from "@/modules_outsourced/module_serverIndex";
 import { useState, useTransition } from "react";
 import styles from "./simple-job-card.module.scss";
 

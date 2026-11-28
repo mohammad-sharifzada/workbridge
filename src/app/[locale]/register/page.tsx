@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
-import { isLocale } from "@/i18n/config";
+import { isLocale } from "@/prog_configs/localization_config";
 import { notFound } from "next/navigation";
 import { LanguagePicker, SeekerAuthForm, CompanyAuthForm } from "@/components/auth-forms";
 import { destroySession, getCurrentUser } from "@/lib/auth";

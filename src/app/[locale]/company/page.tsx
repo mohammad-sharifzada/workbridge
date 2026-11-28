@@ -1,10 +1,10 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { isLocale } from "@/i18n/config";
+import { isLocale } from "@/prog_configs/localization_config";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { formatWage } from "@/lib/utils";
 import { CreateJobForm, CompanyBillingActions } from "@/components/company-forms";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/modules_outsourced/module_localizationRouting";
 import { CheckCircle2 } from "lucide-react";
 import { localizeText } from "@/lib/i18n-content";
 import { localizeCity } from "@/lib/localize-job";

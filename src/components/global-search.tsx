@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/modules_outsourced/module_localizationRouting";
 import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
 import { useState } from "react";

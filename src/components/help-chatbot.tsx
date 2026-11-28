@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/modules_outsourced/module_localizationRouting";
 import { Bot, MessageCircle, Send, Sparkles, X } from "lucide-react";
 import clsx from "clsx";
 import styles from "./help-chatbot.module.scss";

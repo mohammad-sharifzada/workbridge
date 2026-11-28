@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { isLocale } from "@/i18n/config";
+import { isLocale } from "@/prog_configs/localization_config";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/prisma/db";
@@ -7,7 +7,7 @@ import { parseJsonArray } from "@/lib/utils";
 import { STATUS_COLORS } from "@/lib/status";
 import { UnlockButton } from "@/components/unlock-button";
 import { SendOfferButton } from "@/components/send-offer-button";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/modules_outsourced/module_localizationRouting";
 import styles from "./page.module.scss";
 
 export default async function CandidatesPage({

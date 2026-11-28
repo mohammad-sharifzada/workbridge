@@ -1,33 +1,17 @@
 import { db } from "@/prisma/db";
 import { demoSeekerProfileSeed, DEMO_CV_PERSON } from "@/lib/demo-cv";
 import { buildCvApplicationMessage, type CvMessageLabels } from "@/lib/cv";
-import { isLocale, type Locale } from "@/i18n/config";
+import { defaultLocale, isLocale } from "@/prog_configs/localization_config";
+import { messages } from "@/project_workbridge_main";
 import { PRESENTATION_READY_PHONE } from "@/lib/presentation-constants";
 import { getSeekerProfileByUserId, upsertSeekerProfile } from "@/lib/seeker-profile-p8";
 import { upsertJobApplication } from "@/lib/job-application-p8";
 
 export { PRESENTATION_READY_PHONE } from "@/lib/presentation-constants";
 
-async function labelsForLocale(locale: string): Promise<CvMessageLabels> {
-  const loc = (isLocale(locale) ? locale : "de") as Locale;
-  const pack = (await import(`../../messages/${loc}.json`)).default as {
-    cvApplication: {
-      application: string;
-      skills: string;
-      tools: string;
-      languages: string;
-      experience: string;
-      education: string;
-      footer: string;
-    };
-    onboarding: {
-      warehouse: string;
-      cleaning: string;
-      delivery: string;
-      construction: string;
-      hasBike: string;
-    };
-  };
+function labelsForLocale(locale: string): CvMessageLabels {
+  const pack = messages[isLocale(locale) ? locale : defaultLocale];
+  if (!pack) throw new Error(`Missing messages for locale: ${locale}`);
   return {
     application: pack.cvApplication.application,
     skills: pack.cvApplication.skills,
@@ -46,7 +30,7 @@ async function labelsForLocale(locale: string): Promise<CvMessageLabels> {
 
 export async function ensurePresentationReadyUser(locale: string) {
   const profileData = demoSeekerProfileSeed();
-  const labels = await labelsForLocale(locale);
+  const labels = labelsForLocale(locale);
 
   const phone = PRESENTATION_READY_PHONE;
   const patch = { phoneVerified: true, locale, name: DEMO_CV_PERSON.name, email: "ahmed.hassan@example.de" };

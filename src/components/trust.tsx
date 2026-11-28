@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { submitReport } from "@/actions";
-import { submitCollaborationRating } from "@/actions/messaging";
+import { submitReport } from "@/modules_outsourced/module_serverIndex";
+import { submitCollaborationRating } from "@/modules_outsourced/module_serverMessaging";
 import type { ReportReason } from "@/prisma/types";
 import styles from "./trust.module.scss";
 

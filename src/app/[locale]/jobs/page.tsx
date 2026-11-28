@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { isLocale } from "@/i18n/config";
+import { isLocale } from "@/prog_configs/localization_config";
 import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { rankJobs } from "@/lib/matching";

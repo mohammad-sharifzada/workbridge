@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { isLocale } from "@/i18n/config";
+import { isLocale } from "@/prog_configs/localization_config";
 import { notFound } from "next/navigation";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/modules_outsourced/module_localizationRouting";
 import { CompanyMap } from "@/components/company-map";
 import { CheckCircle2, Globe, Building2, Phone, Mail } from "lucide-react";
 import { localizeText } from "@/lib/i18n-content";

@@ -2,8 +2,8 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/routing";
-import { saveOnboarding } from "@/actions";
+import { Link, useRouter } from "@/modules_outsourced/module_localizationRouting";
+import { saveOnboarding } from "@/modules_outsourced/module_serverIndex";
 import type { Availability, PhysicalLevel, SeekerProfile } from "@/prisma/types";
 import {
   Bike,

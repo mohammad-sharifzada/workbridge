@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/modules_outsourced/module_localizationRouting";
 import { DEMO_APPLICATIONS, demoText } from "@/lib/demo-applications";
 import clsx from "clsx";
 import styles from "./demo-applications.module.scss";

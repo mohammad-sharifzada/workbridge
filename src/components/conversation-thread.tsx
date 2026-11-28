@@ -2,8 +2,8 @@
 
 import { useState, useTransition, useEffect, useCallback, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { Link, useRouter } from "@/i18n/routing";
-import { respondToOffer, sendTextMessage, translateMessageForUser } from "@/actions/messaging";
+import { Link, useRouter } from "@/modules_outsourced/module_localizationRouting";
+import { respondToOffer, sendTextMessage, translateMessageForUser } from "@/modules_outsourced/module_serverMessaging";
 import { formatWage, parseJsonArray } from "@/lib/utils";
 import { localizeText } from "@/lib/i18n-content";
 import { localizeCity } from "@/lib/localize-job";

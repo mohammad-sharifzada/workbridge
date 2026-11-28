@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { isLocale } from "@/i18n/config";
+import { isLocale } from "@/prog_configs/localization_config";
 import { notFound, redirect } from "next/navigation";
 import {
   Landmark,
@@ -11,7 +11,7 @@ import {
   Languages,
   CircleHelp,
 } from "lucide-react";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/modules_outsourced/module_localizationRouting";
 import { HelpBankChoice, HelpPermitChoice } from "@/components/help-choices";
 import { WorkChecklist } from "@/components/work-checklist";
 import { getCurrentUser } from "@/lib/auth";

@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { isLocale } from "@/i18n/config";
+import { isLocale } from "@/prog_configs/localization_config";
 import { notFound } from "next/navigation";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/modules_outsourced/module_localizationRouting";
 import { VisualCv } from "@/components/visual-cv";
 import { buildDemoVisualCvData, DEMO_CV_PERSON } from "@/lib/demo-cv";
 import styles from "./page.module.scss";

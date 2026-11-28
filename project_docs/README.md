@@ -24,6 +24,8 @@ npm run dev
 
 Öffnen: [http://localhost:3000/de](http://localhost:3000/de)
 
+Die ESLint- und Prisma-Konfigurationen liegen in `prog_configs/`. `npm run lint` und die `db:*`-Befehle in `package.json` verwenden die passenden Einstellungen. Bei einem direkten Prisma-CLI-Aufruf im Projektstamm `--config prog_configs/prisma.config.ts` angeben.
+
 ### Demo-Zugänge
 
 | Rolle | Login |

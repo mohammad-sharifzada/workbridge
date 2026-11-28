@@ -1,6 +1,6 @@
 import createMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
-import { routing } from "./i18n/routing";
+import { routing } from "@/modules_outsourced/module_localizationRouting";
 import { getPublicOrigin } from "./lib/public-origin";
 
 const intlMiddleware = createMiddleware(routing);

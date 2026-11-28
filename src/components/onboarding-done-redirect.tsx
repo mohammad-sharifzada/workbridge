@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/modules_outsourced/module_localizationRouting";
 
 export function OnboardingDoneRedirect() {
   const router = useRouter();

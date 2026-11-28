@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
-import { saveStatusCheck } from "@/actions";
+import { useRouter } from "@/modules_outsourced/module_localizationRouting";
+import { saveStatusCheck } from "@/modules_outsourced/module_serverIndex";
 import { Landmark, FileText, IdCard } from "lucide-react";
 import clsx from "clsx";
 import styles from "./status-check-form.module.scss";

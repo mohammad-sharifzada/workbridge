@@ -2,14 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/modules_outsourced/module_localizationRouting";
 import { Languages } from "lucide-react";
 import {
   DEMO_THREADS,
   demoText,
   type DemoThread,
 } from "@/lib/demo-threads";
-import type { Locale } from "@/i18n/config";
+import type { Locale } from "@/prog_configs/localization_config";
 import clsx from "clsx";
 import styles from "./demo-messages.module.scss";
 

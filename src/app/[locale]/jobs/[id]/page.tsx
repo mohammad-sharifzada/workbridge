@@ -1,10 +1,10 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { isLocale } from "@/i18n/config";
+import { isLocale } from "@/prog_configs/localization_config";
 import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { SimpleJobCard } from "@/components/simple-job-card";
 import { ReportButton } from "@/components/trust";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/modules_outsourced/module_localizationRouting";
 import { rankJobs } from "@/lib/matching";
 import { requireSeekerOnboardingDone } from "@/lib/onboarding-guard";
 import { db } from "@/prisma/db";

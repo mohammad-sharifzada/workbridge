@@ -4,7 +4,7 @@ import { db } from "@/prisma/db";
 import { upsertJobApplication } from "@/lib/job-application-p8";
 import { getCurrentUser } from "@/lib/auth";
 import { translateText, isSupportedLocale } from "@/lib/translate";
-import type { Locale } from "@/i18n/config";
+import type { Locale } from "@/prog_configs/localization_config";
 import { revalidatePath } from "next/cache";
 
 type ActionResult<T = undefined> = {

@@ -1,4 +1,4 @@
-import type { Locale } from "@/i18n/config";
+import type { Locale } from "@/prog_configs/localization_config";
 import { localizeText } from "@/lib/i18n-content";
 
 /** Feste Ortsnamen – immer in der UI-Sprache */

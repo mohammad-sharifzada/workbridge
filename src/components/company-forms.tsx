@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
-import { createJob, buyContactCredits, requestCompanyVerification } from "@/actions";
+import { useRouter } from "@/modules_outsourced/module_localizationRouting";
+import { createJob, buyContactCredits, requestCompanyVerification } from "@/modules_outsourced/module_serverIndex";
 import type { Availability, JobCategory, PhysicalLevel } from "@/prisma/types";
 import styles from "./company-forms.module.scss";
 

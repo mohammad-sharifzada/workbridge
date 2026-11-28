@@ -1,33 +1,14 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { Lexend, Outfit, Noto_Sans_Arabic } from "next/font/google";
-import { locales, rtlLocales, isLocale, type Locale } from "@/i18n/config";
+import { locales, rtlLocales, isLocale, type Locale } from "@/prog_configs/localization_config";
 import { AppFooter, AppHeader } from "@/components/layout";
 import { HelpChatbot } from "@/components/help-chatbot";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/prisma/db";
+import { abigail_font, aboric_font, adelaide_font, valentine_font } from "@/project_workbridge_main";
 import clsx from "clsx";
 import styles from "./layout.module.scss";
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const lexend = Lexend({
-  subsets: ["latin"],
-  variable: "--font-body",
-  display: "swap",
-});
-
-const notoArabic = Noto_Sans_Arabic({
-  subsets: ["arabic"],
-  variable: "--font-rtl",
-  display: "swap",
-  weight: ["400", "600", "700"],
-});
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -68,7 +49,13 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={dir} className={styles.document}>
       <body
-        className={clsx(outfit.variable, lexend.variable, notoArabic.variable, styles.body)}
+        className={clsx(
+          adelaide_font.variable,
+          aboric_font.variable,
+          abigail_font.variable,
+          valentine_font.variable,
+          styles.body,
+        )}
       >
         <div className={styles.shell}>
           <NextIntlClientProvider locale={locale} messages={messages}>

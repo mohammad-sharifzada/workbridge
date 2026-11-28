@@ -1,5 +1,5 @@
-import type { Locale } from "@/i18n/config";
-import { locales } from "@/i18n/config";
+import type { Locale } from "@/prog_configs/localization_config";
+import { locales } from "@/prog_configs/localization_config";
 
 const DEEPL_LANG: Record<Locale, string> = {
   de: "DE",

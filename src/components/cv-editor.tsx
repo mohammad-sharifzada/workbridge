@@ -2,8 +2,8 @@
 
 import { useState, useTransition, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
-import { saveCvProfile } from "@/actions";
+import { useRouter } from "@/modules_outsourced/module_localizationRouting";
+import { saveCvProfile } from "@/modules_outsourced/module_serverIndex";
 import { compressImageFile } from "@/lib/image-upload";
 import { Camera } from "lucide-react";
 import styles from "./cv-editor.module.scss";

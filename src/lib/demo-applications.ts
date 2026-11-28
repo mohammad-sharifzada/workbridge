@@ -1,4 +1,4 @@
-import type { Locale } from "@/i18n/config";
+import type { Locale } from "@/prog_configs/localization_config";
 
 export type DemoApplicationStatus = "pending" | "offer" | "accepted";
 

@@ -19,7 +19,10 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/prog_configs/*": ["./prog_configs/*"],
+      "@/modules_outsourced/*": ["./project_files/modules_outsourced/*"],
+      "@/media_graphics/*": ["./project_files/media_graphics/*"]
     }
   },
   "include": [

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isLocale, type Locale } from "@/i18n/config";
+import { isLocale, type Locale } from "@/prog_configs/localization_config";
 import {
   buildKnowledgeContext,
   findBestArticles,
